@@ -74,12 +74,26 @@ class MigrationTest {
     }
 
     @Test
+    fun version3To4AddsFirstMetDateAndKeepsPeople() {
+        helper.createDatabase(DB, 3).apply {
+            execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 4, true)
+        db.query("SELECT name, firstMetOn FROM person WHERE id = 2").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Anna", it.getString(0))
+            assertTrue("old people have no stored date", it.isNull(1))
+        }
+    }
+
+    @Test
     fun version1To3InOneUpdate() {
         helper.createDatabase(DB, 1).apply {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 3, true)
+        val db = helper.runMigrationsAndValidate(DB, 4, true)
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))

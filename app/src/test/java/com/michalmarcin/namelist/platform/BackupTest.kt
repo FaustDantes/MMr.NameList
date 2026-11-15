@@ -57,7 +57,7 @@ class BackupTest {
         val work = tabs.add("Work")
         val anna = people.save(
             0,
-            PersonDraft("Anna Nováková", "Brno tram", "anna.jpg", work, "Brno, Morava", 49.1951, 16.6068),
+            PersonDraft("Anna Nováková", "Brno tram", "anna.jpg", work, "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000),
         )
         val peter = people.save(0, "Peter", "")
         links.add(anna, peter, RelationType.PARENT)
@@ -69,7 +69,7 @@ class BackupTest {
 
     private fun snapshot() = runBlocking {
         Triple(
-            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${it.tabId}|${it.metCity}|${it.metLat}|${it.isSelf}" },
+            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${it.tabId}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.isSelf}" },
             db.tabDao().getAll(),
             db.relationshipDao().getAll(),
         )
@@ -137,6 +137,21 @@ class BackupTest {
         backup.import(ByteArrayInputStream(zip))
         assertFalse(File(photos.directory.parentFile, "evil.jpg").exists())
         assertEquals(null, db.personDao().getAll().first { it.name == "Eve" }.photoFile)
+    }
+
+    @Test
+    fun firstMetDateSurvivesExportAndImport() = runBlocking {
+        val file = seed()
+        db.personDao().getAll().forEach { people.delete(it.id) }
+        backup.import(ByteArrayInputStream(file))
+        assertEquals(19_000L, db.personDao().getAll().first { it.name == "Anna Nováková" }.firstMetOn)
+    }
+
+    @Test
+    fun backupFromVersion1_0WithoutTheDateStillImports() = runBlocking {
+        val json = """{"format":"mmr.namelist.backup","version":1,"tabs":[],"relationships":[],"people":[{"id":5,"name":"Eve","createdAt":7}]}"""
+        backup.import(ByteArrayInputStream(zip(mapOf("backup.json" to json.toByteArray()))))
+        assertNull(db.personDao().getAll().first { it.name == "Eve" }.firstMetOn)
     }
 
     @Test

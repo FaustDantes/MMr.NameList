@@ -23,6 +23,7 @@ Each milestone ends with:
 | M7 | Backup and polish | F9 (switch), F12 | Export and import a zip ([format](backup-format.md)). Settings screen. Theme switch. Accessibility check. |
 | M8 | Multi-select and colors | F14 | Long press selects; tap adds; bulk delete with confirmation; bulk move to a tab; drag by handle. White, black and light blue palette (ADR-023). |
 | M9 | World map | F15 | Map screen with country borders, pan and zoom; initials circles for people with GPS, clustered when close; tap opens the person; small map on the detail screen. |
+| M10 | First meeting | F16 | Date of first meeting (empty = today), picker without future dates, shown on the detail screen and in the backup; the add button focuses the Name field. Release 1.1.0. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

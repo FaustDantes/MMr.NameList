@@ -42,6 +42,12 @@
     <string name="tabs_empty_body">Tabs sort people into groups, such as Work or Family.</string>
     <string name="drag_to_reorder">Drag to reorder</string>
     <string name="where_met">Where you met</string>
+    <string name="first_met">First met</string>
+    <string name="first_met_on">First met: %1$s</string>
+    <string name="first_met_today">Today (if empty)</string>
+    <string name="pick_date">Pick a date</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="city_state">City, state</string>
     <string name="use_current_location">Use current location</string>
     <string name="gps_coordinates">GPS %1$s</string>

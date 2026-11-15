@@ -23,6 +23,8 @@ data class Person(
     val metCity: String? = null,
     val metLat: Double? = null,
     val metLon: Double? = null,
+    /** Day of the first meeting as days since 1970-01-01 (local date). Null only for people saved before version 1.1. */
+    val firstMetOn: Long? = null,
     val isSelf: Boolean = false,
     val sortIndex: Long = 0,
     val createdAt: Long = 0,

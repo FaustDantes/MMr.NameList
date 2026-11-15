@@ -162,6 +162,7 @@ class BackupManager(
         .put("metCity", metCity ?: JSONObject.NULL)
         .put("metLat", metLat ?: JSONObject.NULL)
         .put("metLon", metLon ?: JSONObject.NULL)
+        .put("firstMetOn", firstMetOn ?: JSONObject.NULL)
         .put("isSelf", isSelf)
         .put("sortIndex", sortIndex)
         .put("createdAt", createdAt)
@@ -175,6 +176,7 @@ class BackupManager(
         metCity = optStringOrNull("metCity"),
         metLat = optDoubleOrNull("metLat"),
         metLon = optDoubleOrNull("metLon"),
+        firstMetOn = if (isNull("firstMetOn") || !has("firstMetOn")) null else getLong("firstMetOn"),
         isSelf = optBoolean("isSelf", false),
         sortIndex = optLong("sortIndex"),
         createdAt = optLong("createdAt"),

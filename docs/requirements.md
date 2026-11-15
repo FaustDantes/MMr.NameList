@@ -68,6 +68,14 @@ Removed by the owner on 2026-11-15 (ADR-019).
 - The map works offline and sends nothing (N3). A typed "City, state" has no coordinates and does not show.
 - The detail screen shows a small map at the person's place.
 
+### F16 Date of first meeting and quick add (added by the owner on 2026-11-15)
+
+- Each person has a date of the first meeting. The user can pick it, or leave it empty.
+- An empty date is saved as the current date (local time zone). The picker allows no future dates.
+- The name is the only required field.
+- The add button opens the new-person form with the cursor in the Name field and the keyboard open.
+- Backups carry the date (optional field; backups of version 1.0.0 still import).
+
 ## 5. Non-functional requirements
 
 | ID | Requirement |

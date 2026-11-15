@@ -13,6 +13,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -100,6 +109,7 @@ fun PersonEditRoute(
         onRemovePhoto = viewModel::removePhoto,
         onTabChange = viewModel::onTabChange,
         onPlaceChange = viewModel::onPlaceChange,
+        onFirstMetChange = viewModel::onFirstMetChange,
         onUseLocation = {
             if (viewModel.hasLocationPermission()) {
                 viewModel.fetchLocation()
@@ -127,7 +137,17 @@ fun PersonEditScreen(
     onPlaceChange: (String) -> Unit = {},
     onUseLocation: () -> Unit = {},
     onClearCoordinates: () -> Unit = {},
+    onFirstMetChange: (Long?) -> Unit = {},
 ) {
+    // F16: a new person opens with the cursor in the Name field; Name is the only required field.
+    val nameFocus = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(state.isNew) {
+        if (state.isNew) {
+            nameFocus.requestFocus()
+            keyboard?.show()
+        }
+    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -161,6 +181,7 @@ fun PersonEditScreen(
                 onValueChange = onNameChange,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .focusRequester(nameFocus)
                     .testTag("nameField"),
                 label = { Text(stringResource(R.string.name)) },
                 isError = state.showNameError,
@@ -174,6 +195,7 @@ fun PersonEditScreen(
             )
             TabField(state.tabs, state.tabId, onTabChange)
             PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
+            FirstMetField(state.firstMetOn, onFirstMetChange)
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = onNotesChange,
@@ -341,5 +363,66 @@ private fun PlaceField(
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
+    }
+}
+
+/** F16: date of the first meeting. Empty means today; the picker allows no future dates. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FirstMetField(epochDay: Long?, onChange: (Long?) -> Unit) {
+    var showPicker by rememberSaveable { mutableStateOf(false) }
+    val interaction = remember { MutableInteractionSource() }
+    // A read-only field takes the tap itself, so the picker opens on the release of a press.
+    LaunchedEffect(interaction) {
+        interaction.interactions.collect { if (it is PressInteraction.Release) showPicker = true }
+    }
+    OutlinedTextField(
+        value = epochDay?.let { formatEpochDay(it) }.orEmpty(),
+        onValueChange = {},
+        readOnly = true,
+        interactionSource = interaction,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("firstMetField"),
+        label = { Text(stringResource(R.string.first_met)) },
+        placeholder = { Text(stringResource(R.string.first_met_today)) },
+        trailingIcon = {
+            if (epochDay != null) {
+                IconButton(onClick = { onChange(null) }, modifier = Modifier.testTag("clearFirstMet")) {
+                    Icon(painterResource(R.drawable.ic_close), stringResource(R.string.clear))
+                }
+            } else {
+                IconButton(onClick = { showPicker = true }, modifier = Modifier.testTag("pickFirstMet")) {
+                    Icon(painterResource(R.drawable.ic_calendar), stringResource(R.string.pick_date))
+                }
+            }
+        },
+    )
+    if (showPicker) {
+        val todayMillis = epochDayToPickerMillis(todayEpochDay())
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = epochDayToPickerMillis(epochDay ?: todayEpochDay()),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= todayMillis
+            },
+        )
+        DatePickerDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = {
+                        pickerState.selectedDateMillis?.let { onChange(pickerMillisToEpochDay(it)) }
+                        showPicker = false
+                    },
+                    modifier = Modifier.testTag("confirmDate"),
+                ) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(shape = MaterialTheme.shapes.large, onClick = { showPicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        ) { DatePicker(state = pickerState) }
     }
 }

@@ -250,6 +250,15 @@ private fun PersonDetailContent(
             }
         }
         Spacer(Modifier.height(24.dp))
+        // People saved before 1.1 have no stored date; they count from the day they were added.
+        (person.firstMetOn ?: person.createdAt.takeIf { it > 0 }?.let { it / 86_400_000L })?.let { day ->
+            Text(
+                text = stringResource(R.string.first_met_on, formatEpochDay(day)),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.testTag("firstMetLabel"),
+            )
+            Spacer(Modifier.height(16.dp))
+        }
         val coordinates = person.coordinates()
         if (person.metCity != null || coordinates != null) {
             DetailSection(title = stringResource(R.string.where_met), modifier = Modifier.testTag("placeSection")) {

@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.Collator
 import java.text.Normalizer
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Locale
 
 enum class SortMode { MANUAL, A_TO_Z }
@@ -20,6 +22,8 @@ data class PersonDraft(
     val metPlace: String? = null,
     val metLat: Double? = null,
     val metLon: Double? = null,
+    /** Day of the first meeting (epoch day). Null means "not filled": the repository uses today (F16). */
+    val firstMetOn: Long? = null,
 )
 
 class PeopleRepository(
@@ -27,6 +31,7 @@ class PeopleRepository(
     private val deletePhoto: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
     private val locale: () -> Locale = Locale::getDefault,
+    private val zone: () -> ZoneId = ZoneId::systemDefault,
 ) {
 
     /**
@@ -80,6 +85,8 @@ class PeopleRepository(
             metCity = place,
             metLat = if (hasCoordinates) draft.metLat else null,
             metLon = if (hasCoordinates) draft.metLon else null,
+            // F16: an empty date is today.
+            firstMetOn = draft.firstMetOn ?: epochDay(clock()),
         )
         return if (existing == null) {
             dao.insert(person)
@@ -95,7 +102,7 @@ class PeopleRepository(
         val existing = if (id == 0L) null else dao.get(id)
         return save(
             id,
-            PersonDraft(name, notes, photoFile, tabId, existing?.metCity, existing?.metLat, existing?.metLon),
+            PersonDraft(name, notes, photoFile, tabId, existing?.metCity, existing?.metLat, existing?.metLon, existing?.let(::firstMetDay)),
         )
     }
 
@@ -124,6 +131,11 @@ class PeopleRepository(
         if (deleted) photo?.let(deletePhoto)
         return deleted
     }
+
+    /** Day a person without a stored date counts from: the day they were added. */
+    fun firstMetDay(person: Person): Long = person.firstMetOn ?: epochDay(person.createdAt)
+
+    private fun epochDay(millis: Long): Long = Instant.ofEpochMilli(millis).atZone(zone()).toLocalDate().toEpochDay()
 
     private fun Person.matches(needle: String): Boolean =
         listOfNotNull(name, notes, metCity).any { normalize(it).contains(needle) }

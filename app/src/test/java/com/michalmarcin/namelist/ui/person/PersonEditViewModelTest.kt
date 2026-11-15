@@ -34,6 +34,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import java.time.LocalDate
 
 /** Most used feature: adding and editing a person. */
 @RunWith(AndroidJUnit4::class)
@@ -142,6 +143,41 @@ class PersonEditViewModelTest {
         assertEquals("Peter Horváth", peter.name)
         assertEquals("Plays badminton", peter.notes)
         assertEquals(50.08, peter.metLat ?: 0.0, 1e-9)
+    }
+
+    @Test
+    fun onlyTheNameIsRequiredAndTheDateDefaultsToToday() {
+        val vm = viewModel()
+        assertNull("a new form has no date typed in", vm.uiState.value.firstMetOn)
+        vm.onNameChange("Anna")
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        assertEquals(LocalDate.now().toEpochDay(), everyone().single().firstMetOn)
+    }
+
+    @Test
+    fun chosenFirstMetDateIsSavedAndLoadedAgain() {
+        val vm = viewModel()
+        vm.onNameChange("Anna")
+        vm.onFirstMetChange(19_000)
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        val id = everyone().single().id
+        assertEquals(19_000L, everyone().single().firstMetOn)
+
+        val edit = viewModel(id = id)
+        assertEquals(19_000L, edit.uiState.await { !it.isLoading }.firstMetOn)
+    }
+
+    @Test
+    fun clearingTheDateOfAnExistingPersonMeansToday() {
+        val id = runBlocking { people.save(0, PersonDraft("Anna", firstMetOn = 19_000)) }
+        val vm = viewModel(id = id)
+        vm.uiState.await { !it.isLoading }
+        vm.onFirstMetChange(null)
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        assertEquals(LocalDate.now().toEpochDay(), everyone().single().firstMetOn)
     }
 
     @Test

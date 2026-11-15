@@ -3,6 +3,7 @@ package com.michalmarcin.namelist.data
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.data.db.AppDatabase
+import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.data.repo.PeopleRepository
 import com.michalmarcin.namelist.data.repo.PersonDraft
 import com.michalmarcin.namelist.data.repo.SortMode
@@ -18,6 +19,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Locale
 
 @RunWith(AndroidJUnit4::class)
@@ -174,5 +177,51 @@ class PeopleRepositoryTest {
         assertEquals(listOf("Eva"), names())
         assertNotNull(repo.getSelf())
         assertEquals(listOf("a.jpg"), deletedPhotos)
+    }
+
+    private fun repoAt(millis: Long, zone: ZoneId) =
+        PeopleRepository(db.personDao(), clock = { millis }, locale = { Locale.ENGLISH }, zone = { zone })
+
+    @Test
+    fun emptyFirstMetDateIsToday() = runBlocking {
+        val id = repoAt(20_000 * DAY + 5_000, ZoneOffset.UTC).save(0, PersonDraft("Anna"))
+        assertEquals(20_000L, repo.getPerson(id)?.firstMetOn)
+    }
+
+    @Test
+    fun todayFollowsTheLocalTimeZone() = runBlocking {
+        // 15:00 UTC is already the next day in Auckland (UTC+13 in November).
+        val id = repoAt(20_000 * DAY + 15 * HOUR, ZoneId.of("Pacific/Auckland")).save(0, PersonDraft("Anna"))
+        assertEquals(20_001L, repo.getPerson(id)?.firstMetOn)
+    }
+
+    @Test
+    fun givenFirstMetDateIsKeptAndCanChange() = runBlocking {
+        val id = repoAt(20_000 * DAY, ZoneOffset.UTC).save(0, PersonDraft("Anna", firstMetOn = 19_000))
+        assertEquals(19_000L, repo.getPerson(id)?.firstMetOn)
+
+        repoAt(20_500 * DAY, ZoneOffset.UTC).save(id, PersonDraft("Anna", firstMetOn = 18_000))
+        assertEquals(18_000L, repo.getPerson(id)?.firstMetOn)
+    }
+
+    @Test
+    fun shortSaveKeepsTheFirstMetDate() = runBlocking {
+        val id = repo.save(0, PersonDraft("Anna", firstMetOn = 19_000))
+        repo.save(id, "Anna N.", "note")
+        assertEquals(19_000L, repo.getPerson(id)?.firstMetOn)
+    }
+
+    @Test
+    fun personWithoutStoredDateCountsFromTheDayTheyWereAdded() = runBlocking {
+        val id = db.personDao().insert(Person(name = "Old", createdAt = 19_500 * DAY + 1))
+        val old = repoAt(20_000 * DAY, ZoneOffset.UTC)
+        assertEquals(19_500L, old.firstMetDay(old.getPerson(id)!!))
+        old.save(id, "Old", "")
+        assertEquals(19_500L, repo.getPerson(id)?.firstMetOn)
+    }
+
+    private companion object {
+        const val HOUR = 3_600_000L
+        const val DAY = 24 * HOUR
     }
 }

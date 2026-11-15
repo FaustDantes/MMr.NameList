@@ -220,3 +220,11 @@ Status: accepted (extends ADR-007)
 Decision: From version 1.0.0, releases are tagged `vX.Y.Z` on `master` and review builds `vX.Y.Z-rcN` on `dev`. The app's versionName is the tag without "v"; versionCode is the CI run number, so it always goes up. Each release gets an entry in CHANGELOG.md.
 Reason: The owner asked for "version 1". Milestone tags no longer fit once the planned milestones are done.
 Alternatives: Keep milestone tags (unclear to users of the app).
+
+## ADR-027: Date of first meeting, stored as an epoch day
+
+Date: 2026-11-15
+Status: accepted
+Decision: `person.firstMetOn` is a nullable `Long`: days since 1970-01-01 of the local calendar date. Room schema 4, auto migration from 3. An empty date is replaced by today when the person is saved; a person from before 1.1 counts from the day they were added (`createdAt`), without writing it to the database. The backup gets an optional `firstMetOn` field; the backup `version` stays 1 because older files import unchanged. The Name field takes focus when a new person opens. The date picker is the Material 3 `DatePickerDialog`; no new dependency.
+Reason: A calendar date has no time or time zone, so an epoch day cannot shift when the user travels (a timestamp would). Nullable avoids inventing a date for old rows during migration.
+Alternatives: Timestamp in milliseconds (shifts with the time zone); text "yyyy-MM-dd" (needs parsing; sorts the same but is easier to corrupt); non-null column with a default of 0 (shows 1970 for old people).

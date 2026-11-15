@@ -1,6 +1,8 @@
 package com.michalmarcin.namelist.ui.person
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -143,6 +145,71 @@ class PersonScreensTest {
             }
         }
         compose.onNodeWithTag("tabField").assertDoesNotExist()
+    }
+
+    @Test
+    fun newPersonOpensWithTheCursorInTheNameField() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(isNew = true), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("nameField").assertIsFocused()
+    }
+
+    @Test
+    fun editingAPersonDoesNotStealTheFocus() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(isNew = false, name = "Anna"), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("nameField").assertIsNotFocused()
+    }
+
+    @Test
+    fun emptyFirstMetDateShowsTodayHintAndNoClearButton() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Today (if empty)").assertIsDisplayed()
+        compose.onNodeWithTag("pickFirstMet").assertIsDisplayed()
+        compose.onNodeWithTag("clearFirstMet").assertDoesNotExist()
+    }
+
+    @Test
+    fun filledFirstMetDateShowsAndClears() {
+        val changes = mutableListOf<Long?>()
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(
+                    state = PersonEditUiState(name = "Anna", firstMetOn = 20_407),
+                    onNameChange = {},
+                    onNotesChange = {},
+                    onSave = {},
+                    onClose = {},
+                    onFirstMetChange = { changes += it },
+                )
+            }
+        }
+        compose.onNodeWithText(formatEpochDay(20_407)).assertIsDisplayed()
+        compose.onNodeWithTag("clearFirstMet").performClick()
+        assertEquals(listOf<Long?>(null), changes)
+    }
+
+    @Test
+    fun detailShowsTheFirstMetDate() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(
+                    PersonDetailUiState(SampleData.anna.copy(firstMetOn = 20_407), isLoading = false),
+                    {}, {}, {},
+                )
+            }
+        }
+        compose.onNodeWithText("First met: " + formatEpochDay(20_407)).assertIsDisplayed()
     }
 
     @Test

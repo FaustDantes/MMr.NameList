@@ -2,6 +2,12 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
+## 1.1.0 (unreleased)
+
+- Date of first meeting for each person. Leave it empty and the app uses today. It shows on the person's page and in backups; backups from 1.0.0 still import.
+- The add button opens the form with the cursor in the Name field. Name is the only required field.
+- Database schema 4 (automatic update, data kept).
+
 ## 1.0.0 (2026-11-15)
 
 First release. All data stays on the phone.
