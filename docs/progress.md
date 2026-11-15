@@ -36,7 +36,7 @@ The agent updates this file at the end of each session. Newest entry first.
 - Date of first meeting (`firstMetOn`, schema 4, ADR-027); empty means today; picker without future dates; shown on the detail screen; in the backup as an optional field.
 - New person: the Name field has the focus and the keyboard opens. Name stays the only required field.
 - Tests added for the repository (zone and defaults), migration 3 to 4, backup (with and without the field), edit ViewModel, screens (focus, date field, detail) and date helpers.
-- Open: the Room schema `4.json` comes from CI (`ci-outputs` branch) and must be committed; check the date picker and keyboard on the phone.
+- Schema `4.json` committed. CI: 121 tests and lint pass. Check the date picker and the keyboard on the phone.
 
 ### 2026-11-15 (M4, M5, M7, one review at the end, by owner request)
 
