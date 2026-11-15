@@ -13,7 +13,7 @@ MMr.NameList is a simple Android app to remember people. Kotlin, Jetpack Compose
 3. [docs/architecture.md](docs/architecture.md): stack, layers, data model, platform decisions.
 4. [docs/design.md](docs/design.md): visual rules.
 5. [docs/decisions.md](docs/decisions.md): decisions already made. Do not reopen them without the owner.
-6. [docs/requirements.md](docs/requirements.md): feature IDs (F1 to F13, N1 to N5).
+6. [docs/requirements.md](docs/requirements.md): feature IDs (F1 to F19, N1 to N5).
 
 If two documents disagree, stop and ask the owner.
 

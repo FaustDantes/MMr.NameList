@@ -15,7 +15,9 @@ A simple Android app to remember the people you meet: name, photo, where they co
 | Relationships | Two-way links between people and to you, with relationship types |
 | Map | Offline world map with country borders; people with GPS shown as initials |
 | Multi-select | Select many people; delete them or move them to a tab at once |
-| Privacy and backup | Local storage only; export and import one backup file |
+| Privacy and backup | Local storage only; export and import one backup file, optionally encrypted with your password (AES-256) |
+| Archive | Move people to an archive and restore them; the archive shows how long they have been there |
+| Details | Native language, date of birth, education, current work, "ask about", date of first meeting, last updated |
 | Look | Square Material 3 design, light, dark or system theme |
 
 Full list with IDs: [docs/requirements.md](docs/requirements.md).
@@ -28,7 +30,7 @@ Kotlin, Jetpack Compose, Material 3, Room. Built and tested in GitHub Actions. N
 
 | Document | Content |
 |---|---|
-| [Requirements](docs/requirements.md) | What the app must do (F1 to F13, N1 to N5) |
+| [Requirements](docs/requirements.md) | What the app must do (F1 to F19, N1 to N5) |
 | [Architecture](docs/architecture.md) | Stack, layers, data model, platform decisions, open decisions |
 | [Design](docs/design.md) | Theme, colors, components, accessibility |
 | [Milestones](docs/milestones.md) | Build plan M0 to M7, "done when" criteria, screenshot rules |

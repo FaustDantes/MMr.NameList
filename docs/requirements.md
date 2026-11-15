@@ -76,6 +76,28 @@ Removed by the owner on 2026-11-15 (ADR-019).
 - The add button opens the new-person form with the cursor in the Name field and the keyboard open.
 - Backups carry the date (optional field; backups of version 1.0.0 still import).
 
+### F17 Backup password and encryption (added by the owner on 2026-11-15)
+
+- Settings has a backup password. The user sets it, changes it by giving the old and the new password, or removes it with the old password. A forgotten password can be reset; old encrypted backups then stay locked.
+- Export asks "Encrypt this backup?" with a checkbox "Do not show this again". The checkbox makes the answer the default. Settings changes the default: ask, always encrypt, never encrypt.
+- To encrypt, the user types the password again (it must match the saved one). With no password set, the app asks for one first.
+- An encrypted backup uses AES-256-GCM with a key from the password (PBKDF2-HMAC-SHA256). Import asks for the password of an encrypted file. A wrong password or a changed file changes nothing.
+- The password is at least 8 characters. The app never stores the password, only a check value (ADR-028).
+
+### F18 Archive (added by the owner on 2026-11-15)
+
+- The user selects people (F14) and moves them to the archive.
+- Archived people leave the lists, the search, the map and the relationship picker. Their data and links stay.
+- Each archived person has the time of archiving. The archive screen shows the date and how long they are in the archive. The user can restore people or delete them.
+- "Me" cannot be archived.
+
+### F19 More details and last update (added by the owner on 2026-11-15)
+
+- New optional fields: native language, date of birth, education, current work, ask about.
+- The form shows only the icon (photo), name and tab on top. Place of meeting, first meeting, the new fields and notes are in a collapsed "More details" section.
+- Each person has "last updated": the time of the last save from the edit screen. The detail screen shows it.
+- Search also looks in the new text fields.
+
 ## 5. Non-functional requirements
 
 | ID | Requirement |

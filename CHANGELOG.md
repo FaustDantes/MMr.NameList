@@ -4,6 +4,13 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 
 ## 1.1.0 (unreleased)
 
+- Backup password in Settings: set it, change it with the old password, remove it, or reset it when forgotten.
+- Export asks "Encrypt this backup?" with "Do not show this again". The default (ask, always, never) can be changed in Settings. Encrypted backups use AES-256 with a key from your password. Import asks for the password of an encrypted file.
+- Archive: select people and move them to the archive. They leave the lists, the search and the map. The archive screen shows the date and how long each person has been there, and can restore them.
+- More details for each person: native language, date of birth, education, current work and "ask about". The form shows only the photo, name and tab on top; everything else is in a collapsed "More details" section.
+- "Last updated" on the person's page: the time of the last save.
+- Search also looks in the new text fields.
+- Database schema 5 (automatic update, data kept). Backups from 1.0.0 still import.
 - Date of first meeting for each person. Leave it empty and the app uses today. It shows on the person's page and in backups; backups from 1.0.0 still import.
 - The add button opens the form with the cursor in the Name field. Name is the only required field.
 - Database schema 4 (automatic update, data kept).

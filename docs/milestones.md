@@ -24,6 +24,10 @@ Each milestone ends with:
 | M8 | Multi-select and colors | F14 | Long press selects; tap adds; bulk delete with confirmation; bulk move to a tab; drag by handle. White, black and light blue palette (ADR-023). |
 | M9 | World map | F15 | Map screen with country borders, pan and zoom; initials circles for people with GPS, clustered when close; tap opens the person; small map on the detail screen. |
 | M10 | First meeting | F16 | Date of first meeting (empty = today), picker without future dates, shown on the detail screen and in the backup; the add button focuses the Name field. Release 1.1.0. |
+| M10 | First meeting | F16 | Date of first meeting (empty = today), picker without future dates, shown on the detail screen and in the backup; the add button focuses the Name field. Part of release 1.1.0. |
+| M11 | Backup password | F17 | Password in settings (set, change with old, remove, reset); export asks to encrypt with "do not show again"; default in settings; AES-256-GCM backup; import asks for the password. |
+| M12 | Archive | F18 | Archive selected people with a time stamp; archive screen with time in the archive; restore and delete. |
+| M13 | More details | F19 | Native language, date of birth, education, current work, ask about, last updated; collapsed "More details" section; only icon, name and tab on top. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

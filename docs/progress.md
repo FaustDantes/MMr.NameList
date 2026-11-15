@@ -31,6 +31,16 @@ The agent updates this file at the end of each session. Newest entry first.
 - M9: offline world map from Natural Earth 1:110m borders (80 KB asset, tools/map/); Mercator; pan, pinch, double tap; initials circles, clusters; mini map on detail (ADR-025).
 - Check on the phone: long press and selection, drag handle, map gestures and marker taps.
 
+### 2026-11-15 (1.1.0, F17 to F19, owner request)
+
+- F17 (ADR-028): backup password in settings (check value only; set, change with old, remove, reset); export asks to encrypt with "do not show again"; default ask, always or never in settings; AES-256-GCM streaming with Tink 1.24.0 and PBKDF2 (600,000 iterations); import asks for the password. Format in `docs/backup-format.md`.
+- F18 (ADR-029): archive selected people; archive screen with date and time in the archive; restore all or one; hidden from list, search, map and relationship picker.
+- F19 (ADR-030): native language, date of birth, education, current work, ask about, last updated; collapsed "More details" section; schema 5.
+- Tests: 202 pass in CI (new: crypto, password store, settings ViewModel, archive repository and screen, more details, migration 4 to 5). Lint passes.
+- Decisions I made without asking (change them if wrong): the password is typed again for each encrypted export; "note how long" means the computed time in the archive; the details section is always collapsed when the form opens.
+- Not done, waiting for the owner: the signing key (finding 1 of the security scan) and a cleaned repo history.
+- Check on the phone: the encrypt question and password dialogs, export to a file and import it back with the password, archive and restore, the collapsed section and date pickers.
+
 ### 2026-11-15 (1.1.0, F16, owner request)
 
 - Date of first meeting (`firstMetOn`, schema 4, ADR-027); empty means today; picker without future dates; shown on the detail screen; in the backup as an optional field.

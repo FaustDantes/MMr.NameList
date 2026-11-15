@@ -228,3 +228,30 @@ Status: accepted
 Decision: `person.firstMetOn` is a nullable `Long`: days since 1970-01-01 of the local calendar date. Room schema 4, auto migration from 3. An empty date is replaced by today when the person is saved; a person from before 1.1 counts from the day they were added (`createdAt`), without writing it to the database. The backup gets an optional `firstMetOn` field; the backup `version` stays 1 because older files import unchanged. The Name field takes focus when a new person opens. The date picker is the Material 3 `DatePickerDialog`; no new dependency.
 Reason: A calendar date has no time or time zone, so an epoch day cannot shift when the user travels (a timestamp would). Nullable avoids inventing a date for old rows during migration.
 Alternatives: Timestamp in milliseconds (shifts with the time zone); text "yyyy-MM-dd" (needs parsing; sorts the same but is easier to corrupt); non-null column with a default of 0 (shows 1970 for old people).
+
+## ADR-028: Backup encryption with a password in settings
+
+Date: 2026-11-15
+Status: accepted
+Decision: An encrypted backup is the zip stream inside Tink's AES-GCM-HKDF streaming AEAD (`AesGcmHkdfStreaming`, 256-bit key, 64 KiB segments). The key is PBKDF2-HMAC-SHA256 of the password, 600,000 iterations, a random 16-byte salt per file. The file starts with a plain header: `MMRNLENC`, version 1, iteration count, salt. The header is the associated data, so a changed header fails. Import accepts both plain and encrypted files and finds the type from the first 8 bytes. The format is public; only the password is secret. Details: [backup-format.md](backup-format.md).
+The settings password is saved only as a check value: PBKDF2 hash with its own salt, in SharedPreferences. The app does not keep the password. To encrypt an export, the user types the password (it must match the check value). The check lets the user change or remove the password with the old one, and stops a typing error from locking a backup. Changing the password does not re-encrypt old backups. A forgotten password can be reset in settings; this removes only the check value.
+Export asks "Encrypt this backup?" with "Do not show this again". The checkbox saves the answer as the default (`EncryptChoice`: ASK, ALWAYS, NEVER). Settings changes it.
+New dependency: `com.google.crypto.tink:tink-android` 1.24.0 (newest stable on Maven Central, checked with the versions probe on 2026-11-15). Reason: a reviewed streaming AEAD. The platform AES-GCM buffers a whole file in memory when it decrypts, which can run out of memory with many photos, and a self-made chunk format is easy to get wrong.
+Reason: The owner asked for AES, a password in settings, and a question on export.
+Alternatives: Platform `Cipher` AES-GCM only (memory limit); password-protected zip (older format, weaker integrity, needs a library); storing the password in the Android Keystore so export needs no typing (the password would be at rest; the owner can ask for it later).
+
+## ADR-029: Archive
+
+Date: 2026-11-15
+Status: accepted
+Decision: `person.archivedAt` (milliseconds, nullable). A person with a value is archived. The list, search, map and relationship picker read only people without it. The archive screen reads the others, newest first, and shows the date (device time zone) and the time in the archive: under a day, days up to 59, months up to 23, then years. Archiving a person who is already archived keeps the first time. "Me" cannot be archived. Restoring clears the value; tab, order and links are untouched. Archiving and restoring do not change "last updated". Relationships of archived people stay and show on the other person.
+Reason: The owner asked to move people to an archive with a timestamp and the time they stay there. "Note how long" is read as the time in the archive, computed from the timestamp, not as a text note. Say so if a text note is wanted.
+Alternatives: A separate table (moves rows and links); a tab called "Archive" (people would still show in "All" and on the map).
+
+## ADR-030: More details, collapsed form, last updated
+
+Date: 2026-11-15
+Status: accepted
+Decision: New nullable columns `nativeLanguage`, `birthDate` (epoch day, like ADR-027), `education`, `currentWork`, `askAbout` and `lastUpdatedAt` (milliseconds). Room schema 5, automatic migration from 4. The edit form shows the photo, name and tab; everything else is in a "More details" section that starts collapsed on every visit (place of meeting, first meeting, birth date, the four text fields, notes). Every save from the edit screen sets `lastUpdatedAt`; moving to a tab, archiving and reordering do not. People saved before 1.1 show the day they were added. Blank text is stored as empty. Search covers the new text fields. The backup carries all new fields as optional (format version stays 1).
+Reason: The owner asked for these fields, a short top of the form, and a "last updated" time.
+Alternatives: Expand the section when a person already has values (one tap less when editing; easy to add later); a custom-fields table (more than the owner asked for).
