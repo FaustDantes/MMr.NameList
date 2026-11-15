@@ -98,6 +98,7 @@ fun PersonDetailScreen(
             text = { Text(stringResource(R.string.delete_body)) },
             confirmButton = {
                 TextButton(
+                    shape = MaterialTheme.shapes.large,
                     onClick = {
                         confirmDelete = false
                         onDelete()
@@ -106,7 +107,7 @@ fun PersonDetailScreen(
                 ) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(shape = MaterialTheme.shapes.large, onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }

@@ -113,7 +113,7 @@ fun PersonEditScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onSave, enabled = !state.isLoading, modifier = Modifier.testTag("save")) {
+                    TextButton(shape = MaterialTheme.shapes.large, onClick = onSave, enabled = !state.isLoading, modifier = Modifier.testTag("save")) {
                         Text(stringResource(R.string.save))
                     }
                 },
@@ -174,18 +174,18 @@ private fun PhotoSection(
         }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            FilledTonalButton(onClick = onCamera, modifier = Modifier.testTag("camera")) {
+            FilledTonalButton(shape = MaterialTheme.shapes.large, onClick = onCamera, modifier = Modifier.testTag("camera")) {
                 Icon(painterResource(R.drawable.ic_photo_camera), contentDescription = null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.camera))
             }
-            FilledTonalButton(onClick = onGallery, modifier = Modifier.testTag("gallery")) {
+            FilledTonalButton(shape = MaterialTheme.shapes.large, onClick = onGallery, modifier = Modifier.testTag("gallery")) {
                 Icon(painterResource(R.drawable.ic_photo_library), contentDescription = null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.gallery))
             }
             if (state.photoFile != null) {
-                TextButton(onClick = onRemovePhoto, modifier = Modifier.testTag("removePhoto")) {
+                TextButton(shape = MaterialTheme.shapes.large, onClick = onRemovePhoto, modifier = Modifier.testTag("removePhoto")) {
                     Text(stringResource(R.string.remove_photo))
                 }
             }

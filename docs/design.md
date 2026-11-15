@@ -33,7 +33,7 @@ The owner chose a square look on 2026-11-15 (ADR-010). No circles.
 |---|---|
 | Avatars, icon badges | Square with corners at 22 % of the size (`IconSquare`) |
 | Cards, list rows | 10 dp corners |
-| Search field, floating action button | 12 dp corners |
+| Search field, floating action button, all buttons | 12 dp corners. Material 3 buttons are round by default: always pass `shape = MaterialTheme.shapes.large`. |
 | Dialogs, sheets | 16 dp corners |
 
 The launcher icon shape comes from the phone's launcher. The app cannot force it to be square.
