@@ -66,6 +66,22 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
+      - name: Push screenshots to the ci-screenshots branch
+        # Agents without artifact access fetch screenshots from this branch (AGENTS.md).
+        if: always() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls out/*.png >/dev/null 2>&1 || { echo "No screenshots."; exit 0; }
+          mkdir -p "$RUNNER_TEMP/shots" && cp out/*.png "$RUNNER_TEMP/shots/"
+          cd "$RUNNER_TEMP/shots"
+          echo "Screenshots from run ${{ github.run_number }} on ${{ github.ref_name }} (${{ github.sha }})." > README.md
+          git init -q -b ci-screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "screenshots: run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ci-screenshots
+
       - name: Check APK signature
         if: env.SIGNING_STORE_FILE != ''
         run: |
