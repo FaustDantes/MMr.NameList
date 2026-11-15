@@ -38,6 +38,7 @@ jobs:
           add coil3 "$(latest $C/io/coil-kt/coil3/coil-compose/maven-metadata.xml)"
           add reorderable "$(latest $C/sh/calvin/reorderable/reorderable/maven-metadata.xml)"
           add room3 "$(curl -fsSL $G/androidx/room3/room3-runtime/maven-metadata.xml 2>/dev/null | grep -o '<latest>[^<]*' | cut -d'>' -f2)"
+          add tink "$(latest $C/com/google/crypto/tink/tink-android/maven-metadata.xml)"
           add junit4 "$(latest $C/junit/junit/maven-metadata.xml)"
           add gradle "$(curl -fsSL https://services.gradle.org/versions/current | grep -o '"version" *: *"[^"]*"' | cut -d'"' -f4)"
           for a in actions/checkout actions/setup-java gradle/actions actions/upload-artifact; do
