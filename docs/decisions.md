@@ -164,3 +164,11 @@ Status: accepted
 Decision: (1) M6 Reminders and F8 removed. (2) F11 Country of origin removed. (3) M4 is one "City, state" text field plus a GPS button that stores coordinates; no city lookup. (4) No more screenshots; Roborazzi and screenshot tests removed. (5) M4, M5 and M7 are built without stops and reviewed together.
 Reason: Owner decisions.
 Alternatives: None; owner direction.
+
+## ADR-020: Location without Google Play Services, settings in SharedPreferences
+
+Date: 2026-11-15
+Status: accepted
+Decision: The GPS button uses `LocationManagerCompat.getCurrentLocation` (fused provider on Android 12+, else GPS or network), asks for location only on tap, and accepts "approximate". Coordinates are shown with 4 decimals; "Open in maps" hands them to the user's map app. The theme choice (M7) is kept in SharedPreferences.
+Reason: No new dependency (AGENTS.md rule 6). DataStore is not needed for one value.
+Alternatives: Play Services FusedLocationProviderClient (new dependency, not on all phones), DataStore.

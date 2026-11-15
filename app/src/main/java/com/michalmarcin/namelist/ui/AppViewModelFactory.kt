@@ -25,6 +25,7 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
             container().peopleRepository,
             container().tabsRepository,
             container().photoStore,
+            container().locationProvider,
             createSavedStateHandle(),
         )
     }

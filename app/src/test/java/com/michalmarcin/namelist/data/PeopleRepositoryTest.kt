@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.PersonDraft
 import com.michalmarcin.namelist.data.repo.SortMode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -135,5 +136,31 @@ class PeopleRepositoryTest {
         val id = repo.save(0, "Anna", "", photoFile = "a.jpg")
         repo.delete(id)
         assertEquals(listOf("a.jpg"), deletedPhotos)
+    }
+
+    @Test
+    fun placeAndCoordinatesAreSavedAndSearchable() = runBlocking {
+        val id = repo.save(0, PersonDraft(name = "Anna", metPlace = "  Brno, Morava ", metLat = 49.19, metLon = 16.6))
+        val anna = requireNotNull(repo.getPerson(id))
+        assertEquals("Brno, Morava", anna.metCity)
+        assertEquals(49.19, requireNotNull(anna.metLat), 0.0)
+        assertEquals(listOf("Anna"), names("morava"))
+    }
+
+    @Test
+    fun blankPlaceAndHalfCoordinatesAreNotStored() = runBlocking {
+        val id = repo.save(0, PersonDraft(name = "Anna", metPlace = "   ", metLat = 49.19, metLon = null))
+        val anna = requireNotNull(repo.getPerson(id))
+        assertNull(anna.metCity)
+        assertNull(anna.metLat)
+        assertNull(anna.metLon)
+    }
+
+    @Test
+    fun shortSaveKeepsThePlace() = runBlocking {
+        val id = repo.save(0, PersonDraft(name = "Anna", metPlace = "Brno", metLat = 1.0, metLon = 2.0))
+        repo.save(id, "Anna N.", "")
+        assertEquals("Brno", repo.getPerson(id)?.metCity)
+        assertEquals(2.0, requireNotNull(repo.getPerson(id)?.metLon), 0.0)
     }
 }

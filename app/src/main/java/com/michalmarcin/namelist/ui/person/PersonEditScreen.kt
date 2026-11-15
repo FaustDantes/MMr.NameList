@@ -19,6 +19,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.remember
 import com.michalmarcin.namelist.data.db.Tab
+import com.michalmarcin.namelist.platform.LocationProvider
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +73,11 @@ fun PersonEditRoute(
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         viewModel.onPhotoPicked(uri)
     }
+    val locationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { result ->
+        if (result.values.any { it }) viewModel.fetchLocation() else viewModel.onLocationDenied()
+    }
 
     PersonEditScreen(
         state = state,
@@ -93,6 +99,15 @@ fun PersonEditRoute(
         },
         onRemovePhoto = viewModel::removePhoto,
         onTabChange = viewModel::onTabChange,
+        onPlaceChange = viewModel::onPlaceChange,
+        onUseLocation = {
+            if (viewModel.hasLocationPermission()) {
+                viewModel.fetchLocation()
+            } else {
+                locationPermission.launch(LocationProvider.PERMISSIONS)
+            }
+        },
+        onClearCoordinates = viewModel::clearCoordinates,
     )
 }
 
@@ -109,6 +124,9 @@ fun PersonEditScreen(
     onGallery: () -> Unit = {},
     onRemovePhoto: () -> Unit = {},
     onTabChange: (Long?) -> Unit = {},
+    onPlaceChange: (String) -> Unit = {},
+    onUseLocation: () -> Unit = {},
+    onClearCoordinates: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -155,6 +173,7 @@ fun PersonEditScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             TabField(state.tabs, state.tabId, onTabChange)
+            PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = onNotesChange,
@@ -250,6 +269,77 @@ private fun TabField(tabs: List<Tab>, selectedId: Long?, onChange: (Long?) -> Un
                     },
                 )
             }
+        }
+    }
+}
+
+/** F10: one "City, state" field and a GPS button that stores the current coordinates. */
+@Composable
+private fun PlaceField(
+    state: PersonEditUiState,
+    onPlaceChange: (String) -> Unit,
+    onUseLocation: () -> Unit,
+    onClearCoordinates: () -> Unit,
+) {
+    Column {
+        OutlinedTextField(
+            value = state.metPlace,
+            onValueChange = onPlaceChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("placeField"),
+            label = { Text(stringResource(R.string.where_met)) },
+            placeholder = { Text(stringResource(R.string.city_state)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+            trailingIcon = {
+                if (state.isLocating) {
+                    CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                } else {
+                    IconButton(onClick = onUseLocation, modifier = Modifier.testTag("useLocation")) {
+                        Icon(painterResource(R.drawable.ic_my_location), stringResource(R.string.use_current_location))
+                    }
+                }
+            },
+        )
+        state.coordinates?.let { coordinates ->
+            Row(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .testTag("coordinates"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_place),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.gps_coordinates, coordinates.format()),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onClearCoordinates,
+                    modifier = Modifier.testTag("clearCoordinates"),
+                ) { Text(stringResource(R.string.clear)) }
+            }
+        }
+        state.locationMessage?.let { message ->
+            Text(
+                text = stringResource(
+                    when (message) {
+                        LocationMessage.DENIED -> R.string.location_denied
+                        LocationMessage.UNAVAILABLE -> R.string.location_unavailable
+                    },
+                ),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
     }
 }

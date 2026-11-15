@@ -10,6 +10,18 @@ import java.util.Locale
 
 enum class SortMode { MANUAL, A_TO_Z }
 
+/** What the edit screen saves. */
+data class PersonDraft(
+    val name: String,
+    val notes: String = "",
+    val photoFile: String? = null,
+    val tabId: Long? = null,
+    /** "City, state" as the user typed it (F10). */
+    val metPlace: String? = null,
+    val metLat: Double? = null,
+    val metLon: Double? = null,
+)
+
 class PeopleRepository(
     private val dao: PersonDao,
     private val deletePhoto: (String) -> Unit = {},
@@ -50,25 +62,38 @@ class PeopleRepository(
      * Inserts a new person when [id] is 0, else updates. Returns the id.
      * A replaced or removed photo file is deleted from storage.
      */
-    suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null, tabId: Long? = null): Long {
-        require(name.isNotBlank()) { "Name must not be blank" }
+    suspend fun save(id: Long, draft: PersonDraft): Long {
+        require(draft.name.isNotBlank()) { "Name must not be blank" }
         val existing = if (id == 0L) null else dao.get(id)
+        val place = draft.metPlace?.trim()?.takeIf { it.isNotEmpty() }
+        // Coordinates are stored as a pair or not at all.
+        val hasCoordinates = draft.metLat != null && draft.metLon != null
+        val base = existing ?: Person(name = "", sortIndex = dao.maxSortIndex() + 1, createdAt = clock())
+        val person = base.copy(
+            name = draft.name.trim(),
+            notes = draft.notes.trim(),
+            photoFile = draft.photoFile,
+            tabId = draft.tabId,
+            metCity = place,
+            metLat = if (hasCoordinates) draft.metLat else null,
+            metLon = if (hasCoordinates) draft.metLon else null,
+        )
         return if (existing == null) {
-            dao.insert(
-                Person(
-                    name = name.trim(),
-                    notes = notes.trim(),
-                    photoFile = photoFile,
-                    tabId = tabId,
-                    sortIndex = dao.maxSortIndex() + 1,
-                    createdAt = clock(),
-                ),
-            )
+            dao.insert(person)
         } else {
-            dao.update(existing.copy(name = name.trim(), notes = notes.trim(), photoFile = photoFile, tabId = tabId))
-            existing.photoFile?.takeIf { it != photoFile }?.let(deletePhoto)
+            dao.update(person)
+            existing.photoFile?.takeIf { it != draft.photoFile }?.let(deletePhoto)
             existing.id
         }
+    }
+
+    /** Short form used by tests and simple callers. Keeps the place of meeting of an existing person. */
+    suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null, tabId: Long? = null): Long {
+        val existing = if (id == 0L) null else dao.get(id)
+        return save(
+            id,
+            PersonDraft(name, notes, photoFile, tabId, existing?.metCity, existing?.metLat, existing?.metLon),
+        )
     }
 
     /** Drag and drop result: puts the shown people in this order (F5). */

@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.PersonDraft
+import com.michalmarcin.namelist.platform.Coordinates
+import com.michalmarcin.namelist.platform.LocationProvider
 import com.michalmarcin.namelist.data.repo.TabsRepository
 import com.michalmarcin.namelist.platform.PhotoStore
 import com.michalmarcin.namelist.ui.nav.EditPersonRoute
@@ -18,6 +21,8 @@ import kotlinx.coroutines.launch
 
 enum class PhotoMessage { IMPORT_FAILED, NO_CAMERA }
 
+enum class LocationMessage { DENIED, UNAVAILABLE }
+
 data class PersonEditUiState(
     val isNew: Boolean = true,
     val name: String = "",
@@ -25,6 +30,10 @@ data class PersonEditUiState(
     val photoFile: String? = null,
     val tabId: Long? = null,
     val tabs: List<Tab> = emptyList(),
+    val metPlace: String = "",
+    val coordinates: Coordinates? = null,
+    val isLocating: Boolean = false,
+    val locationMessage: LocationMessage? = null,
     val isImportingPhoto: Boolean = false,
     val photoMessage: PhotoMessage? = null,
     val showNameError: Boolean = false,
@@ -36,6 +45,7 @@ class PersonEditViewModel(
     private val repository: PeopleRepository,
     tabs: TabsRepository,
     private val photos: PhotoStore,
+    private val location: LocationProvider,
     handle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -67,6 +77,10 @@ class PersonEditViewModel(
                         notes = person?.notes.orEmpty(),
                         photoFile = person?.photoFile,
                         tabId = person?.tabId,
+                        metPlace = person?.metCity.orEmpty(),
+                        coordinates = person?.let { p ->
+                            if (p.metLat != null && p.metLon != null) Coordinates(p.metLat, p.metLon) else null
+                        },
                         isLoading = false,
                     )
                 }
@@ -79,6 +93,29 @@ class PersonEditViewModel(
     fun onNotesChange(value: String) = state.update { it.copy(notes = value) }
 
     fun onTabChange(value: Long?) = state.update { it.copy(tabId = value) }
+
+    fun onPlaceChange(value: String) = state.update { it.copy(metPlace = value) }
+
+    fun hasLocationPermission(): Boolean = location.hasPermission()
+
+    fun onLocationDenied() = state.update { it.copy(locationMessage = LocationMessage.DENIED, isLocating = false) }
+
+    /** Call after the permission is granted. */
+    fun fetchLocation() {
+        state.update { it.copy(isLocating = true, locationMessage = null) }
+        viewModelScope.launch {
+            val found = location.current()
+            state.update {
+                it.copy(
+                    coordinates = found ?: it.coordinates,
+                    isLocating = false,
+                    locationMessage = if (found == null) LocationMessage.UNAVAILABLE else null,
+                )
+            }
+        }
+    }
+
+    fun clearCoordinates() = state.update { it.copy(coordinates = null, locationMessage = null) }
 
     fun newCaptureUri(): Uri = photos.newCaptureUri()
 
@@ -111,7 +148,18 @@ class PersonEditViewModel(
             return
         }
         viewModelScope.launch {
-            repository.save(id, current.name, current.notes, current.photoFile, current.tabId)
+            repository.save(
+                id,
+                PersonDraft(
+                    name = current.name,
+                    notes = current.notes,
+                    photoFile = current.photoFile,
+                    tabId = current.tabId,
+                    metPlace = current.metPlace,
+                    metLat = current.coordinates?.latitude,
+                    metLon = current.coordinates?.longitude,
+                ),
+            )
             sessionPhotos.clear()
             state.update { it.copy(isSaved = true) }
         }

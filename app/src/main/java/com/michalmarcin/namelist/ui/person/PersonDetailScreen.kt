@@ -1,6 +1,15 @@
 package com.michalmarcin.namelist.ui.person
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.platform.LocalContext
+import com.michalmarcin.namelist.platform.Coordinates
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,8 +55,15 @@ fun PersonDetailRoute(
     viewModel: PersonDetailViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
-    PersonDetailScreen(state = state, onBack = onBack, onEdit = onEdit, onDelete = viewModel::delete)
+    PersonDetailScreen(
+        state = state,
+        onBack = onBack,
+        onEdit = onEdit,
+        onDelete = viewModel::delete,
+        onOpenMap = { person -> openMap(context, person) },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +74,7 @@ fun PersonDetailScreen(
     onEdit: (Long) -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenMap: (Person) -> Unit = {},
 ) {
     val person = state.person
     var confirmDelete by remember { mutableStateOf(false) }
@@ -87,7 +104,7 @@ fun PersonDetailScreen(
         },
     ) { padding ->
         if (person != null) {
-            PersonDetailContent(person, state.tabName, Modifier.padding(padding))
+            PersonDetailContent(person, state.tabName, onOpenMap, Modifier.padding(padding))
         }
     }
 
@@ -114,7 +131,12 @@ fun PersonDetailScreen(
 }
 
 @Composable
-private fun PersonDetailContent(person: Person, tabName: String?, modifier: Modifier = Modifier) {
+private fun PersonDetailContent(
+    person: Person,
+    tabName: String?,
+    onOpenMap: (Person) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -146,6 +168,29 @@ private fun PersonDetailContent(person: Person, tabName: String?, modifier: Modi
             }
         }
         Spacer(Modifier.height(24.dp))
+        val coordinates = person.coordinates()
+        if (person.metCity != null || coordinates != null) {
+            DetailSection(title = stringResource(R.string.where_met), modifier = Modifier.testTag("placeSection")) {
+                person.metCity?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
+                if (coordinates != null) {
+                    Text(
+                        text = stringResource(R.string.gps_coordinates, coordinates.format()),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    TextButton(
+                        shape = MaterialTheme.shapes.large,
+                        onClick = { onOpenMap(person) },
+                        modifier = Modifier.testTag("openMap"),
+                    ) {
+                        Icon(painterResource(R.drawable.ic_place), contentDescription = null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.open_in_maps))
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
         DetailSection(title = stringResource(R.string.notes)) {
             Text(
                 text = person.notes.ifBlank { stringResource(R.string.no_notes) },
@@ -176,5 +221,23 @@ fun DetailSection(title: String, modifier: Modifier = Modifier, content: @Compos
             )
             content()
         }
+    }
+}
+
+private fun Person.coordinates(): Coordinates? {
+    val lat = metLat
+    val lon = metLon
+    return if (lat != null && lon != null) Coordinates(lat, lon) else null
+}
+
+/** Opens the user's map app at the saved point. The map app, not this app, decides what goes online. */
+private fun openMap(context: Context, person: Person) {
+    val coordinates = person.coordinates() ?: return
+    val point = coordinates.format().replace(" ", "")
+    val uri = Uri.parse("geo:$point?q=$point(${Uri.encode(person.name)})")
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+    } catch (_: ActivityNotFoundException) {
+        Toast.makeText(context, R.string.no_map_app, Toast.LENGTH_SHORT).show()
     }
 }

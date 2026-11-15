@@ -41,4 +41,13 @@
     <string name="tabs_empty_title">No tabs yet</string>
     <string name="tabs_empty_body">Tabs sort people into groups, such as Work or Family.</string>
     <string name="drag_to_reorder">Drag to reorder</string>
+    <string name="where_met">Where you met</string>
+    <string name="city_state">City, state</string>
+    <string name="use_current_location">Use current location</string>
+    <string name="gps_coordinates">GPS %1$s</string>
+    <string name="clear">Clear</string>
+    <string name="location_denied">Location is not allowed. You can still type the place.</string>
+    <string name="location_unavailable">Location not found. Turn on location and try again.</string>
+    <string name="open_in_maps">Open in maps</string>
+    <string name="no_map_app">No map app found on this phone.</string>
 </resources>
