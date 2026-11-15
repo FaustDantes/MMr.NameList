@@ -54,6 +54,18 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: ./gradlew --stacktrace assembleRelease recordRoborazziDebug lintDebug
 
+      - name: Test summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          t = f = s = 0
+          for x in glob.glob("app/build/test-results/**/*.xml", recursive=True):
+              r = ET.parse(x).getroot()
+              t += int(r.get("tests", 0)); f += int(r.get("failures", 0)) + int(r.get("errors", 0)); s += int(r.get("skipped", 0))
+          print(f"::notice title=tests::{t} tests, {t - f - s} passed, {f} failed, {s} skipped")
+          PY
+
       - name: Collect outputs
         if: always()
         run: |
