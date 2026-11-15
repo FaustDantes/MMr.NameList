@@ -82,7 +82,9 @@ class PeopleViewModel(
     }
 
     fun onToggleSelect(id: Long) {
-        val current = uiState.value.selected
+        // Read the saved selection, not uiState: uiState updates asynchronously, and two quick taps
+        // would both see the old selection and lose the first tap.
+        val current = (handle.get<LongArray>(KEY_SELECTED) ?: LongArray(0)).toSet()
         setSelected(if (id in current) current - id else current + id)
     }
 
