@@ -17,6 +17,10 @@ interface PersonDao {
     @Query("SELECT * FROM person WHERE id = :id")
     fun observe(id: Long): Flow<Person?>
 
+    /** Everyone, "Me" included. */
+    @Query("SELECT * FROM person ORDER BY isSelf DESC, sortIndex, id")
+    fun observeAll(): Flow<List<Person>>
+
     @Query("SELECT * FROM person WHERE id = :id")
     suspend fun get(id: Long): Person?
 

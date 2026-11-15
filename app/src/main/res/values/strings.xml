@@ -50,4 +50,22 @@
     <string name="location_unavailable">Location not found. Turn on location and try again.</string>
     <string name="open_in_maps">Open in maps</string>
     <string name="no_map_app">No map app found on this phone.</string>
+    <string name="relationships">Relationships</string>
+    <string name="no_relationships">No relationships yet.</string>
+    <string name="add_relationship">Add relationship</string>
+    <string name="relationship_hint">Tap the person who is %1$s\'s %2$s.</string>
+    <string name="relationship_exists">This relationship already exists.</string>
+    <string name="change_type">Change type</string>
+    <string name="change_type_title">%1$s is…</string>
+    <string name="remove">Remove</string>
+    <string name="more_options">More options</string>
+    <string name="rel_friend">Friend</string>
+    <string name="rel_family">Family</string>
+    <string name="rel_partner">Partner</string>
+    <string name="rel_sibling">Sibling</string>
+    <string name="rel_parent">Parent</string>
+    <string name="rel_child">Child</string>
+    <string name="rel_colleague">Colleague</string>
+    <string name="rel_neighbour">Neighbour</string>
+    <string name="rel_other">Other</string>
 </resources>

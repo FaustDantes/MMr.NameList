@@ -24,6 +24,7 @@ fun AppNavHost() {
             PersonDetailRoute(
                 onBack = { nav.popBackStack() },
                 onEdit = { id -> nav.navigate(EditPersonRoute(id)) },
+                onOpenPerson = { id -> nav.navigate(PersonRoute(id)) },
             )
         }
         composable<EditPersonRoute> {

@@ -9,7 +9,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalContext
+import com.michalmarcin.namelist.data.db.RelationType
+import com.michalmarcin.namelist.data.repo.AddResult
+import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.platform.Coordinates
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,6 +60,7 @@ import com.michalmarcin.namelist.ui.components.Avatar
 fun PersonDetailRoute(
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
+    onOpenPerson: (Long) -> Unit,
     viewModel: PersonDetailViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,6 +72,11 @@ fun PersonDetailRoute(
         onEdit = onEdit,
         onDelete = viewModel::delete,
         onOpenMap = { person -> openMap(context, person) },
+        onOpenPerson = onOpenPerson,
+        onAddRelationship = viewModel::addRelationship,
+        onChangeRelationshipType = viewModel::changeRelationshipType,
+        onRemoveRelationship = viewModel::removeRelationship,
+        onMessageShown = viewModel::clearMessage,
     )
 }
 
@@ -75,11 +89,27 @@ fun PersonDetailScreen(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenMap: (Person) -> Unit = {},
+    onOpenPerson: (Long) -> Unit = {},
+    onAddRelationship: (Long, RelationType) -> Unit = { _, _ -> },
+    onChangeRelationshipType: (Long, RelationType) -> Unit = { _, _ -> },
+    onRemoveRelationship: (Long) -> Unit = {},
+    onMessageShown: () -> Unit = {},
 ) {
     val person = state.person
     var confirmDelete by remember { mutableStateOf(false) }
+    var addingRelation by rememberSaveable { mutableStateOf(false) }
+    var changing by remember { mutableStateOf<RelationView?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+    val duplicateText = stringResource(R.string.relationship_exists)
+    LaunchedEffect(state.relationMessage) {
+        if (state.relationMessage == AddResult.DUPLICATE) {
+            snackbar.showSnackbar(duplicateText)
+            onMessageShown()
+        }
+    }
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = {},
@@ -104,7 +134,49 @@ fun PersonDetailScreen(
         },
     ) { padding ->
         if (person != null) {
-            PersonDetailContent(person, state.tabName, onOpenMap, Modifier.padding(padding))
+            PersonDetailContent(
+                person = person,
+                tabName = state.tabName,
+                onOpenMap = onOpenMap,
+                modifier = Modifier.padding(padding),
+            ) {
+                RelationshipsSection(
+                    relations = state.relations,
+                    onOpenPerson = onOpenPerson,
+                    onAdd = { addingRelation = true },
+                    onChangeType = { changing = it },
+                    onRemove = { onRemoveRelationship(it.id) },
+                )
+            }
+        }
+    }
+
+    if (addingRelation && person != null) {
+        ModalBottomSheet(onDismissRequest = { addingRelation = false }) {
+            AddRelationshipContent(
+                personName = person.name,
+                candidates = state.candidates,
+                onAdd = { otherId, type ->
+                    addingRelation = false
+                    onAddRelationship(otherId, type)
+                },
+            )
+        }
+    }
+
+    changing?.let { relation ->
+        BasicAlertDialog(onDismissRequest = { changing = null }) {
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                ChangeTypeContent(
+                    name = relation.other.name,
+                    current = relation.type,
+                    onSelect = { type ->
+                        changing = null
+                        onChangeRelationshipType(relation.id, type)
+                    },
+                    onCancel = { changing = null },
+                )
+            }
         }
     }
 
@@ -136,6 +208,7 @@ private fun PersonDetailContent(
     tabName: String?,
     onOpenMap: (Person) -> Unit,
     modifier: Modifier = Modifier,
+    relationships: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -191,6 +264,8 @@ private fun PersonDetailContent(
             }
             Spacer(Modifier.height(12.dp))
         }
+        relationships()
+        Spacer(Modifier.height(12.dp))
         DetailSection(title = stringResource(R.string.notes)) {
             Text(
                 text = person.notes.ifBlank { stringResource(R.string.no_notes) },

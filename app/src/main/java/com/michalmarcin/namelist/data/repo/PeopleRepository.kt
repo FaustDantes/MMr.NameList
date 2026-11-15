@@ -54,6 +54,9 @@ class PeopleRepository(
 
     fun observePerson(id: Long): Flow<Person?> = dao.observe(id)
 
+    /** Everyone, "Me" first. */
+    fun observeEveryone(): Flow<List<Person>> = dao.observeAll()
+
     suspend fun getPerson(id: Long): Person? = dao.get(id)
 
     suspend fun getSelf(): Person? = dao.getSelf()

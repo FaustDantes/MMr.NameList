@@ -18,7 +18,12 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
         PeopleViewModel(container().peopleRepository, container().tabsRepository, createSavedStateHandle())
     }
     initializer {
-        PersonDetailViewModel(container().peopleRepository, container().tabsRepository, createSavedStateHandle())
+        PersonDetailViewModel(
+            container().peopleRepository,
+            container().tabsRepository,
+            container().relationshipsRepository,
+            createSavedStateHandle(),
+        )
     }
     initializer {
         PersonEditViewModel(

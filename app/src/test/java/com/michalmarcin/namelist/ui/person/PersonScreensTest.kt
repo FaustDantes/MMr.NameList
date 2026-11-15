@@ -6,6 +6,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.michalmarcin.namelist.data.db.RelationType
+import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.platform.Coordinates
 import com.michalmarcin.namelist.testutil.SampleData
 import com.michalmarcin.namelist.ui.theme.NameListTheme
@@ -198,5 +200,61 @@ class PersonScreensTest {
             }
         }
         compose.onNodeWithTag("placeSection").assertDoesNotExist()
+    }
+
+    @Test
+    fun relationshipsSectionShowsLinksAndRemoves() {
+        val peter = SampleData.people[1]
+        var removed = -1L
+        var opened = -1L
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(
+                    PersonDetailUiState(
+                        SampleData.anna,
+                        relations = listOf(RelationView(9, peter, RelationType.SIBLING)),
+                        isLoading = false,
+                    ),
+                    {}, {}, {},
+                    onOpenPerson = { opened = it },
+                    onRemoveRelationship = { removed = it },
+                )
+            }
+        }
+        compose.onNodeWithText("Sibling").assertIsDisplayed()
+        compose.onNodeWithText(peter.name).performClick()
+        assertEquals(peter.id, opened)
+        compose.onNodeWithTag("relationMenu-9").performClick()
+        compose.onNodeWithTag("removeRelation").performClick()
+        assertEquals(9L, removed)
+    }
+
+    @Test
+    fun emptyRelationshipsText() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(PersonDetailUiState(SampleData.anna, isLoading = false), {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("No relationships yet.").assertExists()
+        compose.onNodeWithTag("addRelationship").assertExists()
+    }
+
+    @Test
+    fun addRelationshipPicksTypeThenPerson() {
+        var added: Pair<Long, RelationType>? = null
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                AddRelationshipContent(
+                    personName = "Anna",
+                    candidates = SampleData.people.drop(1),
+                    onAdd = { id, type -> added = id to type },
+                )
+            }
+        }
+        compose.onNodeWithTag("type-PARENT").performClick()
+        compose.onNodeWithText("Tap the person who is Anna's parent.").assertIsDisplayed()
+        compose.onNodeWithTag("candidate-3").performClick()
+        assertEquals(3L to RelationType.PARENT, added)
     }
 }

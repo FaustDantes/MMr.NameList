@@ -172,3 +172,11 @@ Status: accepted
 Decision: The GPS button uses `LocationManagerCompat.getCurrentLocation` (fused provider on Android 12+, else GPS or network), asks for location only on tap, and accepts "approximate". Coordinates are shown with 4 decimals; "Open in maps" hands them to the user's map app. The theme choice (M7) is kept in SharedPreferences.
 Reason: No new dependency (AGENTS.md rule 6). DataStore is not needed for one value.
 Alternatives: Play Services FusedLocationProviderClient (new dependency, not on all phones), DataStore.
+
+## ADR-021: Relationships
+
+Date: 2026-11-15
+Status: accepted
+Decision: Table `relationship` (schema v3, auto migration). One row (from = A, to = B, type = T) means "B is A's T"; from B's side it reads T.inverse (PARENT and CHILD swap, all other types are symmetric). Gender-neutral types (open decision 2, default A). Foreign keys CASCADE delete links with a person. A fact that already exists from either side is rejected. Added on the detail screen through a bottom sheet: pick a type, then tap a person ("Me" first).
+Reason: Requirements F13 and ADR-003.
+Alternatives: Two rows per link.

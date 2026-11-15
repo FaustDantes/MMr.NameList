@@ -55,6 +55,37 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun version2To3AddsRelationships() {
+        helper.createDatabase(DB, 2).apply {
+            execSQL("INSERT INTO tab (id, name, sortIndex) VALUES (1, 'Work', 1)")
+            execSQL(
+                "INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt, tabId) VALUES " +
+                    "(1, 'Me', '', 1, 0, 0, NULL), (2, 'Anna', '', 0, 1, 5, 1)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 3, true)
+        db.query("SELECT tabId FROM person WHERE id = 2").use {
+            assertTrue(it.moveToFirst())
+            assertEquals(1L, it.getLong(0))
+        }
+        db.execSQL("INSERT INTO relationship (fromPersonId, toPersonId, type) VALUES (2, 1, 'FRIEND')")
+    }
+
+    @Test
+    fun version1To3InOneUpdate() {
+        helper.createDatabase(DB, 1).apply {
+            execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 3, true)
+        db.query("SELECT name FROM person WHERE id = 2").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Anna", it.getString(0))
+        }
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }
