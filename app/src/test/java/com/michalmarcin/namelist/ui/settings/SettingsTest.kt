@@ -63,7 +63,14 @@ class SettingsTest {
     fun resultMessages() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
-                SettingsScreen(SettingsUiState(message = BackupMessage.Exported(12, 1)), "1", {}, {}, {}, {})
+                SettingsScreen(
+                    state = SettingsUiState(message = BackupMessage.Exported(12, 1)),
+                    versionName = "1",
+                    onBack = {},
+                    onThemeChange = {},
+                    onExport = {},
+                    onImport = {},
+                )
             }
         }
         compose.onNodeWithText("Exported 12 people. 1 photo.").assertIsDisplayed()
