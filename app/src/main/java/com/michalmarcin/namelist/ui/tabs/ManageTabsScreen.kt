@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -220,31 +222,41 @@ private fun TabList(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NameDialog(title: String, initial: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+            TabNameForm(title = title, initial = initial, onConfirm = onConfirm, onCancel = onDismiss)
+        }
+    }
+}
+
+/** Content of the add and rename dialogs. Separate from the dialog window so tests can drive it. */
+@Composable
+fun TabNameForm(title: String, initial: String, onConfirm: (String) -> Unit, onCancel: () -> Unit) {
     var name by rememberSaveable { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text(stringResource(R.string.tab_name)) },
-                singleLine = true,
-                modifier = Modifier.testTag("tabNameField"),
-            )
-        },
-        confirmButton = {
+    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(title, style = MaterialTheme.typography.headlineSmall)
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text(stringResource(R.string.tab_name)) },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("tabNameField"),
+        )
+        Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(shape = MaterialTheme.shapes.large, onClick = onCancel) {
+                Text(stringResource(R.string.cancel))
+            }
             TextButton(
                 shape = MaterialTheme.shapes.large,
                 onClick = { onConfirm(name) },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.testTag("confirmTabName"),
             ) { Text(stringResource(R.string.save)) }
-        },
-        dismissButton = {
-            TextButton(shape = MaterialTheme.shapes.large, onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        },
-    )
+        }
+    }
 }
