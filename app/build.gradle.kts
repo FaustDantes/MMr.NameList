@@ -53,9 +53,10 @@ android {
         compose = true
     }
 
-    // Room schemas as test assets, for MigrationTestHelper in Robolectric tests.
+    // Room schemas as assets for MigrationTestHelper. Robolectric reads the app's debug assets,
+    // not the test source set. Debug builds only; the release APK does not contain them.
     sourceSets {
-        getByName("test") {
+        getByName("debug") {
             assets.directories.add("$projectDir/schemas")
         }
     }

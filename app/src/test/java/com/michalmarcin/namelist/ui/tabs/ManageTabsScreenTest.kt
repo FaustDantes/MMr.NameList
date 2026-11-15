@@ -42,11 +42,18 @@ class ManageTabsScreenTest {
 
     @Test
     fun addTabThroughDialog() {
+        // Under Robolectric the dialog window never reports idle while the clock runs freely,
+        // so this test advances the clock by hand.
+        compose.mainClock.autoAdvance = false
         show(ManageTabsUiState(isLoading = false))
+        compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithTag("addTab").performClick()
+        compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithTag("confirmTabName").assertIsNotEnabled()
         compose.onNodeWithTag("tabNameField").performTextInput("Work")
+        compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithTag("confirmTabName").performClick()
+        compose.mainClock.advanceTimeBy(500)
         assertEquals(listOf("Work"), added)
     }
 
