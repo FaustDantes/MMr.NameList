@@ -49,7 +49,8 @@
             android:textColor="@color/widget_text_secondary"
             android:textSize="14sp" />
 
-        <View
+        <!-- Spacer. RemoteViews cannot inflate a plain View. -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />

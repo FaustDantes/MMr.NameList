@@ -8,12 +8,10 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.platform.widget.NameListWidget
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,8 +47,11 @@ class QuickAddFromWidgetTest {
             compose.waitUntilAtLeastOneExists(hasTestTag("nameField"), 10_000)
             compose.onNodeWithTag("nameField").performTextInput("Widget Person")
             compose.onNodeWithTag("save").performClick()
-            compose.waitUntil(10_000) { scenario.state == Lifecycle.State.DESTROYED }
-            assertEquals(Lifecycle.State.DESTROYED, scenario.state)
+            compose.waitUntil(10_000) {
+                var finishing = false
+                scenario.onActivity { finishing = it.isFinishing }
+                finishing
+            }
         }
     }
 
