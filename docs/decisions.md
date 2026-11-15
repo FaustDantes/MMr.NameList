@@ -212,3 +212,11 @@ Status: accepted
 Decision: Country borders from Natural Earth Admin 0, 1:110m (public domain), taken from npm `world-atlas` 2.0.2 and converted by `tools/map/convert.py` into an 80 KB binary asset. Drawn with Compose Canvas in Web Mercator (latitude clamped to 85°, Antarctica left out). Pinch, drag and double tap; markers are composables (circles with initials, as the owner asked), grouped when they would overlap. Only people with GPS coordinates show; there is no geocoding (ADR-019).
 Reason: Free, no API key, no network, no new dependency; the map never sends locations anywhere (N3). The 1:110m detail matches "not so detailed".
 Alternatives: Google Maps SDK (API key, network, Play Services), MapLibre or osmdroid with online tiles (network, larger app), 1:50m data (5 times larger).
+
+## ADR-026: Semantic versions from 1.0.0
+
+Date: 2026-11-15
+Status: accepted (extends ADR-007)
+Decision: From version 1.0.0, releases are tagged `vX.Y.Z` on `master` and review builds `vX.Y.Z-rcN` on `dev`. The app's versionName is the tag without "v"; versionCode is the CI run number, so it always goes up. Each release gets an entry in CHANGELOG.md.
+Reason: The owner asked for "version 1". Milestone tags no longer fit once the planned milestones are done.
+Alternatives: Keep milestone tags (unclear to users of the app).

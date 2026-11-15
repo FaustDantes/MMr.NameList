@@ -35,7 +35,10 @@ If two documents disagree, stop and ask the owner.
 
 Tags cannot be pushed from the agent sandbox. Run the workflow instead; it creates the tag and the release:
 
-`gh workflow run android.yml --ref dev -f release_tag=m<N>-rc<K>`
+`gh workflow run android.yml --ref dev -f release_tag=v<X.Y.Z>-rc<K>` for a review build on `dev`,
+`gh workflow run android.yml --ref master -f release_tag=v<X.Y.Z>` for a release after the owner approves.
+
+Since 1.0.0, versions follow semantic versioning (ADR-026). Add each release to CHANGELOG.md.
 
 A tag pushed by a human (`git push origin m<N>-rc<K>`) also works.
 

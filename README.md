@@ -2,7 +2,7 @@
 
 A simple Android app to remember the people you meet: name, photo, where they come from, where you met, and how they relate to you and to each other. All data stays on your phone.
 
-**Status:** all milestones built (M6 removed). M1 to M7 ready for review. See [progress](docs/progress.md) and [releases](../../releases).
+**Status:** version 1.0.0. See the [changelog](CHANGELOG.md), [progress](docs/progress.md) and [releases](../../releases).
 
 ## Features
 

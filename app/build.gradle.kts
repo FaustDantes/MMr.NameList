@@ -10,7 +10,8 @@ plugins {
 
 // CI sets these. Local builds use the defaults.
 val ciVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
-val ciVersionName = System.getenv("VERSION_NAME") ?: "0.0.0-dev"
+// Tag "v1.0.0" gives versionName "1.0.0" (ADR-026).
+val ciVersionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.0.0-dev"
 val releaseStoreFile = System.getenv("SIGNING_STORE_FILE")?.let { file(it) }?.takeIf { it.exists() }
 
 android {

@@ -14,10 +14,16 @@ The agent updates this file at the end of each session. Newest entry first.
 | M5 Relationships | approved | m7 | 2026-11-15 |
 | ~~M6 Reminders~~ | removed | - | - |
 | M7 Backup and polish | approved | m7 | 2026-11-15 |
-| M8 Multi-select and colors | ready for review | m9-rc1 | 2026-11-15 |
-| M9 World map | ready for review | m9-rc1 | 2026-11-15 |
+| M8 Multi-select and colors | approved | v1.0.0 | 2026-11-15 |
+| M9 World map | approved | v1.0.0 | 2026-11-15 |
 
 ## Log
+
+### 2026-11-15 (version 1.0.0)
+
+- Owner approved M8 and M9 and asked for version 1, merged into master.
+- Tests added for the most used features: PersonEditViewModel, PersonDetailViewModel, and AppFlowTest (the real app: add, search, open, edit, delete; long press and bulk delete). 102 tests pass.
+- Released as v1.0.0 from master (ADR-026). Changes: CHANGELOG.md.
 
 ### 2026-11-15 (M8, M9)
 
