@@ -6,7 +6,7 @@ The agent updates this file at the end of each session. Newest entry first.
 
 | Milestone | Status | Tag | Date |
 |---|---|---|---|
-| M0 Skeleton and CI | ready for review | m0-rc1 | 2026-11-15 |
+| M0 Skeleton and CI | approved | m0 | 2026-11-15 |
 | M1 People basics | not started | - | - |
 | M2 Photos | not started | - | - |
 | M3 Tabs and ordering | not started | - | - |
