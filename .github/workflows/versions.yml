@@ -1,0 +1,37 @@
+name: Versions probe
+
+# Reads the newest stable versions from the official repositories.
+# Used by agents that cannot reach these repositories directly.
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read newest stable versions
+        shell: bash
+        run: |
+          latest() { # $1 = metadata URL
+            curl -fsSL "$1" | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' \
+              | grep -viE 'alpha|beta|rc|dev|eap|snapshot|-m[0-9]' | sort -V | tail -1
+          }
+          G=https://dl.google.com/dl/android/maven2
+          C=https://repo1.maven.org/maven2
+          out=""
+          add() { out+="$1=$2; "; }
+          add agp "$(latest $G/com/android/tools/build/gradle/maven-metadata.xml)"
+          add composeBom "$(latest $G/androidx/compose/compose-bom/maven-metadata.xml)"
+          add activityCompose "$(latest $G/androidx/activity/activity-compose/maven-metadata.xml)"
+          add coreKtx "$(latest $G/androidx/core/core-ktx/maven-metadata.xml)"
+          add lifecycle "$(latest $G/androidx/lifecycle/lifecycle-runtime-compose/maven-metadata.xml)"
+          add junitExt "$(latest $G/androidx/test/ext/junit/maven-metadata.xml)"
+          add kotlin "$(latest $C/org/jetbrains/kotlin/kotlin-gradle-plugin/maven-metadata.xml)"
+          add roborazzi "$(latest $C/io/github/takahirom/roborazzi/roborazzi/maven-metadata.xml)"
+          add robolectric "$(latest $C/org/robolectric/robolectric/maven-metadata.xml)"
+          add junit4 "$(latest $C/junit/junit/maven-metadata.xml)"
+          add gradle "$(curl -fsSL https://services.gradle.org/versions/current | grep -o '"version" *: *"[^"]*"' | cut -d'"' -f4)"
+          for a in actions/checkout actions/setup-java gradle/actions actions/upload-artifact; do
+            add "$a" "$(curl -fsSL -H 'Accept: application/vnd.github+json' https://api.github.com/repos/$a/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)"
+          done
+          echo "::notice title=versions::$out"
