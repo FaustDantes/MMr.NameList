@@ -1,6 +1,7 @@
 package com.michalmarcin.namelist
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
@@ -34,16 +35,22 @@ class AppFlowTest {
 
     private fun waitGone(text: String) = compose.waitUntilDoesNotExist(hasText(text), 10_000)
 
-    // Right after navigating back, the screen is still inside the navigation transition, whose semantics
-    // merge the search field into a parent node. The unmerged tree finds it in every case.
-    private fun search() = compose.onNodeWithTag("search", useUnmergedTree = true)
+    /**
+     * Waits for a screen by a test tag that only that screen has. Waiting for a name is not enough:
+     * after Save, the name is still on screen in the edit form's Name field.
+     */
+    private fun waitForScreen(tag: String) = compose.waitUntilAtLeastOneExists(hasTestTag(tag), 10_000)
+
+    private fun search() = compose.onNodeWithTag("search")
 
     private fun addPerson(name: String, notes: String = "") {
+        waitForScreen("addPerson")
         compose.onNodeWithTag("addPerson").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("New person"), 10_000)
+        waitForScreen("nameField")
         compose.onNodeWithTag("nameField").performTextInput(name)
         if (notes.isNotEmpty()) compose.onNodeWithTag("notesField").performTextInput(notes)
         compose.onNodeWithTag("save").performClick()
+        waitForScreen("peopleList")
         waitFor(name)
     }
 
@@ -59,17 +66,20 @@ class AppFlowTest {
         compose.onNodeWithText("Anna Nováková").performClick()
 
         // Detail, then edit the name.
+        waitForScreen("relationsSection")
         waitFor("Met at the tram stop")
         compose.onNodeWithTag("edit").performClick()
-        waitFor("Edit person")
+        waitForScreen("nameField")
         compose.onNodeWithTag("nameField").performTextClearance()
         compose.onNodeWithTag("nameField").performTextInput("Anna Svobodová")
         compose.onNodeWithTag("save").performClick()
+        waitForScreen("relationsSection") // back on the detail screen
         waitFor("Anna Svobodová")
 
         // Delete from the detail screen; the app goes back to the list.
         compose.onNodeWithTag("delete").performClick()
         compose.onNodeWithTag("confirmDelete").performClick()
+        waitForScreen("search")
         waitGone("Anna Svobodová")
         search().performTextClearance()
         waitFor("Peter Horváth")
