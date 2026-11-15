@@ -80,6 +80,12 @@ class WidgetTest {
         val view = render(WidgetSize.CARD, WidgetContent.from(people.take(2)))
         assertEquals(android.view.View.VISIBLE, view.findViewById<TextView>(R.id.widget_tile_1).visibility)
         assertEquals(android.view.View.GONE, view.findViewById<TextView>(R.id.widget_tile_2).visibility)
+        assertEquals(android.view.View.VISIBLE, view.findViewById<android.view.View>(R.id.widget_recent).visibility)
+    }
+
+    @Test
+    fun cardHidesTheRecentLabelWhenNobodyIsThere() {
+        val view = render(WidgetSize.CARD, WidgetContent.from(emptyList()))
         assertEquals(android.view.View.GONE, view.findViewById<android.view.View>(R.id.widget_recent).visibility)
     }
 
