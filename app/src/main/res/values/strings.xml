@@ -216,4 +216,8 @@
     <string name="report_bug_explained">Opens your email app with a message to the developer. It adds the app version and the phone model, and nothing from your list.</string>
     <string name="report_intro">Describe the problem here:</string>
     <string name="no_email_app">No email app found. Write to %1$s.</string>
+
+    <!-- F27 Language -->
+    <string name="language">Language</string>
+    <string name="language_system">System language</string>
 </resources>

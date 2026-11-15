@@ -3,6 +3,7 @@ package com.michalmarcin.namelist.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.michalmarcin.namelist.platform.AppLanguage
 import com.michalmarcin.namelist.platform.BackupException
 import com.michalmarcin.namelist.platform.BackupManager
 import com.michalmarcin.namelist.platform.BackupPasswordException
@@ -67,6 +68,7 @@ data class SettingsUiState(
     val dialog: SettingsDialog? = null,
     val passwordError: PasswordError? = null,
     val saveRequest: SaveRequest? = null,
+    val language: AppLanguage = AppLanguage.SYSTEM,
 )
 
 class SettingsViewModel(
@@ -85,7 +87,7 @@ class SettingsViewModel(
     private var pendingPassword: CharArray? = null
 
     val uiState: StateFlow<SettingsUiState> = combine(
-        listOf(settings.theme, busy, message, settings.encryptChoice, passwords.isSet, dialog, error, saveRequest),
+        listOf(settings.theme, busy, message, settings.encryptChoice, passwords.isSet, dialog, error, saveRequest, settings.language),
     ) { v ->
         @Suppress("UNCHECKED_CAST")
         SettingsUiState(
@@ -97,10 +99,13 @@ class SettingsViewModel(
             dialog = v[5] as SettingsDialog?,
             passwordError = v[6] as PasswordError?,
             saveRequest = v[7] as SaveRequest?,
+            language = v[8] as AppLanguage,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(settings.theme.value))
 
     fun setTheme(mode: ThemeMode) = settings.setTheme(mode)
+
+    fun setLanguage(language: AppLanguage) = settings.setLanguage(language)
 
     fun setEncryptChoice(choice: EncryptChoice) = settings.setEncryptChoice(choice)
 

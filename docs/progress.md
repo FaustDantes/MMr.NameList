@@ -21,6 +21,11 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-15 (1.2.0, F22 to F27, owner request)
+
+- F22 to F27 in ADR-033 and ADR-034. Review builds v1.2.0-rc2 and rc3.
+- Decisions I made without asking: search treats "any field" as all text fields plus all dates; the widget follows the system language; the translations are mine and need a native check; the add button is 88 dp.
+
 ### 2026-11-15 (1.2.0, F20 and F21, owner request)
 
 - F20 (ADR-031): home-screen widget with RemoteViews, resizable between 1 x 1, 4 x 1 and 4 x 2, as designed (navy add button). The add button opens the quick-add form; saving or closing returns to the home screen. The widget refreshes when the app closes.

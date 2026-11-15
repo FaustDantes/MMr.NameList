@@ -283,3 +283,11 @@ F24: Settings shows the version and build number, the contact address info@micha
 F25: languages English (default), German, Slovak, Czech, Polish, via `values-<lang>/strings.xml` and `locales_config.xml`. Plural forms use the CLDR categories of each language.
 Reason: The owner asked for these. The mail app is used so the app needs no internet permission.
 Alternatives: A built-in form that sends the report (needs internet permission, which the app avoids); machine translation (the texts were written by hand and need a native check).
+
+## ADR-034: Language drop-down, 88 dp add button
+
+Date: 2026-11-15
+Status: accepted
+Decision: The language is saved in `SettingsStore` (`AppLanguage`: system, en, de, sk, cs, pl). `MainActivity.attachBaseContext` wraps the context with the saved locale and sets the default locale, so texts and dates follow it. A change recreates the activity. Flags are emoji; each entry also shows the language name in its own language. No new dependency: `AppCompatDelegate` would add androidx.appcompat. The widget follows the system language, because it runs outside the activity. The add button is 88 dp (was 112 dp), still a navy circle at the bottom right (supersedes the size in ADR-032 and ADR-033).
+Reason: The owner asked for a visible language list with flags and for a smaller add button. A system option stays first so the app can follow the phone again.
+Alternatives: `AppCompatDelegate.setApplicationLocales` (new dependency); only the Android 13 system language screen (hidden from most users; the owner could not find it).

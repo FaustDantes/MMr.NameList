@@ -1,5 +1,6 @@
 package com.michalmarcin.namelist
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import com.michalmarcin.namelist.platform.AppLanguage
 import com.michalmarcin.namelist.platform.ThemeMode
 import com.michalmarcin.namelist.platform.WorldShapes
 import com.michalmarcin.namelist.ui.map.LocalWorldShapes
@@ -20,6 +22,10 @@ import com.michalmarcin.namelist.ui.nav.AppNavHost
 import com.michalmarcin.namelist.ui.theme.NameListTheme
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

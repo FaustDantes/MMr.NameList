@@ -117,3 +117,9 @@ A widget for the phone's home screen with one big add button. The button opens t
 
 ### F21 Big centered add button (added by the owner on 2026-11-15)
 The add button on the people list is dark navy, twice the usual size (112 dp) and at the bottom center, so it is easy to hit with the thumb (ADR-032).
+
+### F22 to F26 (added by the owner on 2026-11-15)
+F22 warning when a new name equals an existing one (case ignored), with a button that opens the existing person. F23 "Conversation Spark" field (was "Ask about") directly under the name, and its first words under the name in the list. F24 version, build number, contact address and "Report a problem" in Settings. F25 languages English, German, Slovak, Czech, Polish. F26 search over every field and every date. See ADR-033.
+
+### F27 Language choice (added by the owner on 2026-11-15)
+Settings has a drop-down with a flag and the name of each language, "System language" first. The choice applies at once (ADR-034).

@@ -75,4 +75,39 @@ class SettingsTest {
         }
         compose.onNodeWithText("Exported 12 people. 1 photo.").assertIsDisplayed()
     }
+
+    @Test
+    fun languageDropdownListsAllLanguagesWithFlagsAndReportsTheChoice() {
+        var chosen: com.michalmarcin.namelist.platform.AppLanguage? = null
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                SettingsScreen(
+                    state = SettingsUiState(),
+                    versionName = "1",
+                    onBack = {},
+                    onThemeChange = {},
+                    onExport = {},
+                    onImport = {},
+                    onLanguageChange = { chosen = it },
+                )
+            }
+        }
+        compose.onNodeWithText("\uD83C\uDF10 System language").assertIsDisplayed()
+        compose.onNodeWithTag("languageButton").performClick()
+        compose.onNodeWithText("\uD83C\uDDE9\uD83C\uDDEA Deutsch").assertIsDisplayed()
+        compose.onNodeWithText("\uD83C\uDDE8\uD83C\uDDFF Čeština").assertIsDisplayed()
+        compose.onNodeWithTag("language-POLISH").assertIsDisplayed()
+        compose.onNodeWithTag("language-SLOVAK").performClick()
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SLOVAK, chosen)
+    }
+
+    @Test
+    fun languageIsSavedAndReadBack() {
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.app.Application>()
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, SettingsStore(context).language.value)
+        SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.POLISH)
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.POLISH, SettingsStore(context).language.value)
+        SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM)
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, SettingsStore(context).language.value)
+    }
 }

@@ -1,5 +1,8 @@
 package com.michalmarcin.namelist.ui.settings
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -44,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michalmarcin.namelist.R
 import com.michalmarcin.namelist.platform.AppInfo
+import com.michalmarcin.namelist.platform.AppLanguage
 import com.michalmarcin.namelist.platform.EncryptChoice
 import com.michalmarcin.namelist.platform.ThemeMode
 import com.michalmarcin.namelist.ui.AppViewModelFactory
@@ -87,6 +94,11 @@ fun SettingsRoute(
         },
         onBack = onBack,
         onThemeChange = viewModel::setTheme,
+        onLanguageChange = { language ->
+            viewModel.setLanguage(language)
+            // The new language shows after the activity is created again.
+            context.findActivity()?.recreate()
+        },
         onExport = viewModel::onExportClicked,
         onImport = { importLauncher.launch(arrayOf("application/zip", "application/octet-stream")) },
         actions = SettingsActions(
@@ -119,6 +131,7 @@ fun SettingsScreen(
     onThemeChange: (ThemeMode) -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
+    onLanguageChange: (AppLanguage) -> Unit = {},
     modifier: Modifier = Modifier,
     actions: SettingsActions = SettingsActions(),
 ) {
@@ -144,6 +157,9 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            DetailSection(title = stringResource(R.string.language)) {
+                LanguageDropdown(state.language, onLanguageChange)
+            }
             DetailSection(title = stringResource(R.string.theme)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ThemeMode.entries.forEach { mode ->
@@ -335,4 +351,42 @@ private fun BackupMessage.text(): String = when (this) {
     BackupMessage.PasswordSet -> stringResource(R.string.password_saved)
     BackupMessage.PasswordChanged -> stringResource(R.string.password_changed)
     BackupMessage.PasswordRemoved -> stringResource(R.string.password_removed)
+}
+
+/** F27: drop-down with a flag and the name of each language; "System language" first. */
+@Composable
+private fun LanguageDropdown(selected: AppLanguage, onChange: (AppLanguage) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(
+            shape = MaterialTheme.shapes.large,
+            onClick = { open = true },
+            modifier = Modifier.fillMaxWidth().testTag("languageButton"),
+        ) {
+            Text(selected.label(), modifier = Modifier.weight(1f))
+            Icon(painterResource(R.drawable.ic_expand_more), contentDescription = null)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            AppLanguage.entries.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(language.label()) },
+                    onClick = {
+                        open = false
+                        if (language != selected) onChange(language)
+                    },
+                    modifier = Modifier.testTag("language-${language.name}"),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppLanguage.label(): String =
+    if (this == AppLanguage.SYSTEM) "$flag ${stringResource(R.string.language_system)}" else "$flag $nativeName"
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

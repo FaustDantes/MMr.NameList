@@ -18,6 +18,16 @@ class SettingsStore(context: Context) {
 
     val theme: StateFlow<ThemeMode> = themeState.asStateFlow()
 
+    private val languageState = MutableStateFlow(AppLanguage.fromTag(savedLanguageTag(context)))
+
+    val language: StateFlow<AppLanguage> = languageState.asStateFlow()
+
+    /** Saves the language. The activity must be recreated to show it (F27). */
+    fun setLanguage(language: AppLanguage) {
+        prefs.edit().apply { language.tag?.let { putString(KEY_LANGUAGE, it) } ?: remove(KEY_LANGUAGE) }.apply()
+        languageState.value = language
+    }
+
     private val encryptState = MutableStateFlow(readEncryptChoice())
 
     val encryptChoice: StateFlow<EncryptChoice> = encryptState.asStateFlow()
@@ -39,8 +49,13 @@ class SettingsStore(context: Context) {
         // Default is Light: the owner wants a white background (ADR-023), even when the phone is in dark mode.
         ThemeMode.entries.firstOrNull { it.name == prefs.getString(KEY_THEME, null) } ?: ThemeMode.LIGHT
 
-    private companion object {
-        const val KEY_THEME = "theme"
-        const val KEY_ENCRYPT = "encrypt_backup"
+    companion object {
+        /** The saved language tag, or null for "system". Read before the app has a settings store. */
+        fun savedLanguageTag(context: Context): String? =
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE).getString(KEY_LANGUAGE, null)
+
+        private const val KEY_LANGUAGE = "language"
+        private const val KEY_THEME = "theme"
+        private const val KEY_ENCRYPT = "encrypt_backup"
     }
 }

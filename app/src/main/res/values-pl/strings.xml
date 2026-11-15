@@ -224,4 +224,6 @@
     <string name="report_bug_explained">Otwiera aplikację pocztową z wiadomością do twórcy. Dodaje wersję aplikacji i model telefonu, nic z twojej listy.</string>
     <string name="report_intro">Opisz problem tutaj:</string>
     <string name="no_email_app">Nie znaleziono aplikacji pocztowej. Napisz na %1$s.</string>
+    <string name="language">Język</string>
+    <string name="language_system">Język systemu</string>
 </resources>

@@ -404,7 +404,7 @@ private fun PeopleList(
         modifier = modifier
             .fillMaxWidth()
             .testTag("peopleList"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 144.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { it.id }) { person ->
@@ -564,5 +564,5 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier
     )
 }
 
-/** The add button on the people list: 112 dp, twice the Material default of 56 dp (F21). */
-internal val AddButtonSize = 112.dp
+/** The add button on the people list: 88 dp, a round button well above the Material default of 56 dp (F21, ADR-034). */
+internal val AddButtonSize = 88.dp

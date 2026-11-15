@@ -6,7 +6,12 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 
 - Home-screen widget: add a person with one tap. Long press the home screen, choose Widgets, then Name List. Resize it to 1 x 1 (button only), 4 x 1 (button and the newest person) or 4 x 2 (button and the initials of the three newest people).
 - The widget's button opens the form with the cursor in the Name field. Saving or closing the form returns to the home screen.
-- The add button in the app is now dark navy, twice as big and at the bottom center.
+- The add button in the app is dark navy, round and at the bottom right.
+- A warning when you save a name that already exists (capitals do not matter), with a button to open that person.
+- "Ask about" is now "Conversation Spark". It sits under the name, and the first words show under the name in the list.
+- Search finds text in every field and every date.
+- Settings shows the version and build, the contact address and "Report a problem" (opens your mail app with the version and phone model, nothing from your list).
+- Five languages: English, German, Slovak, Czech, Polish. Choose one in Settings with the flag drop-down, or follow the phone.
 
 ## 1.1.0 (2026-11-15)
 

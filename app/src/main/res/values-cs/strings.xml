@@ -224,4 +224,6 @@
     <string name="report_bug_explained">Otevře e-mailovou aplikaci se zprávou pro vývojáře. Přidá verzi aplikace a model telefonu, nic z vašeho seznamu.</string>
     <string name="report_intro">Popište problém zde:</string>
     <string name="no_email_app">Nebyla nalezena e-mailová aplikace. Napište na %1$s.</string>
+    <string name="language">Jazyk</string>
+    <string name="language_system">Jazyk systému</string>
 </resources>
