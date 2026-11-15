@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michalmarcin.namelist.App
 import com.michalmarcin.namelist.AppContainer
+import com.michalmarcin.namelist.ui.map.MapViewModel
 import com.michalmarcin.namelist.ui.people.PeopleViewModel
 import com.michalmarcin.namelist.ui.person.PersonDetailViewModel
 import com.michalmarcin.namelist.ui.person.PersonEditViewModel
@@ -36,6 +37,7 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
         )
     }
     initializer { ManageTabsViewModel(container().tabsRepository) }
+    initializer { MapViewModel(container().peopleRepository, createSavedStateHandle()) }
     initializer { SettingsViewModel(container().settingsStore, container().backupManager) }
 }
 

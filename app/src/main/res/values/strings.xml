@@ -83,7 +83,7 @@
     <string name="backup_failed">The file could not be read or written. Nothing was changed.</string>
     <string name="about">About</string>
     <string name="about_version">Name List %1$s</string>
-    <string name="about_privacy">All data stays on this phone. The app has no account and sends nothing to a server.</string>
+    <string name="about_privacy">All data stays on this phone. The app has no account and sends nothing to a server. Map borders: Natural Earth (public domain).</string>
     <plurals name="exported">
         <item quantity="one">Exported %d person.</item>
         <item quantity="other">Exported %d people.</item>
@@ -113,4 +113,11 @@
         <item quantity="one">Move %d person to</item>
         <item quantity="other">Move %d people to</item>
     </plurals>
+    <string name="map">Map</string>
+    <plurals name="map_title">
+        <item quantity="one">Map: %d person</item>
+        <item quantity="other">Map: %d people</item>
+    </plurals>
+    <string name="map_empty">Nobody has a GPS place yet. Tap the GPS button next to "Where you met" when you add or edit a person.</string>
+    <string name="map_attribution">Borders: Natural Earth</string>
 </resources>

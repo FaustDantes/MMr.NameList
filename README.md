@@ -13,6 +13,8 @@ A simple Android app to remember the people you meet: name, photo, where they co
 | Organization | Unlimited tabs, drag and drop |
 | Place of meeting | "City, state" text, or the current GPS position (stays on the phone) |
 | Relationships | Two-way links between people and to you, with relationship types |
+| Map | Offline world map with country borders; people with GPS shown as initials |
+| Multi-select | Select many people; delete them or move them to a tab at once |
 | Privacy and backup | Local storage only; export and import one backup file |
 | Look | Square Material 3 design, light, dark or system theme |
 

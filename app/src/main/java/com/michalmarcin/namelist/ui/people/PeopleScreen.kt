@@ -78,6 +78,7 @@ fun PeopleRoute(
     onOpenPerson: (Long) -> Unit,
     onManageTabs: () -> Unit,
     onSettings: () -> Unit,
+    onMap: () -> Unit,
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +92,7 @@ fun PeopleRoute(
         onReorder = viewModel::onReorder,
         onManageTabs = onManageTabs,
         onSettings = onSettings,
+        onMap = onMap,
         onToggleSelect = viewModel::onToggleSelect,
         onSelectAll = viewModel::onSelectAll,
         onClearSelection = viewModel::onClearSelection,
@@ -112,6 +114,7 @@ fun PeopleScreen(
     onReorder: (List<Long>) -> Unit = {},
     onManageTabs: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onMap: () -> Unit = {},
     onToggleSelect: (Long) -> Unit = {},
     onSelectAll: () -> Unit = {},
     onClearSelection: () -> Unit = {},
@@ -136,6 +139,9 @@ fun PeopleScreen(
             } else LargeTopAppBar(
                 title = { Text(stringResource(R.string.people_title)) },
                 actions = {
+                    IconButton(onClick = onMap, modifier = Modifier.testTag("map")) {
+                        Icon(painterResource(R.drawable.ic_map), contentDescription = stringResource(R.string.map))
+                    }
                     IconButton(onClick = onManageTabs, modifier = Modifier.testTag("manageTabs")) {
                         Icon(painterResource(R.drawable.ic_folder), contentDescription = stringResource(R.string.manage_tabs))
                     }

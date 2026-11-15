@@ -22,6 +22,7 @@ Each milestone ends with:
 | ~~M6~~ | ~~Reminders~~ | ~~F8~~ | Removed by the owner (ADR-019). |
 | M7 | Backup and polish | F9 (switch), F12 | Export and import a zip ([format](backup-format.md)). Settings screen. Theme switch. Accessibility check. |
 | M8 | Multi-select and colors | F14 | Long press selects; tap adds; bulk delete with confirmation; bulk move to a tab; drag by handle. White, black and light blue palette (ADR-023). |
+| M9 | World map | F15 | Map screen with country borders, pan and zoom; initials circles for people with GPS, clustered when close; tap opens the person; small map on the detail screen. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

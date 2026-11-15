@@ -17,3 +17,7 @@ data object ManageTabsRoute
 
 @Serializable
 data object SettingsRoute
+
+/** [focusId] = 0 shows everyone; else starts centered on that person. */
+@Serializable
+data class MapRoute(val focusId: Long = 0L)

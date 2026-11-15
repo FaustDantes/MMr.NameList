@@ -204,3 +204,11 @@ Status: accepted (changes the gesture in ADR-015)
 Decision: Long press on a person starts multi-select (F14); tap adds or removes people while selecting; Back or the X ends it. Drag and drop moves to a handle on the right of each row, shown only in manual order and outside selection. The selection is kept in the ViewModel's SavedStateHandle and is always cut to the people on screen, so a bulk action never touches hidden people.
 Reason: Long press to select is the Android convention; one gesture cannot both select and drag.
 Alternatives: A "Select" button in the top bar and keep long press for drag (selection would be harder to find).
+
+## ADR-025: Offline world map from Natural Earth
+
+Date: 2026-11-15
+Status: accepted
+Decision: Country borders from Natural Earth Admin 0, 1:110m (public domain), taken from npm `world-atlas` 2.0.2 and converted by `tools/map/convert.py` into an 80 KB binary asset. Drawn with Compose Canvas in Web Mercator (latitude clamped to 85°, Antarctica left out). Pinch, drag and double tap; markers are composables (circles with initials, as the owner asked), grouped when they would overlap. Only people with GPS coordinates show; there is no geocoding (ADR-019).
+Reason: Free, no API key, no network, no new dependency; the map never sends locations anywhere (N3). The 1:110m detail matches "not so detailed".
+Alternatives: Google Maps SDK (API key, network, Play Services), MapLibre or osmdroid with online tiles (network, larger app), 1:50m data (5 times larger).

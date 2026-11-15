@@ -61,6 +61,13 @@ Removed by the owner on 2026-11-15 (ADR-019).
 - The user moves all selected people to one tab, or removes their tab.
 - Actions apply only to people that are shown at that moment.
 
+### F15 World map (added by the owner on 2026-11-15)
+
+- A simple world map with country borders, not detailed, like the Instagram map.
+- Each person with GPS coordinates (F10) shows as a circle with initials.
+- The map works offline and sends nothing (N3). A typed "City, state" has no coordinates and does not show.
+- The detail screen shows a small map at the person's place.
+
 ## 5. Non-functional requirements
 
 | ID | Requirement |

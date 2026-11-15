@@ -14,9 +14,16 @@ The agent updates this file at the end of each session. Newest entry first.
 | M5 Relationships | approved | m7 | 2026-11-15 |
 | ~~M6 Reminders~~ | removed | - | - |
 | M7 Backup and polish | approved | m7 | 2026-11-15 |
-| M8 Multi-select and colors | ready for review | m8-rc1 | 2026-11-15 |
+| M8 Multi-select and colors | ready for review | m9-rc1 | 2026-11-15 |
+| M9 World map | ready for review | m9-rc1 | 2026-11-15 |
 
 ## Log
+
+### 2026-11-15 (M8, M9)
+
+- M8: white, black and light blue palette, Light by default (ADR-023); multi-select: long press, bulk delete, bulk move to tab; drag by handle (ADR-024).
+- M9: offline world map from Natural Earth 1:110m borders (80 KB asset, tools/map/); Mercator; pan, pinch, double tap; initials circles, clusters; mini map on detail (ADR-025).
+- Check on the phone: long press and selection, drag handle, map gestures and marker taps.
 
 ### 2026-11-15 (M4, M5, M7, one review at the end, by owner request)
 

@@ -13,6 +13,10 @@ import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.AddResult
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.platform.Coordinates
+import com.michalmarcin.namelist.ui.map.WorldMap
+import com.michalmarcin.namelist.ui.map.toMarker
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
@@ -61,6 +65,7 @@ fun PersonDetailRoute(
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
     onOpenPerson: (Long) -> Unit,
+    onShowOnMap: (Long) -> Unit,
     viewModel: PersonDetailViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,6 +78,7 @@ fun PersonDetailRoute(
         onDelete = viewModel::delete,
         onOpenMap = { person -> openMap(context, person) },
         onOpenPerson = onOpenPerson,
+        onShowOnMap = onShowOnMap,
         onAddRelationship = viewModel::addRelationship,
         onChangeRelationshipType = viewModel::changeRelationshipType,
         onRemoveRelationship = viewModel::removeRelationship,
@@ -90,6 +96,7 @@ fun PersonDetailScreen(
     modifier: Modifier = Modifier,
     onOpenMap: (Person) -> Unit = {},
     onOpenPerson: (Long) -> Unit = {},
+    onShowOnMap: (Long) -> Unit = {},
     onAddRelationship: (Long, RelationType) -> Unit = { _, _ -> },
     onChangeRelationshipType: (Long, RelationType) -> Unit = { _, _ -> },
     onRemoveRelationship: (Long) -> Unit = {},
@@ -138,6 +145,7 @@ fun PersonDetailScreen(
                 person = person,
                 tabName = state.tabName,
                 onOpenMap = onOpenMap,
+                onShowOnMap = onShowOnMap,
                 modifier = Modifier.padding(padding),
             ) {
                 RelationshipsSection(
@@ -207,6 +215,7 @@ private fun PersonDetailContent(
     person: Person,
     tabName: String?,
     onOpenMap: (Person) -> Unit,
+    onShowOnMap: (Long) -> Unit,
     modifier: Modifier = Modifier,
     relationships: @Composable () -> Unit,
 ) {
@@ -246,6 +255,21 @@ private fun PersonDetailContent(
             DetailSection(title = stringResource(R.string.where_met), modifier = Modifier.testTag("placeSection")) {
                 person.metCity?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
                 if (coordinates != null) {
+                    person.toMarker()?.let { marker ->
+                        // Small map at the person's place; tap opens the full map there (M9).
+                        WorldMap(
+                            markers = listOf(marker),
+                            focus = marker,
+                            focusZoom = 5f,
+                            interactive = false,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { onShowOnMap(person.id) }
+                                .testTag("miniMap"),
+                        )
+                    }
                     Text(
                         text = stringResource(R.string.gps_coordinates, coordinates.format()),
                         style = MaterialTheme.typography.bodyMedium,
