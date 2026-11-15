@@ -2,7 +2,7 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
-## 1.1.0 (unreleased)
+## 1.1.0 (2026-11-15)
 
 - Backup password in Settings: set it, change it with the old password, remove it, or reset it when forgotten.
 - Export asks "Encrypt this backup?" with "Do not show this again". The default (ask, always, never) can be changed in Settings. Encrypted backups use AES-256 with a key from your password. Import asks for the password of an encrypted file.
