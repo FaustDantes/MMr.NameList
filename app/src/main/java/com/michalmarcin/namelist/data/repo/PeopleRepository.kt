@@ -22,10 +22,15 @@ class PeopleRepository(
      * Search and sort run in Kotlin, not SQL: SQLite LIKE and NOCASE ignore case only for ASCII,
      * and names such as "Šimon" or "Čeněk" must match "simon" and sort by the user's language (ADR-011).
      */
-    fun observePeople(query: String, sort: SortMode): Flow<List<Person>> =
+    fun observePeople(query: String, sort: SortMode, tabId: Long? = null): Flow<List<Person>> =
         dao.observeOthers().map { people ->
             val needle = normalize(query)
-            val found = if (needle.isEmpty()) people else people.filter { it.matches(needle) }
+            // Search is global (F7): a search query ignores the selected tab.
+            val found = when {
+                needle.isNotEmpty() -> people.filter { it.matches(needle) }
+                tabId != null -> people.filter { it.tabId == tabId }
+                else -> people
+            }
             when (sort) {
                 SortMode.MANUAL -> found
                 SortMode.A_TO_Z -> {
@@ -45,7 +50,7 @@ class PeopleRepository(
      * Inserts a new person when [id] is 0, else updates. Returns the id.
      * A replaced or removed photo file is deleted from storage.
      */
-    suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null): Long {
+    suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null, tabId: Long? = null): Long {
         require(name.isNotBlank()) { "Name must not be blank" }
         val existing = if (id == 0L) null else dao.get(id)
         return if (existing == null) {
@@ -54,16 +59,20 @@ class PeopleRepository(
                     name = name.trim(),
                     notes = notes.trim(),
                     photoFile = photoFile,
+                    tabId = tabId,
                     sortIndex = dao.maxSortIndex() + 1,
                     createdAt = clock(),
                 ),
             )
         } else {
-            dao.update(existing.copy(name = name.trim(), notes = notes.trim(), photoFile = photoFile))
+            dao.update(existing.copy(name = name.trim(), notes = notes.trim(), photoFile = photoFile, tabId = tabId))
             existing.photoFile?.takeIf { it != photoFile }?.let(deletePhoto)
             existing.id
         }
     }
+
+    /** Drag and drop result: puts the shown people in this order (F5). */
+    suspend fun reorder(idsInNewOrder: List<Long>) = dao.reorder(idsInNewOrder)
 
     /** Deletes the person and their photo file. "Me" cannot be deleted. */
     suspend fun delete(id: Long): Boolean {

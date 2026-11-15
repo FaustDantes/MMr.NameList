@@ -1,6 +1,7 @@
 package com.michalmarcin.namelist.testutil
 
 import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.db.Tab
 
 /** Fictional people for tests and screenshots (AGENTS.md rule 9). */
 object SampleData {
@@ -11,6 +12,11 @@ object SampleData {
         Person(id = 5, name = "Tomáš Král", notes = "", sortIndex = 4),
         Person(id = 6, name = "Eva Malá", notes = "Neighbour, has a black dog", metCity = "Jihlava", sortIndex = 5),
         Person(id = 7, name = "Šimon Dvořák", notes = "Friend of Peter", sortIndex = 6),
+    )
+    val tabs = listOf(
+        Tab(id = 1, name = "Work", sortIndex = 1),
+        Tab(id = 2, name = "Family", sortIndex = 2),
+        Tab(id = 3, name = "Badminton", sortIndex = 3),
     )
     val anna = people.first().copy(notes = "Met at the Brno tram stop.\nLikes hiking and strong coffee.")
 }

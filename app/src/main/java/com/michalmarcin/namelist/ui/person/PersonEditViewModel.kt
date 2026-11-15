@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.TabsRepository
 import com.michalmarcin.namelist.platform.PhotoStore
 import com.michalmarcin.namelist.ui.nav.EditPersonRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,8 @@ data class PersonEditUiState(
     val name: String = "",
     val notes: String = "",
     val photoFile: String? = null,
+    val tabId: Long? = null,
+    val tabs: List<Tab> = emptyList(),
     val isImportingPhoto: Boolean = false,
     val photoMessage: PhotoMessage? = null,
     val showNameError: Boolean = false,
@@ -30,18 +34,30 @@ data class PersonEditUiState(
 
 class PersonEditViewModel(
     private val repository: PeopleRepository,
+    tabs: TabsRepository,
     private val photos: PhotoStore,
     handle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val id = handle.toRoute<EditPersonRoute>().id
-    private val state = MutableStateFlow(PersonEditUiState(isNew = id == 0L, isLoading = id != 0L))
+    private val route = handle.toRoute<EditPersonRoute>()
+    private val id = route.id
+    private val state = MutableStateFlow(
+        PersonEditUiState(isNew = id == 0L, isLoading = id != 0L, tabId = route.tabId.takeIf { it != 0L }),
+    )
     val uiState: StateFlow<PersonEditUiState> = state.asStateFlow()
 
     /** Photos imported in this edit session. Deleted again if the user does not save. */
     private val sessionPhotos = mutableSetOf<String>()
 
     init {
+        viewModelScope.launch {
+            tabs.observeTabs().collect { list ->
+                state.update { current ->
+                    // A tab deleted meanwhile is cleared.
+                    current.copy(tabs = list, tabId = current.tabId?.takeIf { id -> list.any { it.id == id } })
+                }
+            }
+        }
         if (id != 0L) {
             viewModelScope.launch {
                 val person = repository.getPerson(id)
@@ -50,6 +66,7 @@ class PersonEditViewModel(
                         name = person?.name.orEmpty(),
                         notes = person?.notes.orEmpty(),
                         photoFile = person?.photoFile,
+                        tabId = person?.tabId,
                         isLoading = false,
                     )
                 }
@@ -60,6 +77,8 @@ class PersonEditViewModel(
     fun onNameChange(value: String) = state.update { it.copy(name = value, showNameError = false) }
 
     fun onNotesChange(value: String) = state.update { it.copy(notes = value) }
+
+    fun onTabChange(value: Long?) = state.update { it.copy(tabId = value) }
 
     fun newCaptureUri(): Uri = photos.newCaptureUri()
 
@@ -92,7 +111,7 @@ class PersonEditViewModel(
             return
         }
         viewModelScope.launch {
-            repository.save(id, current.name, current.notes, current.photoFile)
+            repository.save(id, current.name, current.notes, current.photoFile, current.tabId)
             sessionPhotos.clear()
             state.update { it.copy(isSaved = true) }
         }

@@ -32,7 +32,7 @@ class PeopleScreenTest {
         state: PeopleUiState,
         onQuery: (String) -> Unit = {},
         onSort: (SortMode) -> Unit = {},
-        onAdd: () -> Unit = {},
+        onAdd: (Long?) -> Unit = {},
         onOpen: (Long) -> Unit = {},
     ) = compose.setContent {
         NameListTheme(dynamicColor = false) { PeopleScreen(state, onQuery, onSort, onAdd, onOpen) }
@@ -82,9 +82,40 @@ class PeopleScreenTest {
 
     @Test
     fun addButtonCallsAdd() {
-        var added = false
-        show(PeopleUiState(isLoading = false), onAdd = { added = true })
+        var added: Long? = -1
+        show(PeopleUiState(isLoading = false, tabs = SampleData.tabs, selectedTabId = 2), onAdd = { added = it })
         compose.onNodeWithTag("addPerson").performClick()
-        assertEquals(true, added)
+        assertEquals(2L, added)
+    }
+
+    @Test
+    fun tabChipsShowAndSelect() {
+        var selected: Long? = -1
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(
+                    PeopleUiState(people = SampleData.people, tabs = SampleData.tabs, isLoading = false),
+                    {}, {}, {}, {},
+                    onSelectTab = { selected = it },
+                )
+            }
+        }
+        compose.onNodeWithText("All").assertIsDisplayed()
+        compose.onNodeWithText("Family").performClick()
+        assertEquals(2L, selected)
+    }
+
+    @Test
+    fun noTabChipsWithoutTabs() {
+        show(PeopleUiState(people = SampleData.people, isLoading = false))
+        compose.onNodeWithTag("tabChips").assertDoesNotExist()
+    }
+
+    @Test
+    fun reorderOnlyInManualOrderWithoutSearch() {
+        val base = PeopleUiState(people = SampleData.people, isLoading = false)
+        assertEquals(true, base.canReorder)
+        assertEquals(false, base.copy(sort = SortMode.A_TO_Z).canReorder)
+        assertEquals(false, base.copy(query = "an").canReorder)
     }
 }

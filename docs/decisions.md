@@ -124,3 +124,27 @@ Status: accepted
 Decision: Coil 3.6.3 loads photos in the UI (memory cache, off the main thread). AndroidX ExifInterface 1.4.2 reads the camera orientation so photos are upright on Android 8 and 9, where `ImageDecoder` is not available.
 Reason: Planned in docs/architecture.md. Without EXIF handling, many camera photos show turned by 90 degrees.
 Alternatives: Own bitmap loading with an LRU cache (more code, more bugs).
+
+## ADR-015: Reorderable for drag and drop
+
+Date: 2026-11-15
+Status: accepted
+Decision: `sh.calvin.reorderable:reorderable` 3.1.0 for drag and drop in the People list (long press) and in the tab manager (drag handle).
+Reason: Compose has no built-in reorder for lazy lists. The library handles auto-scroll and item animation.
+Alternatives: Own gesture code with `detectDragGesturesAfterLongPress` (more code, scroll edge cases).
+
+## ADR-016: Tabs as chips, global search, reorder by slots
+
+Date: 2026-11-15
+Status: accepted
+Decision: Tabs show as square filter chips under the search field ("All" first), only when at least one tab exists. A search query ignores the selected tab (F7 is global search). Drag and drop works only in manual order without a search query. A reorder inside one tab reuses the sort positions of the moved people, so people in other tabs keep their places.
+Reason: Chips fit the square design and many tabs (scroll). Reordering a filtered list must not move hidden people.
+Alternatives: Material tab row (round indicator, less room), per-tab sort columns (more schema).
+
+## ADR-017: Room auto migration 1 to 2
+
+Date: 2026-11-15
+Status: accepted
+Decision: Schema v2 adds the `tab` table and `person.tabId` (foreign key, ON DELETE SET NULL). Room auto migration; `MigrationTest` checks that people survive.
+Reason: N4 (data survives updates). The owner already has v1 data from `m1-rc1` and `m2-rc1`.
+Alternatives: Manual migration SQL.

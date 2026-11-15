@@ -87,7 +87,7 @@ fun PersonDetailScreen(
         },
     ) { padding ->
         if (person != null) {
-            PersonDetailContent(person, Modifier.padding(padding))
+            PersonDetailContent(person, state.tabName, Modifier.padding(padding))
         }
     }
 
@@ -114,7 +114,7 @@ fun PersonDetailScreen(
 }
 
 @Composable
-private fun PersonDetailContent(person: Person, modifier: Modifier = Modifier) {
+private fun PersonDetailContent(person: Person, tabName: String?, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -130,6 +130,21 @@ private fun PersonDetailContent(person: Person, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
         )
+        if (tabName != null) {
+            Spacer(Modifier.height(8.dp))
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.testTag("tabLabel"),
+            ) {
+                Text(
+                    text = tabName,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                )
+            }
+        }
         Spacer(Modifier.height(24.dp))
         DetailSection(title = stringResource(R.string.notes)) {
             Text(

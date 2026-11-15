@@ -53,6 +53,13 @@ android {
         compose = true
     }
 
+    // Room schemas as test assets, for MigrationTestHelper in Robolectric tests.
+    sourceSets {
+        getByName("test") {
+            assets.directories.add("$projectDir/schemas")
+        }
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -87,6 +94,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.coil.compose)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.reorderable)
 
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

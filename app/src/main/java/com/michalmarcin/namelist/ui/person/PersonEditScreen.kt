@@ -13,6 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.runtime.remember
+import com.michalmarcin.namelist.data.db.Tab
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +92,7 @@ fun PersonEditRoute(
             gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
         onRemovePhoto = viewModel::removePhoto,
+        onTabChange = viewModel::onTabChange,
     )
 }
 
@@ -101,6 +108,7 @@ fun PersonEditScreen(
     onCamera: () -> Unit = {},
     onGallery: () -> Unit = {},
     onRemovePhoto: () -> Unit = {},
+    onTabChange: (Long?) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -146,6 +154,7 @@ fun PersonEditScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
+            TabField(state.tabs, state.tabId, onTabChange)
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = onNotesChange,
@@ -202,6 +211,45 @@ private fun PhotoSection(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp),
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TabField(tabs: List<Tab>, selectedId: Long?, onChange: (Long?) -> Unit) {
+    if (tabs.isEmpty()) return
+    var expanded by remember { mutableStateOf(false) }
+    val label = tabs.firstOrNull { it.id == selectedId }?.name ?: stringResource(R.string.no_tab)
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = label,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.tab)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
+                .testTag("tabField"),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.no_tab)) },
+                onClick = {
+                    onChange(null)
+                    expanded = false
+                },
+            )
+            tabs.forEach { tab ->
+                DropdownMenuItem(
+                    text = { Text(tab.name) },
+                    onClick = {
+                        onChange(tab.id)
+                        expanded = false
+                    },
+                )
+            }
         }
     }
 }

@@ -11,6 +11,8 @@ import com.michalmarcin.namelist.ui.person.PersonDetailScreen
 import com.michalmarcin.namelist.ui.person.PersonDetailUiState
 import com.michalmarcin.namelist.ui.person.PersonEditScreen
 import com.michalmarcin.namelist.ui.person.PersonEditUiState
+import com.michalmarcin.namelist.ui.tabs.ManageTabsScreen
+import com.michalmarcin.namelist.ui.tabs.ManageTabsUiState
 import com.michalmarcin.namelist.ui.theme.NameListTheme
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +35,11 @@ class ScreenshotTest {
             }
         }
 
-    private val list = PeopleUiState(people = SampleData.people, isLoading = false)
+    private val list = PeopleUiState(people = SampleData.people, tabs = SampleData.tabs, isLoading = false)
+    private val workTab = list.copy(
+        selectedTabId = 1,
+        people = SampleData.people.filter { it.id in setOf(2L, 4L) },
+    )
 
     @Test fun peopleListLight() = shot("people_list", false) { PeopleScreen(list, {}, {}, {}, {}) }
 
@@ -47,6 +53,18 @@ class ScreenshotTest {
         PeopleScreen(PeopleUiState(query = "nov", people = SampleData.people.take(1), isLoading = false), {}, {}, {}, {})
     }
 
+    @Test fun peopleTabLight() = shot("people_tab", false) { PeopleScreen(workTab, {}, {}, {}, {}) }
+
+    @Test fun peopleTabDark() = shot("people_tab", true) { PeopleScreen(workTab, {}, {}, {}, {}) }
+
+    @Test fun manageTabsLight() = shot("manage_tabs", false) {
+        ManageTabsScreen(ManageTabsUiState(SampleData.tabs, isLoading = false), {}, {}, { _, _ -> }, {}, {})
+    }
+
+    @Test fun manageTabsDark() = shot("manage_tabs", true) {
+        ManageTabsScreen(ManageTabsUiState(SampleData.tabs, isLoading = false), {}, {}, { _, _ -> }, {}, {})
+    }
+
     @Test fun personDetailLight() = shot("person_detail", false) { detail() }
 
     @Test fun personDetailDark() = shot("person_detail", true) { detail() }
@@ -58,6 +76,8 @@ class ScreenshotTest {
                 name = SampleData.anna.name,
                 notes = SampleData.anna.notes,
                 photoFile = SampleData.anna.photoFile,
+                tabId = 1,
+                tabs = SampleData.tabs,
             ),
             {}, {}, {}, {},
         )
@@ -68,5 +88,5 @@ class ScreenshotTest {
     }
 
     @Composable
-    private fun detail() = PersonDetailScreen(PersonDetailUiState(SampleData.anna, isLoading = false), {}, {}, {})
+    private fun detail() = PersonDetailScreen(PersonDetailUiState(SampleData.anna, tabName = "Work", isLoading = false), {}, {}, {})
 }

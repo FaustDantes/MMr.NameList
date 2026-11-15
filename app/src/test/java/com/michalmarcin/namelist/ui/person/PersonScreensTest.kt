@@ -121,4 +121,24 @@ class PersonScreensTest {
         }
         compose.onNodeWithText("That photo could not be loaded. Try another one.").assertIsDisplayed()
     }
+
+    @Test
+    fun detailShowsTabLabel() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(PersonDetailUiState(SampleData.anna, tabName = "Work", isLoading = false), {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Work").assertIsDisplayed()
+    }
+
+    @Test
+    fun tabFieldHiddenWithoutTabs() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("tabField").assertDoesNotExist()
+    }
 }

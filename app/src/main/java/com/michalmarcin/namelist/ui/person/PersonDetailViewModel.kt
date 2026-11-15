@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.TabsRepository
 import com.michalmarcin.namelist.ui.nav.PersonRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,12 +17,14 @@ import kotlinx.coroutines.launch
 
 data class PersonDetailUiState(
     val person: Person? = null,
+    val tabName: String? = null,
     val isLoading: Boolean = true,
     val isDeleted: Boolean = false,
 )
 
 class PersonDetailViewModel(
     private val repository: PeopleRepository,
+    tabs: TabsRepository,
     handle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -29,8 +32,13 @@ class PersonDetailViewModel(
     private val deleted = MutableStateFlow(false)
 
     val uiState: StateFlow<PersonDetailUiState> =
-        combine(repository.observePerson(id), deleted) { person, isDeleted ->
-            PersonDetailUiState(person = person, isLoading = false, isDeleted = isDeleted || person == null)
+        combine(repository.observePerson(id), tabs.observeTabs(), deleted) { person, tabList, isDeleted ->
+            PersonDetailUiState(
+                person = person,
+                tabName = tabList.firstOrNull { it.id == person?.tabId }?.name,
+                isLoading = false,
+                isDeleted = isDeleted || person == null,
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PersonDetailUiState())
 
     fun delete() {

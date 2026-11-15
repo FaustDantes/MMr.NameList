@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,15 +49,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michalmarcin.namelist.R
 import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
 import com.michalmarcin.namelist.ui.components.EmptyState
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun PeopleRoute(
-    onAddPerson: () -> Unit,
+    onAddPerson: (tabId: Long?) -> Unit,
     onOpenPerson: (Long) -> Unit,
+    onManageTabs: () -> Unit,
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +71,9 @@ fun PeopleRoute(
         onSortChange = viewModel::onSortChange,
         onAddPerson = onAddPerson,
         onOpenPerson = onOpenPerson,
+        onSelectTab = viewModel::onSelectTab,
+        onReorder = viewModel::onReorder,
+        onManageTabs = onManageTabs,
     )
 }
 
@@ -73,9 +83,12 @@ fun PeopleScreen(
     state: PeopleUiState,
     onQueryChange: (String) -> Unit,
     onSortChange: (SortMode) -> Unit,
-    onAddPerson: () -> Unit,
+    onAddPerson: (tabId: Long?) -> Unit,
     onOpenPerson: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    onSelectTab: (Long?) -> Unit = {},
+    onReorder: (List<Long>) -> Unit = {},
+    onManageTabs: () -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -83,13 +96,18 @@ fun PeopleScreen(
         topBar = {
             LargeTopAppBar(
                 title = { Text(stringResource(R.string.people_title)) },
-                actions = { SortMenu(state.sort, onSortChange) },
+                actions = {
+                    IconButton(onClick = onManageTabs, modifier = Modifier.testTag("manageTabs")) {
+                        Icon(painterResource(R.drawable.ic_folder), contentDescription = stringResource(R.string.manage_tabs))
+                    }
+                    SortMenu(state.sort, onSortChange)
+                },
                 scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onAddPerson,
+                onClick = { onAddPerson(state.selectedTabId) },
                 modifier = Modifier.testTag("addPerson"),
                 icon = { Icon(painterResource(R.drawable.ic_person_add), contentDescription = null) },
                 text = { Text(stringResource(R.string.add_person)) },
@@ -106,6 +124,9 @@ fun PeopleScreen(
                 onQueryChange = onQueryChange,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
+            if (state.tabs.isNotEmpty() && state.query.isBlank()) {
+                TabChips(state.tabs, state.selectedTabId, onSelectTab)
+            }
             when {
                 state.showEmptyState -> EmptyState(
                     icon = R.drawable.ic_group,
@@ -119,35 +140,96 @@ fun PeopleScreen(
                     body = stringResource(R.string.no_matches_body, state.query.trim()),
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                 )
-                else -> PeopleList(state.people, onOpenPerson, Modifier.weight(1f))
+                else -> PeopleList(
+                    people = state.people,
+                    canReorder = state.canReorder,
+                    onOpenPerson = onOpenPerson,
+                    onReorder = onReorder,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PeopleList(people: List<Person>, onOpenPerson: (Long) -> Unit, modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier
+private fun TabChips(tabs: List<Tab>, selectedTabId: Long?, onSelectTab: (Long?) -> Unit) {
+    LazyRow(
+        modifier = Modifier
             .fillMaxWidth()
-            .testTag("peopleList"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .testTag("tabChips"),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(people, key = { it.id }) { person ->
-            PersonRow(person, onClick = { onOpenPerson(person.id) })
+        item(key = "all") {
+            TabChip(stringResource(R.string.all), selectedTabId == null) { onSelectTab(null) }
+        }
+        items(tabs, key = { it.id }) { tab ->
+            TabChip(tab.name, selectedTabId == tab.id) { onSelectTab(tab.id) }
         }
     }
 }
 
 @Composable
-fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun TabChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        shape = MaterialTheme.shapes.small,
+    )
+}
+
+/**
+ * People list. When [canReorder] is true, a long press starts drag and drop (F5).
+ * The new order is kept locally while dragging and saved once, when the finger lifts.
+ */
+@Composable
+private fun PeopleList(
+    people: List<Person>,
+    canReorder: Boolean,
+    onOpenPerson: (Long) -> Unit,
+    onReorder: (List<Long>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var items by remember(people) { mutableStateOf(people) }
+    val listState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
+        items = items.toMutableList().apply { add(to.index, removeAt(from.index)) }
+    }
+    LazyColumn(
+        state = listState,
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("peopleList"),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(items, key = { it.id }) { person ->
+            ReorderableItem(reorderState, key = person.id, enabled = canReorder) { isDragging ->
+                PersonRow(
+                    person = person,
+                    onClick = { onOpenPerson(person.id) },
+                    lifted = isDragging,
+                    modifier = Modifier.longPressDraggableHandle(
+                        enabled = canReorder,
+                        onDragStopped = { onReorder(items.map { it.id }) },
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier, lifted: Boolean = false) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = if (lifted) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = if (lifted) 6.dp else 0.dp,
     ) {
         Row(
             modifier = Modifier
