@@ -36,10 +36,12 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import com.michalmarcin.namelist.ui.theme.Navy
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -130,6 +132,7 @@ fun PeopleScreen(
     var dialog by remember { mutableStateOf<BulkDialog?>(null) }
     BackHandler(enabled = state.isSelecting) { onClearSelection() }
     Scaffold(
+        floatingActionButtonPosition = FabPosition.Center,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (state.isSelecting) {
@@ -164,11 +167,19 @@ fun PeopleScreen(
         },
         floatingActionButton = {
             if (!state.isSelecting) {
+                // F21: twice the usual 56 dp, dark navy, bottom center (ADR-032).
                 FloatingActionButton(
                     onClick = { onAddPerson(state.selectedTabId) },
-                    modifier = Modifier.testTag("addPerson"),
+                    modifier = Modifier.size(AddButtonSize).testTag("addPerson"),
+                    shape = MaterialTheme.shapes.large,
+                    containerColor = Navy,
+                    contentColor = Color.White,
                 ) {
-                    Icon(painterResource(R.drawable.ic_person_add), contentDescription = stringResource(R.string.add_person))
+                    Icon(
+                        painterResource(R.drawable.ic_person_add),
+                        contentDescription = stringResource(R.string.add_person),
+                        modifier = Modifier.size(AddButtonSize / 2),
+                    )
                 }
             }
         },
@@ -391,7 +402,7 @@ private fun PeopleList(
         modifier = modifier
             .fillMaxWidth()
             .testTag("peopleList"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 144.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { it.id }) { person ->
@@ -547,3 +558,6 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier
         ),
     )
 }
+
+/** The add button on the people list: 112 dp, twice the Material default of 56 dp (F21). */
+internal val AddButtonSize = 112.dp

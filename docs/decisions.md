@@ -255,3 +255,19 @@ Status: accepted
 Decision: New nullable columns `nativeLanguage`, `birthDate` (epoch day, like ADR-027), `education`, `currentWork`, `askAbout` and `lastUpdatedAt` (milliseconds). Room schema 5, automatic migration from 4. The edit form shows the photo, name and tab; everything else is in a "More details" section that starts collapsed on every visit (place of meeting, first meeting, birth date, the four text fields, notes). Every save from the edit screen sets `lastUpdatedAt`; moving to a tab, archiving and reordering do not. People saved before 1.1 show the day they were added. Blank text is stored as empty. Search covers the new text fields. The backup carries all new fields as optional (format version stays 1).
 Reason: The owner asked for these fields, a short top of the form, and a "last updated" time.
 Alternatives: Expand the section when a person already has values (one tap less when editing; easy to add later); a custom-fields table (more than the owner asked for).
+
+## ADR-031: Home-screen widget with RemoteViews
+
+Date: 2026-11-15
+Status: accepted
+Decision: The widget is an `AppWidgetProvider` with plain `RemoteViews` (XML layouts `widget_icon`, `widget_strip`, `widget_card`). One widget is resizable; the layout follows the size the launcher reports (`WidgetSize.forDp`: height 110 dp or more = card, width 110 dp or more = strip, else icon). `updatePeriodMillis` is 0; the data is read on each update, and `MainActivity.onStop` asks for an update, so a new person shows up as soon as the app closes. The add button starts `MainActivity` with the action `ADD_PERSON`; the activity opens the edit form and, when the form closes or saves, finishes, so the user is back on the home screen. The widget shows the name of the newest person on the 4 x 1 layout and initials only on the 4 x 2 layout, as designed. No new dependency.
+Reason: The owner approved the design and asked for it as designed. RemoteViews needs no library; Jetpack Glance would add a dependency for three simple layouts without a list.
+Alternatives: Jetpack Glance (new dependency, useful once the widget has a scrolling list); a scrolling list in the 4 x 2 layout (the owner kept the design without it, so the question of names or initials stays as designed).
+
+## ADR-032: Add button, dark navy, bottom center, 112 dp
+
+Date: 2026-11-15
+Status: accepted
+Decision: The add button on the people list is 112 dp (twice the Material default of 56 dp), color `#0B2545` (dark navy) with a white 56 dp icon, and sits at the bottom center (`FabPosition.Center`). The list has 144 dp of bottom padding so the last person is not hidden. The widget add button uses the same navy. All other buttons keep the light blue palette (ADR-023); the small "add tab" button stays as it was.
+Reason: The owner asked for a dark navy color, a bottom center position and twice the size, so people can tap it easily. The owner's color request is applied to the add buttons only, because the palette of all other buttons was chosen in ADR-023; say if all buttons should change.
+Alternatives: Navy for every button (changes ADR-023 across the app); navy only on the widget.

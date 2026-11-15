@@ -111,3 +111,9 @@ Removed by the owner on 2026-11-15 (ADR-019).
 ## 6. Open decisions
 
 See [architecture.md, section 12](architecture.md#12-open-decisions-for-the-owner).
+
+### F20 Home-screen widget (added by the owner on 2026-11-15)
+A widget for the phone's home screen with one big add button. The button opens the quick-add form with the cursor in the Name field; saving or closing the form returns to the home screen. One widget resizes between three layouts: 1 x 1 (add button), 4 x 1 (add button and the name of the newest person), 4 x 2 (add button, hint and the initials of the three newest people). Archived people and "Me" are not shown. Dark navy add button (ADR-031).
+
+### F21 Big centered add button (added by the owner on 2026-11-15)
+The add button on the people list is dark navy, twice the usual size (112 dp) and at the bottom center, so it is easy to hit with the thumb (ADR-032).

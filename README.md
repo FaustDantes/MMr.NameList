@@ -30,7 +30,7 @@ Kotlin, Jetpack Compose, Material 3, Room. Built and tested in GitHub Actions. N
 
 | Document | Content |
 |---|---|
-| [Requirements](docs/requirements.md) | What the app must do (F1 to F19, N1 to N5) |
+| [Requirements](docs/requirements.md) | What the app must do (F1 to F21, N1 to N5) |
 | [Architecture](docs/architecture.md) | Stack, layers, data model, platform decisions, open decisions |
 | [Design](docs/design.md) | Theme, colors, components, accessibility |
 | [Milestones](docs/milestones.md) | Build plan M0 to M7, "done when" criteria, screenshot rules |

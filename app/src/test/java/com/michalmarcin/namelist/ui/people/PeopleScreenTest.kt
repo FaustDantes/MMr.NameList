@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.longClick
@@ -16,6 +17,7 @@ import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.testutil.SampleData
 import com.michalmarcin.namelist.ui.theme.NameListTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -225,5 +227,17 @@ class PeopleScreenTest {
     fun noReorderWhileSelecting() {
         val state = PeopleUiState(people = SampleData.people, selected = setOf(2), isLoading = false)
         assertEquals(false, state.canReorder)
+    }
+
+    @Test
+    fun addButtonIsTwiceTheDefaultSizeAndInTheBottomCenter() {
+        show(PeopleUiState(people = SampleData.people, isLoading = false))
+        val button = compose.onNodeWithTag("addPerson").fetchSemanticsNode()
+        val root = compose.onRoot().fetchSemanticsNode()
+        val density = compose.density.density
+        assertEquals(112f * density, button.size.width.toFloat(), 1f)
+        assertEquals(112f * density, button.size.height.toFloat(), 1f)
+        assertEquals(root.size.width / 2f, button.boundsInRoot.center.x, 2f)
+        assertTrue(button.boundsInRoot.center.y > root.size.height / 2f)
     }
 }

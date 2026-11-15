@@ -25,6 +25,19 @@
             </intent-filter>
         </activity>
 
+        <!-- Home-screen widget (F20, ADR-031). Only the system sends it updates. -->
+        <receiver
+            android:name=".platform.widget.NameListWidget"
+            android:exported="false"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
         <!-- Camera app writes the photo here. No CAMERA permission: the app uses the camera intent (docs/architecture.md, section 8). -->
         <provider
             android:name="androidx.core.content.FileProvider"

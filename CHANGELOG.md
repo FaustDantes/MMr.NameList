@@ -2,6 +2,12 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
+## 1.2.0 (2026-11-15)
+
+- Home-screen widget: add a person with one tap. Long press the home screen, choose Widgets, then Name List. Resize it to 1 x 1 (button only), 4 x 1 (button and the newest person) or 4 x 2 (button and the initials of the three newest people).
+- The widget's button opens the form with the cursor in the Name field. Saving or closing the form returns to the home screen.
+- The add button in the app is now dark navy, twice as big and at the bottom center.
+
 ## 1.1.0 (2026-11-15)
 
 - Backup password in Settings: set it, change it with the old password, remove it, or reset it when forgotten.

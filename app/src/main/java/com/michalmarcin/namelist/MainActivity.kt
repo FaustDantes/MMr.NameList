@@ -15,6 +15,7 @@ import com.michalmarcin.namelist.ui.map.LocalWorldShapes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.michalmarcin.namelist.ui.components.LocalPhotoDirectory
+import com.michalmarcin.namelist.platform.widget.NameListWidget
 import com.michalmarcin.namelist.ui.nav.AppNavHost
 import com.michalmarcin.namelist.ui.theme.NameListTheme
 
@@ -22,6 +23,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // The widget's add button opens the form straight away (F20). Not again after a rotation.
+        val startWithAdd = savedInstanceState == null && intent?.action == NameListWidget.ACTION_ADD_PERSON
         setContent {
             val container = (application as App).container
             val theme by container.settingsStore.theme.collectAsState()
@@ -38,9 +41,15 @@ class MainActivity : ComponentActivity() {
                 LocalWorldShapes provides worldShapes,
             ) {
                 NameListTheme(darkTheme = dark) {
-                    AppNavHost()
+                    AppNavHost(startWithAdd = startWithAdd, onExit = ::finish)
                 }
             }
         }
+    }
+
+    /** The widget shows the newest people, so it is refreshed whenever the app leaves the screen. */
+    override fun onStop() {
+        super.onStop()
+        NameListWidget.refresh(applicationContext)
     }
 }

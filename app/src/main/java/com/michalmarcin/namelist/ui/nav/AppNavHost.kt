@@ -1,6 +1,8 @@
 package com.michalmarcin.namelist.ui.nav
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -13,8 +15,12 @@ import com.michalmarcin.namelist.ui.settings.SettingsRoute as SettingsScreenRout
 import com.michalmarcin.namelist.ui.tabs.ManageTabsRoute as ManageTabsScreenRoute
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(startWithAdd: Boolean = false, onExit: () -> Unit = {}) {
     val nav = rememberNavController()
+    // Opened from the widget's add button: the form comes first, and closing or saving it leaves the app
+    // (back to the home screen) instead of showing the list.
+    val fromWidget = rememberSaveable { startWithAdd }
+    LaunchedEffect(Unit) { if (startWithAdd) nav.navigate(EditPersonRoute()) }
     NavHost(navController = nav, startDestination = PeopleRoute) {
         composable<PeopleRoute> {
             PeopleScreenRoute(
@@ -47,7 +53,7 @@ fun AppNavHost() {
             )
         }
         composable<EditPersonRoute> {
-            PersonEditRoute(onDone = { nav.popBackStack() })
+            PersonEditRoute(onDone = { if (fromWidget) onExit() else nav.popBackStack() })
         }
         composable<SettingsRoute> {
             SettingsScreenRoute(onBack = { nav.popBackStack() })

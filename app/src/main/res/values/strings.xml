@@ -195,4 +195,10 @@
     <string name="current_work">Current work</string>
     <string name="ask_about">Ask about</string>
     <string name="last_updated">Last updated: %1$s</string>
+
+    <!-- Home-screen widget (F20) -->
+    <string name="widget_description">Add a person with one tap and see the newest people.</string>
+    <string name="widget_hint">Tap the button to add someone you just met.</string>
+    <string name="widget_last_added">Last added: %1$s</string>
+    <string name="widget_recent">Recently added</string>
 </resources>

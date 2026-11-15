@@ -19,7 +19,8 @@ Status: approved by the owner on 2026-11-15.
 |---|---|---|
 | Background, surfaces | White `#FFFFFF` | Black `#000000` |
 | Text, icons | Black `#000000` | White `#FFFFFF` |
-| Buttons, FAB, selected chips | Light blue `#CFE6FF`, black text | Light blue `#CFE6FF`, black text |
+| Buttons, selected chips | Light blue `#CFE6FF`, black text | Light blue `#CFE6FF`, black text |
+| Add button (people list and widget) | Dark navy `#0B2545`, white icon | Dark navy `#0B2545`, white icon |
 | Text buttons, accents | Blue `#0B5CAD` | Light blue `#9CCBFF` |
 | Cards | Near white `#F5F7F9` | `#121417` |
 
@@ -44,7 +45,7 @@ The launcher icon shape comes from the phone's launcher. The app cannot force it
 - **Avatar fallback**: initials in a square on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
 - **Empty states**: one short friendly sentence and one action button.
 - **Search field**: always visible at the top of the People screen.
-- **Add buttons**: icon only (person-add icon, + icon), bottom right, with a content description for screen readers.
+- **Add buttons**: icon only with a content description for screen readers. The people list has one 112 dp dark navy person-add button at the bottom center (ADR-032). The "add tab" button on the tabs screen stays small, light blue, bottom right.
 
 ## 5. Accessibility
 

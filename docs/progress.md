@@ -16,8 +16,19 @@ The agent updates this file at the end of each session. Newest entry first.
 | M7 Backup and polish | approved | m7 | 2026-11-15 |
 | M8 Multi-select and colors | approved | v1.0.0 | 2026-11-15 |
 | M9 World map | approved | v1.0.0 | 2026-11-15 |
+| M10 to M13 First meeting, backup password, archive, more details | approved | v1.1.0 | 2026-11-15 |
+| M14 Widget, M15 Big add button | review | v1.2.0-rc1 | 2026-11-15 |
 
 ## Log
+
+### 2026-11-15 (1.2.0, F20 and F21, owner request)
+
+- F20 (ADR-031): home-screen widget with RemoteViews, resizable between 1 x 1, 4 x 1 and 4 x 2, as designed (navy add button). The add button opens the quick-add form; saving or closing returns to the home screen. The widget refreshes when the app closes.
+- F21 (ADR-032): the add button on the people list is navy, 112 dp, bottom center.
+- Decisions I made without asking (change them if wrong): navy applies to the add buttons only, not all buttons; the widget shows names on 4 x 1 and initials on 4 x 2; the widget is not scrollable (the owner kept the original design).
+- Design: https://claude.ai/artifact/6LkuXr71Z35rbfT1Jf55Az (light blue in the board; the app uses navy as asked).
+- AGENTS.md rule 12: only the feature range changed (F1 to F21).
+- Check on the phone: add the widget, resize it, tap the button, save, widget refresh, the new button position.
 
 ### 2026-11-15 (version 1.0.0)
 

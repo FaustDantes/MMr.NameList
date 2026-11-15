@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.Color
 
 private val LightBlue = Color(0xFFCFE6FF)
 private val Blue = Color(0xFF0B5CAD) // Text buttons and accents: light blue text on white is not readable.
+/** Dark navy: the add button in the app and on the home-screen widget (ADR-032). */
+val Navy = Color(0xFF0B2545)
 private val Black = Color(0xFF000000)
 private val White = Color(0xFFFFFFFF)
 

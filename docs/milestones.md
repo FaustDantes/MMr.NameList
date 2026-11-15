@@ -28,6 +28,8 @@ Each milestone ends with:
 | M11 | Backup password | F17 | Password in settings (set, change with old, remove, reset); export asks to encrypt with "do not show again"; default in settings; AES-256-GCM backup; import asks for the password. |
 | M12 | Archive | F18 | Archive selected people with a time stamp; archive screen with time in the archive; restore and delete. |
 | M13 | More details | F19 | Native language, date of birth, education, current work, ask about, last updated; collapsed "More details" section; only icon, name and tab on top. |
+| M14 | Widget | F20 | Resizable home-screen widget (1 x 1, 4 x 1, 4 x 2) with a navy add button that opens the quick-add form; saving returns to the home screen. |
+| M15 | Big add button | F21 | Navy 112 dp add button at the bottom center of the people list. Release 1.2.0. |
 
 The app is useful after M1. The owner can stop after any milestone.
 
