@@ -133,8 +133,8 @@ class SettingsViewModelTest {
     fun settingAPasswordInSettingsSavesItAndConfirms() {
         vm.onSetPasswordClicked()
         vm.onSetPassword("long enough 1", "long enough 1", forExport = false)
-        val s = state { it.hasPassword }
-        assertEquals(BackupMessage.PasswordSet, s.message)
+        val s = state { it.message == BackupMessage.PasswordSet }
+        assertTrue(s.hasPassword)
         assertNull(s.dialog)
         assertNull("no export was asked for", s.saveRequest)
     }
@@ -211,8 +211,8 @@ class SettingsViewModelTest {
         assertTrue(passwords.isSet.value)
 
         vm.onRemovePassword("first password")
-        val s = state { !it.hasPassword }
-        assertEquals(BackupMessage.PasswordRemoved, s.message)
+        val s = state { it.message == BackupMessage.PasswordRemoved }
+        assertFalse(s.hasPassword)
     }
 
     @Test
@@ -221,8 +221,8 @@ class SettingsViewModelTest {
         vm.onForgotPasswordClicked()
         assertEquals(SettingsDialog.ResetPassword, state { it.dialog != null }.dialog)
         vm.onConfirmReset()
-        val s = state { !it.hasPassword }
-        assertEquals(BackupMessage.PasswordRemoved, s.message)
+        val s = state { it.message == BackupMessage.PasswordRemoved }
+        assertFalse(s.hasPassword)
         assertNull(s.dialog)
     }
 

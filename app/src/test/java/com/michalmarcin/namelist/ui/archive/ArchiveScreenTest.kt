@@ -38,8 +38,8 @@ class ArchiveScreenTest {
                 ArchiveScreen(ArchiveUiState(people, isLoading = false), {}, {}, {}, now = now)
             }
         }
-        compose.onNodeWithTag("archiveStatus-2").assertTextContains("in the archive for 5 days", substring = true)
-        compose.onNodeWithTag("archiveStatus-3").assertTextContains("in the archive for 3 months", substring = true)
+        compose.onNodeWithTag("archiveStatus-2", useUnmergedTree = true).assertTextContains("in the archive for 5 days", substring = true)
+        compose.onNodeWithTag("archiveStatus-3", useUnmergedTree = true).assertTextContains("in the archive for 3 months", substring = true)
     }
 
     @Test

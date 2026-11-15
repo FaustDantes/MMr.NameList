@@ -204,7 +204,7 @@ class PersonScreensTest {
         compose.onNodeWithText(formatEpochDay(7_000)).assertExists()
         compose.onNodeWithTag("nativeLanguageField").performTextInput("!")
         compose.onNodeWithTag("clearBirth").performClick()
-        assertEquals(listOf("lang:Slovak!", "birth:null"), changes)
+        assertEquals(listOf("lang:!Slovak", "birth:null"), changes)
     }
 
     @Test

@@ -198,6 +198,7 @@ class PersonEditViewModelTest {
         assertEquals(7_000L, saved.birthDate)
         assertNotNull("every save stamps the time", saved.lastUpdatedAt)
 
+        store.clear() // a new screen: the edit ViewModel loads the saved person
         val loaded = viewModel(id = saved.id).uiState.await { !it.isLoading }
         assertEquals(listOf("Slovak", "MSc", "Nurse", "Her dog"), listOf(loaded.nativeLanguage, loaded.education, loaded.currentWork, loaded.askAbout))
         assertEquals(7_000L, loaded.birthDate)
