@@ -51,7 +51,9 @@ class PhotoStore(private val context: Context) {
     private fun decodeUpright(uri: Uri): Bitmap? {
         val resolver = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
+        // With inJustDecodeBounds, decodeStream always returns null; the result is in [bounds].
+        val stream = resolver.openInputStream(uri) ?: return null
+        stream.use { BitmapFactory.decodeStream(it, null, bounds) }
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
 
         // Decode at no less than MAX_SIDE to keep quality, but avoid loading a full 50 MP image.
