@@ -34,6 +34,10 @@ class AppFlowTest {
 
     private fun waitGone(text: String) = compose.waitUntilDoesNotExist(hasText(text), 10_000)
 
+    // Right after navigating back, the screen is still inside the navigation transition, whose semantics
+    // merge the search field into a parent node. The unmerged tree finds it in every case.
+    private fun search() = compose.onNodeWithTag("search", useUnmergedTree = true)
+
     private fun addPerson(name: String, notes: String = "") {
         compose.onNodeWithTag("addPerson").performClick()
         compose.waitUntilAtLeastOneExists(hasText("New person"), 10_000)
@@ -50,7 +54,7 @@ class AppFlowTest {
         addPerson("Peter Horváth")
 
         // Search ignores case and accents.
-        compose.onNodeWithTag("search").performTextInput("NOVA")
+        search().performTextInput("NOVA")
         waitGone("Peter Horváth")
         compose.onNodeWithText("Anna Nováková").performClick()
 
@@ -67,7 +71,7 @@ class AppFlowTest {
         compose.onNodeWithTag("delete").performClick()
         compose.onNodeWithTag("confirmDelete").performClick()
         waitGone("Anna Svobodová")
-        compose.onNodeWithTag("search").performTextClearance()
+        search().performTextClearance()
         waitFor("Peter Horváth")
     }
 
