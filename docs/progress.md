@@ -7,13 +7,13 @@ The agent updates this file at the end of each session. Newest entry first.
 | Milestone | Status | Tag | Date |
 |---|---|---|---|
 | M0 Skeleton and CI | approved | m0 | 2026-11-15 |
-| M1 People basics | ready for review | m1-rc1 | 2026-11-15 |
-| M2 Photos | ready for review | m2-rc1 | 2026-11-15 |
-| M3 Tabs and ordering | ready for review | m3-rc1 | 2026-11-15 |
-| M4 Place of meeting | ready for review | m7-rc1 | 2026-11-15 |
-| M5 Relationships | ready for review | m7-rc1 | 2026-11-15 |
+| M1 People basics | approved | m1-rc1 | 2026-11-15 |
+| M2 Photos | approved | m2-rc1 | 2026-11-15 |
+| M3 Tabs and ordering | approved | m3-rc1 | 2026-11-15 |
+| M4 Place of meeting | approved | m7 | 2026-11-15 |
+| M5 Relationships | approved | m7 | 2026-11-15 |
 | ~~M6 Reminders~~ | removed | - | - |
-| M7 Backup and polish | ready for review | m7-rc1 | 2026-11-15 |
+| M7 Backup and polish | approved | m7 | 2026-11-15 |
 
 ## Log
 
