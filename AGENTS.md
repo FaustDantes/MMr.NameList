@@ -39,7 +39,7 @@ The Android project starts at milestone M0. Until then, these commands do not ex
 6. Do not add a dependency without an ADR line that gives the reason.
 7. Use the latest stable library versions. Verify each version on the official release page. Do not use versions from memory.
 8. Keep commits small. Use Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `build:`, `ci:`, `refactor:`.
-9. Never commit secrets, keystores or real personal data. Use fictional seed data in tests and screenshots.
+9. Never commit secrets, unencrypted keystores or real personal data. The only keystore in the repo is `signing/release.jks.enc` (ADR-008). Use fictional seed data in tests and screenshots.
 10. If a requirement is not clear, ask the owner. Do not guess silently.
 11. Update `docs/progress.md` at the end of each session.
 12. If you change a rule in this file, tell the owner in the milestone report.

@@ -1,0 +1,85 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.roborazzi)
+}
+
+// CI sets these. Local builds use the defaults.
+val ciVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+val ciVersionName = System.getenv("VERSION_NAME") ?: "0.0.0-dev"
+val releaseStoreFile = System.getenv("SIGNING_STORE_FILE")?.let { file(it) }?.takeIf { it.exists() }
+
+android {
+    namespace = "com.michalmarcin.namelist"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.michalmarcin.namelist"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = ciVersionCode
+        versionName = ciVersionName
+    }
+
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = releaseStoreFile
+                storePassword = System.getenv("SIGNING_PASSWORD")
+                keyAlias = "namelist"
+                keyPassword = System.getenv("SIGNING_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material3)
+
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+}

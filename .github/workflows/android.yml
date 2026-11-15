@@ -1,0 +1,87 @@
+name: Android CI
+
+on:
+  push:
+    branches: [dev, master]
+    tags: ['m*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to publish releases on tags
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: ${{ github.ref_type == 'tag' && github.ref_name || format('0.0.0-{0}', github.sha) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Restore signing key
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_PASSWORD" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in signing/release.jks.enc \
+              -out "$RUNNER_TEMP/release.jks" -pass env:SIGNING_PASSWORD
+            echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Secret SIGNING_PASSWORD is not set. The release APK is not signed and no release is published."
+          fi
+
+      - name: Build, test, screenshots, lint
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: ./gradlew --stacktrace assembleRelease recordRoborazziDebug lintDebug
+
+      - name: Collect outputs
+        if: always()
+        run: |
+          mkdir -p out
+          apk=$(ls app/build/outputs/apk/release/*.apk 2>/dev/null | head -1 || true)
+          [ -n "$apk" ] && cp "$apk" "out/MMr.NameList-${VERSION_NAME}.apk"
+          cp app/build/outputs/roborazzi/*.png out/ 2>/dev/null || true
+          ls -la out
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: namelist-${{ github.run_number }}
+          path: |
+            out/
+            app/build/reports/
+          if-no-files-found: warn
+
+      - name: Check APK signature
+        if: env.SIGNING_STORE_FILE != ''
+        run: |
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$apksigner" verify --print-certs out/*.apk | grep -E "Signer #1 certificate (DN|SHA-256)"
+
+      - name: Publish release
+        if: github.ref_type == 'tag' && env.SIGNING_STORE_FILE != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease=""
+          case "$TAG" in *-rc*) prerelease="--prerelease";; esac
+          cat > notes.md <<NOTES
+          Install: download \`MMr.NameList-${TAG}.apk\` on your Android phone and open it.
+          Screenshots are attached. Milestone details: docs/milestones.md and docs/progress.md.
+          NOTES
+          gh release create "$TAG" out/* $prerelease --title "Name List ${TAG}" --notes-file notes.md --verify-tag

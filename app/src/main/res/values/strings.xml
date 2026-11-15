@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Name List</string>
+    <string name="people_title">People</string>
+    <string name="search_placeholder">Search people</string>
+    <string name="empty_title">No people yet</string>
+    <string name="empty_body">Everyone you add shows up here, so you never forget a name.</string>
+    <string name="add_person">Add person</string>
+    <string name="add_person_soon">Adding people comes in the next update.</string>
+</resources>

@@ -124,9 +124,10 @@ Visual rules are in [design.md](design.md).
 
 ## 11. Signing
 
-- Create one keystore at M0. Store it in GitHub Secrets (`SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`).
-- Sign each APK with it. If each CI run uses a new debug key, Android refuses to update the app, and the owner loses test data. See [ADR-005](decisions.md#adr-005-github-actions-and-one-signing-key).
-- Never commit the keystore.
+- One keystore for all releases. It is in the repo, encrypted: `signing/release.jks.enc`. See [signing/README.md](../signing/README.md) and [ADR-008](decisions.md#adr-008-encrypted-keystore-in-the-repository).
+- CI decrypts it with the GitHub secret `SIGNING_PASSWORD` and signs each release APK with it.
+- Thus each new APK updates the installed app and keeps the data. A new key would force an uninstall.
+- Never commit the decrypted keystore.
 
 ## 12. Open decisions for the owner
 
