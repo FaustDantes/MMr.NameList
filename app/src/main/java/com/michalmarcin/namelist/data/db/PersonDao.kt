@@ -63,6 +63,17 @@ interface PersonDao {
     @Query("DELETE FROM person")
     suspend fun deleteAll()
 
+    // Multi-select (M8)
+    @Query("SELECT photoFile FROM person WHERE id IN (:ids) AND isSelf = 0 AND photoFile IS NOT NULL")
+    suspend fun photoFiles(ids: List<Long>): List<String>
+
+    /** "Me" is never deleted, even when selected. */
+    @Query("DELETE FROM person WHERE id IN (:ids) AND isSelf = 0")
+    suspend fun deleteByIds(ids: List<Long>): Int
+
+    @Query("UPDATE person SET tabId = :tabId WHERE id IN (:ids)")
+    suspend fun setTab(ids: List<Long>, tabId: Long?)
+
     /** "Me" cannot be deleted. */
     @Query("DELETE FROM person WHERE id = :id AND isSelf = 0")
     suspend fun deleteById(id: Long): Int

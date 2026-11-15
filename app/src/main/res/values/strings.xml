@@ -96,4 +96,21 @@
         <item quantity="one">%d photo.</item>
         <item quantity="other">%d photos.</item>
     </plurals>
+    <string name="selected">Selected</string>
+    <string name="select_all">Select all</string>
+    <string name="clear_selection">Clear selection</string>
+    <string name="move_to_tab">Move to tab</string>
+    <string name="delete_people_body">This removes them and everything saved about them, photos included.</string>
+    <plurals name="selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="delete_people_title">
+        <item quantity="one">Delete %d person?</item>
+        <item quantity="other">Delete %d people?</item>
+    </plurals>
+    <plurals name="move_title">
+        <item quantity="one">Move %d person to</item>
+        <item quantity="other">Move %d people to</item>
+    </plurals>
 </resources>

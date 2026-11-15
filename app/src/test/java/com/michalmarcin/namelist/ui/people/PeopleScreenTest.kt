@@ -8,7 +8,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.testutil.SampleData
@@ -117,5 +119,83 @@ class PeopleScreenTest {
         assertEquals(true, base.canReorder)
         assertEquals(false, base.copy(sort = SortMode.A_TO_Z).canReorder)
         assertEquals(false, base.copy(query = "an").canReorder)
+    }
+
+    @Test
+    fun longPressStartsSelection() {
+        var toggled = -1L
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(
+                    PeopleUiState(people = SampleData.people, isLoading = false),
+                    {}, {}, {}, {},
+                    onToggleSelect = { toggled = it },
+                )
+            }
+        }
+        compose.onNodeWithTag("person-3").performTouchInput { longClick() }
+        assertEquals(3L, toggled)
+    }
+
+    @Test
+    fun selectionModeTapTogglesAndShowsBar() {
+        var toggled = -1L
+        var opened = -1L
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(
+                    PeopleUiState(people = SampleData.people, tabs = SampleData.tabs, selected = setOf(2, 3), isLoading = false),
+                    {}, {}, {},
+                    onOpenPerson = { opened = it },
+                    onToggleSelect = { toggled = it },
+                )
+            }
+        }
+        compose.onNodeWithText("2 selected").assertIsDisplayed()
+        compose.onNodeWithTag("addPerson").assertDoesNotExist()
+        compose.onNodeWithTag("bulkMove").assertExists()
+        compose.onNodeWithTag("person-4").performClick()
+        assertEquals(4L, toggled)
+        assertEquals(-1L, opened)
+    }
+
+    @Test
+    fun bulkDeleteNeedsConfirmation() {
+        var deletes = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(
+                    PeopleUiState(people = SampleData.people, selected = setOf(2, 3), isLoading = false),
+                    {}, {}, {}, {},
+                    onDeleteSelected = { deletes++ },
+                )
+            }
+        }
+        compose.onNodeWithTag("bulkMove").assertDoesNotExist() // no tabs, nothing to move to
+        compose.onNodeWithTag("bulkDelete").performClick()
+        assertEquals(0, deletes)
+        compose.onNodeWithText("Delete 2 people?").assertIsDisplayed()
+        compose.onNodeWithTag("confirmBulkDelete").performClick()
+        assertEquals(1, deletes)
+    }
+
+    @Test
+    fun moveToTabContentPicksTabOrNone() {
+        val picks = mutableListOf<Long?>()
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                MoveToTabContent(count = 2, tabs = SampleData.tabs, onPick = { picks += it }, onCancel = {})
+            }
+        }
+        compose.onNodeWithText("Move 2 people to").assertIsDisplayed()
+        compose.onNodeWithTag("moveTo-2").performClick()
+        compose.onNodeWithTag("moveTo-none").performClick()
+        assertEquals(listOf<Long?>(2L, null), picks)
+    }
+
+    @Test
+    fun noReorderWhileSelecting() {
+        val state = PeopleUiState(people = SampleData.people, selected = setOf(2), isLoading = false)
+        assertEquals(false, state.canReorder)
     }
 }

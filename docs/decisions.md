@@ -196,3 +196,11 @@ Status: accepted (replaces the teal and sand palette and dynamic color)
 Decision: White background, black text, light blue (`#CFE6FF`) buttons, FAB and selected chips with black text. Text buttons use a darker blue (`#0B5CAD`) because light blue text on white fails contrast. Dynamic (wallpaper) color is off. The default theme is Light, also when the phone is in dark mode; Settings can still switch to Dark or System. The launcher icon uses the same blues.
 Reason: Owner request.
 Alternatives: Keep System as the default (a phone in dark mode would show a black background).
+
+## ADR-024: Long press selects, a handle drags
+
+Date: 2026-11-15
+Status: accepted (changes the gesture in ADR-015)
+Decision: Long press on a person starts multi-select (F14); tap adds or removes people while selecting; Back or the X ends it. Drag and drop moves to a handle on the right of each row, shown only in manual order and outside selection. The selection is kept in the ViewModel's SavedStateHandle and is always cut to the people on screen, so a bulk action never touches hidden people.
+Reason: Long press to select is the Android convention; one gesture cannot both select and drag.
+Alternatives: A "Select" button in the top bar and keep long press for drag (selection would be harder to find).

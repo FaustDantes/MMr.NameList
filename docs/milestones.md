@@ -21,6 +21,7 @@ Each milestone ends with:
 | M5 | Relationships | F13 | Add, edit and delete links. The reverse link shows on the other person. Delete a person removes the links. Inverse tests pass for all types. |
 | ~~M6~~ | ~~Reminders~~ | ~~F8~~ | Removed by the owner (ADR-019). |
 | M7 | Backup and polish | F9 (switch), F12 | Export and import a zip ([format](backup-format.md)). Settings screen. Theme switch. Accessibility check. |
+| M8 | Multi-select and colors | F14 | Long press selects; tap adds; bulk delete with confirmation; bulk move to a tab; drag by handle. White, black and light blue palette (ADR-023). |
 
 The app is useful after M1. The owner can stop after any milestone.
 

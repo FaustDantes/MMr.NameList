@@ -163,4 +163,16 @@ class PeopleRepositoryTest {
         assertEquals("Brno", repo.getPerson(id)?.metCity)
         assertEquals(2.0, requireNotNull(repo.getPerson(id)?.metLon), 0.0)
     }
+
+    @Test
+    fun deleteManyKeepsMeAndDeletesPhotos() = runBlocking {
+        val anna = repo.save(0, "Anna", "", photoFile = "a.jpg")
+        val peter = repo.save(0, "Peter", "")
+        repo.save(0, "Eva", "")
+        val me = requireNotNull(repo.getSelf()).id
+        assertEquals(2, repo.deleteMany(listOf(anna, peter, me)))
+        assertEquals(listOf("Eva"), names())
+        assertNotNull(repo.getSelf())
+        assertEquals(listOf("a.jpg"), deletedPhotos)
+    }
 }

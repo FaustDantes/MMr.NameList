@@ -54,6 +54,13 @@ Removed by the owner on 2026-11-15 (ADR-019).
 - Each type has an inverse. Symmetric types: friend, colleague, partner, sibling, neighbour, family, other. Paired types: parent and child.
 - When the user deletes a person, the app deletes all links of that person. When the user edits a link, both sides change.
 
+### F14 Multi-select (added by the owner on 2026-11-15)
+
+- The user selects several people (long press, then tap more).
+- The user deletes all selected people at once, after a confirmation.
+- The user moves all selected people to one tab, or removes their tab.
+- Actions apply only to people that are shown at that moment.
+
 ## 5. Non-functional requirements
 
 | ID | Requirement |

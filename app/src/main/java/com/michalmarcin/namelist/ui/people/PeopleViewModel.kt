@@ -24,13 +24,17 @@ data class PeopleUiState(
     val tabs: List<Tab> = emptyList(),
     /** null = "All". */
     val selectedTabId: Long? = null,
+    /** Selected people (M8). Only people shown now: a filter change drops hidden ones. */
+    val selected: Set<Long> = emptySet(),
     val isLoading: Boolean = true,
 ) {
+    val isSelecting: Boolean get() = selected.isNotEmpty()
+
     val showEmptyState: Boolean get() = !isLoading && people.isEmpty() && query.isBlank()
     val showNoMatches: Boolean get() = !isLoading && people.isEmpty() && query.isNotBlank()
 
-    /** Drag and drop works only on the manual order of an unfiltered (by search) list. */
-    val canReorder: Boolean get() = sort == SortMode.MANUAL && query.isBlank() && people.size > 1
+    /** Drag and drop works only on the manual order of an unfiltered (by search) list, outside selection. */
+    val canReorder: Boolean get() = sort == SortMode.MANUAL && query.isBlank() && people.size > 1 && !isSelecting
 }
 
 class PeopleViewModel(
@@ -42,6 +46,7 @@ class PeopleViewModel(
     private val query = handle.getStateFlow(KEY_QUERY, "")
     private val sort = handle.getStateFlow(KEY_SORT, SortMode.MANUAL.name).map { SortMode.valueOf(it) }
     private val selectedTab = handle.getStateFlow(KEY_TAB, NO_TAB)
+    private val selectedPeople = handle.getStateFlow(KEY_SELECTED, LongArray(0))
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<PeopleUiState> =
@@ -49,13 +54,16 @@ class PeopleViewModel(
             // A deleted tab falls back to "All".
             Selection(q, s, tabList.firstOrNull { it.id == selected }?.id, tabList)
         }.flatMapLatest { sel ->
-            people.observePeople(sel.query, sel.sort, sel.tabId).map { list ->
+            combine(people.observePeople(sel.query, sel.sort, sel.tabId), selectedPeople) { list, chosen ->
+                val visible = list.map { it.id }.toSet()
                 PeopleUiState(
                     query = sel.query,
                     sort = sel.sort,
                     people = list,
                     tabs = sel.tabs,
                     selectedTabId = sel.tabId,
+                    // Bulk actions must never touch people the user cannot see.
+                    selected = chosen.filter { it in visible }.toSet(),
                     isLoading = false,
                 )
             }
@@ -73,6 +81,31 @@ class PeopleViewModel(
         handle[KEY_TAB] = id ?: NO_TAB
     }
 
+    fun onToggleSelect(id: Long) {
+        val current = uiState.value.selected
+        setSelected(if (id in current) current - id else current + id)
+    }
+
+    fun onSelectAll() = setSelected(uiState.value.people.map { it.id }.toSet())
+
+    fun onClearSelection() = setSelected(emptySet())
+
+    fun onDeleteSelected() {
+        val ids = uiState.value.selected
+        setSelected(emptySet())
+        viewModelScope.launch { people.deleteMany(ids) }
+    }
+
+    fun onMoveSelected(tabId: Long?) {
+        val ids = uiState.value.selected
+        setSelected(emptySet())
+        viewModelScope.launch { people.moveToTab(ids, tabId) }
+    }
+
+    private fun setSelected(ids: Set<Long>) {
+        handle[KEY_SELECTED] = ids.toLongArray()
+    }
+
     fun onReorder(idsInNewOrder: List<Long>) {
         viewModelScope.launch { people.reorder(idsInNewOrder) }
     }
@@ -83,6 +116,7 @@ class PeopleViewModel(
         const val KEY_QUERY = "query"
         const val KEY_SORT = "sort"
         const val KEY_TAB = "tab"
+        const val KEY_SELECTED = "selected"
         const val NO_TAB = 0L
     }
 }

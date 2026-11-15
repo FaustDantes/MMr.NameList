@@ -1,6 +1,21 @@
 package com.michalmarcin.namelist.ui.people
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import com.michalmarcin.namelist.ui.theme.IconSquare
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,6 +91,11 @@ fun PeopleRoute(
         onReorder = viewModel::onReorder,
         onManageTabs = onManageTabs,
         onSettings = onSettings,
+        onToggleSelect = viewModel::onToggleSelect,
+        onSelectAll = viewModel::onSelectAll,
+        onClearSelection = viewModel::onClearSelection,
+        onDeleteSelected = viewModel::onDeleteSelected,
+        onMoveSelected = viewModel::onMoveSelected,
     )
 }
 
@@ -92,12 +112,28 @@ fun PeopleScreen(
     onReorder: (List<Long>) -> Unit = {},
     onManageTabs: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onToggleSelect: (Long) -> Unit = {},
+    onSelectAll: () -> Unit = {},
+    onClearSelection: () -> Unit = {},
+    onDeleteSelected: () -> Unit = {},
+    onMoveSelected: (Long?) -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var dialog by remember { mutableStateOf<BulkDialog?>(null) }
+    BackHandler(enabled = state.isSelecting) { onClearSelection() }
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
+            if (state.isSelecting) {
+                SelectionBar(
+                    count = state.selected.size,
+                    canMove = state.tabs.isNotEmpty(),
+                    onClear = onClearSelection,
+                    onSelectAll = onSelectAll,
+                    onMove = { dialog = BulkDialog.Move },
+                    onDelete = { dialog = BulkDialog.Delete },
+                )
+            } else LargeTopAppBar(
                 title = { Text(stringResource(R.string.people_title)) },
                 actions = {
                     IconButton(onClick = onManageTabs, modifier = Modifier.testTag("manageTabs")) {
@@ -112,11 +148,13 @@ fun PeopleScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onAddPerson(state.selectedTabId) },
-                modifier = Modifier.testTag("addPerson"),
-            ) {
-                Icon(painterResource(R.drawable.ic_person_add), contentDescription = stringResource(R.string.add_person))
+            if (!state.isSelecting) {
+                FloatingActionButton(
+                    onClick = { onAddPerson(state.selectedTabId) },
+                    modifier = Modifier.testTag("addPerson"),
+                ) {
+                    Icon(painterResource(R.drawable.ic_person_add), contentDescription = stringResource(R.string.add_person))
+                }
             }
         },
     ) { padding ->
@@ -149,13 +187,132 @@ fun PeopleScreen(
                 else -> PeopleList(
                     people = state.people,
                     canReorder = state.canReorder,
+                    selected = state.selected,
                     onOpenPerson = onOpenPerson,
+                    onToggleSelect = onToggleSelect,
                     onReorder = onReorder,
                     modifier = Modifier.weight(1f),
                 )
             }
         }
     }
+
+    when (dialog) {
+        BulkDialog.Delete -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = {
+                Text(pluralStringResource(R.plurals.delete_people_title, state.selected.size, state.selected.size))
+            },
+            text = { Text(stringResource(R.string.delete_people_body)) },
+            confirmButton = {
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = {
+                        dialog = null
+                        onDeleteSelected()
+                    },
+                    modifier = Modifier.testTag("confirmBulkDelete"),
+                ) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = {
+                TextButton(shape = MaterialTheme.shapes.large, onClick = { dialog = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+        BulkDialog.Move -> BasicAlertDialog(onDismissRequest = { dialog = null }) {
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                MoveToTabContent(
+                    count = state.selected.size,
+                    tabs = state.tabs,
+                    onPick = { tabId ->
+                        dialog = null
+                        onMoveSelected(tabId)
+                    },
+                    onCancel = { dialog = null },
+                )
+            }
+        }
+        null -> Unit
+    }
+}
+
+private enum class BulkDialog { Delete, Move }
+
+/** Top bar while people are selected (M8). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectionBar(
+    count: Int,
+    canMove: Boolean,
+    onClear: () -> Unit,
+    onSelectAll: () -> Unit,
+    onMove: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                pluralStringResource(R.plurals.selected_count, count, count),
+                modifier = Modifier.testTag("selectionCount"),
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onClear, modifier = Modifier.testTag("clearSelection")) {
+                Icon(painterResource(R.drawable.ic_close), stringResource(R.string.clear_selection))
+            }
+        },
+        actions = {
+            IconButton(onClick = onSelectAll, modifier = Modifier.testTag("selectAll")) {
+                Icon(painterResource(R.drawable.ic_select_all), stringResource(R.string.select_all))
+            }
+            if (canMove) {
+                IconButton(onClick = onMove, modifier = Modifier.testTag("bulkMove")) {
+                    Icon(painterResource(R.drawable.ic_folder), stringResource(R.string.move_to_tab))
+                }
+            }
+            IconButton(onClick = onDelete, modifier = Modifier.testTag("bulkDelete")) {
+                Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.delete))
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    )
+}
+
+/** Content of the "Move to tab" dialog. Separate from the dialog window so tests can drive it. */
+@Composable
+fun MoveToTabContent(count: Int, tabs: List<Tab>, onPick: (Long?) -> Unit, onCancel: () -> Unit) {
+    Column(Modifier.padding(vertical = 24.dp)) {
+        Text(
+            pluralStringResource(R.plurals.move_title, count, count),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+        )
+        MoveOption(stringResource(R.string.no_tab), Modifier.testTag("moveTo-none")) { onPick(null) }
+        tabs.forEach { tab ->
+            MoveOption(tab.name, Modifier.testTag("moveTo-${tab.id}")) { onPick(tab.id) }
+        }
+        TextButton(
+            shape = MaterialTheme.shapes.large,
+            onClick = onCancel,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(end = 16.dp, top = 8.dp),
+        ) { Text(stringResource(R.string.cancel)) }
+    }
+}
+
+@Composable
+private fun MoveOption(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
+            .padding(horizontal = 24.dp, vertical = 14.dp),
+    )
 }
 
 @Composable
@@ -187,14 +344,19 @@ private fun TabChip(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 /**
- * People list. When [canReorder] is true, a long press starts drag and drop (F5).
- * The new order is kept locally while dragging and saved once, when the finger lifts.
+ * People list.
+ * - Tap opens a person; while selecting, tap adds or removes the person (M8).
+ * - Long press starts selecting (ADR-024).
+ * - In manual order, the handle on the right drags a person to a new place (F5). The new order is kept
+ *   locally while dragging and saved once, when the finger lifts.
  */
 @Composable
 private fun PeopleList(
     people: List<Person>,
     canReorder: Boolean,
+    selected: Set<Long>,
     onOpenPerson: (Long) -> Unit,
+    onToggleSelect: (Long) -> Unit,
     onReorder: (List<Long>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -203,6 +365,8 @@ private fun PeopleList(
     val reorderState = rememberReorderableLazyListState(listState) { from, to ->
         items = items.toMutableList().apply { add(to.index, removeAt(from.index)) }
     }
+    val haptics = LocalHapticFeedback.current
+    val selecting = selected.isNotEmpty()
     LazyColumn(
         state = listState,
         modifier = modifier
@@ -215,12 +379,26 @@ private fun PeopleList(
             ReorderableItem(reorderState, key = person.id, enabled = canReorder) { isDragging ->
                 PersonRow(
                     person = person,
-                    onClick = { onOpenPerson(person.id) },
+                    isSelected = person.id in selected,
+                    isSelecting = selecting,
+                    onClick = { if (selecting) onToggleSelect(person.id) else onOpenPerson(person.id) },
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onToggleSelect(person.id)
+                    },
                     lifted = isDragging,
-                    modifier = Modifier.longPressDraggableHandle(
-                        enabled = canReorder,
-                        onDragStopped = { onReorder(items.map { it.id }) },
-                    ),
+                    trailing = if (canReorder) {
+                        {
+                            IconButton(
+                                onClick = {},
+                                modifier = Modifier.draggableHandle(onDragStopped = { onReorder(items.map { it.id }) }),
+                            ) {
+                                Icon(painterResource(R.drawable.ic_drag_handle), stringResource(R.string.drag_to_reorder))
+                            }
+                        }
+                    } else {
+                        null
+                    },
                 )
             }
         }
@@ -228,22 +406,56 @@ private fun PeopleList(
 }
 
 @Composable
-fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier, lifted: Boolean = false) {
+fun PersonRow(
+    person: Person,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: () -> Unit = {},
+    isSelected: Boolean = false,
+    isSelecting: Boolean = false,
+    lifted: Boolean = false,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val colors = MaterialTheme.colorScheme
+    val selectedLabel = stringResource(R.string.selected)
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .semantics {
+                if (isSelecting) {
+                    selected = isSelected
+                    if (isSelected) stateDescription = selectedLabel
+                }
+            }
+            .testTag("person-${person.id}"),
         shape = MaterialTheme.shapes.medium,
-        color = if (lifted) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
+        color = when {
+            isSelected -> colors.secondaryContainer
+            lifted -> colors.surfaceContainerHigh
+            else -> colors.surfaceContainerLow
+        },
+        contentColor = if (isSelected) colors.onSecondaryContainer else colors.onSurface,
         shadowElevation = if (lifted) 6.dp else 0.dp,
     ) {
         Row(
             modifier = Modifier
                 .heightIn(min = 72.dp)
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(start = 12.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(name = person.name, photoFile = person.photoFile)
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(colors.primary, IconSquare),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = colors.onPrimary)
+                }
+            } else {
+                Avatar(name = person.name, photoFile = person.photoFile)
+            }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(
@@ -257,12 +469,13 @@ fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
+            trailing?.invoke() ?: Spacer(Modifier.width(8.dp))
         }
     }
 }

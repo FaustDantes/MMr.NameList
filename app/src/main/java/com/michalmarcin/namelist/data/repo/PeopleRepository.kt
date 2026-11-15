@@ -102,6 +102,21 @@ class PeopleRepository(
     /** Drag and drop result: puts the shown people in this order (F5). */
     suspend fun reorder(idsInNewOrder: List<Long>) = dao.reorder(idsInNewOrder)
 
+    /** Deletes several people and their photo files (M8). Returns how many were deleted. */
+    suspend fun deleteMany(ids: Collection<Long>): Int {
+        if (ids.isEmpty()) return 0
+        val list = ids.toList()
+        val photos = dao.photoFiles(list)
+        val deleted = dao.deleteByIds(list)
+        photos.forEach(deletePhoto)
+        return deleted
+    }
+
+    /** Moves several people to [tabId]; null removes their tab (M8). */
+    suspend fun moveToTab(ids: Collection<Long>, tabId: Long?) {
+        if (ids.isNotEmpty()) dao.setTab(ids.toList(), tabId)
+    }
+
     /** Deletes the person and their photo file. "Me" cannot be deleted. */
     suspend fun delete(id: Long): Boolean {
         val photo = dao.get(id)?.photoFile

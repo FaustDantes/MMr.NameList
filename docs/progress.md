@@ -14,6 +14,7 @@ The agent updates this file at the end of each session. Newest entry first.
 | M5 Relationships | approved | m7 | 2026-11-15 |
 | ~~M6 Reminders~~ | removed | - | - |
 | M7 Backup and polish | approved | m7 | 2026-11-15 |
+| M8 Multi-select and colors | ready for review | m8-rc1 | 2026-11-15 |
 
 ## Log
 
