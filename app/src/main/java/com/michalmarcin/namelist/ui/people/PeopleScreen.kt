@@ -62,6 +62,7 @@ fun PeopleRoute(
     onAddPerson: (tabId: Long?) -> Unit,
     onOpenPerson: (Long) -> Unit,
     onManageTabs: () -> Unit,
+    onSettings: () -> Unit,
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,6 +75,7 @@ fun PeopleRoute(
         onSelectTab = viewModel::onSelectTab,
         onReorder = viewModel::onReorder,
         onManageTabs = onManageTabs,
+        onSettings = onSettings,
     )
 }
 
@@ -89,6 +91,7 @@ fun PeopleScreen(
     onSelectTab: (Long?) -> Unit = {},
     onReorder: (List<Long>) -> Unit = {},
     onManageTabs: () -> Unit = {},
+    onSettings: () -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -101,6 +104,9 @@ fun PeopleScreen(
                         Icon(painterResource(R.drawable.ic_folder), contentDescription = stringResource(R.string.manage_tabs))
                     }
                     SortMenu(state.sort, onSortChange)
+                    IconButton(onClick = onSettings, modifier = Modifier.testTag("settings")) {
+                        Icon(painterResource(R.drawable.ic_settings), contentDescription = stringResource(R.string.settings))
+                    }
                 },
                 scrollBehavior = scrollBehavior,
             )

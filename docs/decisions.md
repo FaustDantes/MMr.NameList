@@ -180,3 +180,11 @@ Status: accepted
 Decision: Table `relationship` (schema v3, auto migration). One row (from = A, to = B, type = T) means "B is A's T"; from B's side it reads T.inverse (PARENT and CHILD swap, all other types are symmetric). Gender-neutral types (open decision 2, default A). Foreign keys CASCADE delete links with a person. A fact that already exists from either side is rejected. Added on the detail screen through a bottom sheet: pick a type, then tap a person ("Me" first).
 Reason: Requirements F13 and ADR-003.
 Alternatives: Two rows per link.
+
+## ADR-022: Backup as zip with JSON
+
+Date: 2026-11-15
+Status: accepted
+Decision: One `.zip` with `backup.json` (org.json, built into Android) and `photos/`. Saved and opened with the system file picker. Import checks the whole file first, then replaces all data in one transaction. See docs/backup-format.md.
+Reason: F12 and ADR-006 (no cloud). No new dependency. One file is easy to move to a new phone.
+Alternatives: Copy the SQLite file (breaks across schema versions), kotlinx-serialization-json (new dependency).

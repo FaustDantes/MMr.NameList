@@ -28,4 +28,14 @@ interface RelationshipDao {
 
     @Query("DELETE FROM relationship WHERE id = :id")
     suspend fun delete(id: Long)
+
+    // Backup (M7)
+    @Query("SELECT * FROM relationship ORDER BY id")
+    suspend fun getAll(): List<Relationship>
+
+    @Insert
+    suspend fun insertAll(relationships: List<Relationship>)
+
+    @Query("DELETE FROM relationship")
+    suspend fun deleteAll()
 }

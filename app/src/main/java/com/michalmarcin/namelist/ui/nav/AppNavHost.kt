@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.michalmarcin.namelist.ui.people.PeopleRoute as PeopleScreenRoute
 import com.michalmarcin.namelist.ui.person.PersonDetailRoute
 import com.michalmarcin.namelist.ui.person.PersonEditRoute
+import com.michalmarcin.namelist.ui.settings.SettingsRoute as SettingsScreenRoute
 import com.michalmarcin.namelist.ui.tabs.ManageTabsRoute as ManageTabsScreenRoute
 
 @Composable
@@ -18,6 +19,7 @@ fun AppNavHost() {
                 onAddPerson = { tabId -> nav.navigate(EditPersonRoute(tabId = tabId ?: 0L)) },
                 onOpenPerson = { id -> nav.navigate(PersonRoute(id)) },
                 onManageTabs = { nav.navigate(ManageTabsRoute) },
+                onSettings = { nav.navigate(SettingsRoute) },
             )
         }
         composable<PersonRoute> {
@@ -29,6 +31,9 @@ fun AppNavHost() {
         }
         composable<EditPersonRoute> {
             PersonEditRoute(onDone = { nav.popBackStack() })
+        }
+        composable<SettingsRoute> {
+            SettingsScreenRoute(onBack = { nav.popBackStack() })
         }
         composable<ManageTabsRoute> {
             ManageTabsScreenRoute(onBack = { nav.popBackStack() })

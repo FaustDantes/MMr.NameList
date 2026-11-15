@@ -14,3 +14,6 @@ data class EditPersonRoute(val id: Long = 0L, val tabId: Long = 0L)
 
 @Serializable
 data object ManageTabsRoute
+
+@Serializable
+data object SettingsRoute

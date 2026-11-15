@@ -32,6 +32,7 @@ Kotlin, Jetpack Compose, Material 3, Room. Built and tested in GitHub Actions. N
 | [Design](docs/design.md) | Theme, colors, components, accessibility |
 | [Milestones](docs/milestones.md) | Build plan M0 to M7, "done when" criteria, screenshot rules |
 | [Decisions](docs/decisions.md) | Architecture Decision Records (ADR) |
+| [Backup format](docs/backup-format.md) | The export file and the import rules |
 | [Progress](docs/progress.md) | Current status and session log |
 | [Milestone report template](docs/templates/milestone-report.md) | Format of each report to the owner |
 | [Screenshots](docs/screenshots/README.md) | Screenshots per milestone |

@@ -53,6 +53,16 @@ interface PersonDao {
         idsInNewOrder.forEachIndexed { index, id -> setSortIndex(id, slots[index]) }
     }
 
+    // Backup (M7)
+    @Query("SELECT * FROM person ORDER BY id")
+    suspend fun getAll(): List<Person>
+
+    @Insert
+    suspend fun insertAll(people: List<Person>)
+
+    @Query("DELETE FROM person")
+    suspend fun deleteAll()
+
     /** "Me" cannot be deleted. */
     @Query("DELETE FROM person WHERE id = :id AND isSelf = 0")
     suspend fun deleteById(id: Long): Int

@@ -20,7 +20,7 @@ Each milestone ends with:
 | M4 | Place of meeting | F10 | One "City, state" field and a GPS button that stores coordinates. The app works when location permission is denied. |
 | M5 | Relationships | F13 | Add, edit and delete links. The reverse link shows on the other person. Delete a person removes the links. Inverse tests pass for all types. |
 | ~~M6~~ | ~~Reminders~~ | ~~F8~~ | Removed by the owner (ADR-019). |
-| M7 | Backup and polish | F9 (switch), F12 | Export and import a zip. Settings screen. Theme switch. Accessibility check. Final screenshot set. |
+| M7 | Backup and polish | F9 (switch), F12 | Export and import a zip ([format](backup-format.md)). Settings screen. Theme switch. Accessibility check. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

@@ -25,6 +25,16 @@ interface TabDao {
     @Query("DELETE FROM tab WHERE id = :id")
     suspend fun delete(id: Long)
 
+    // Backup (M7)
+    @Query("SELECT * FROM tab ORDER BY id")
+    suspend fun getAll(): List<Tab>
+
+    @Insert
+    suspend fun insertAll(tabs: List<Tab>)
+
+    @Query("DELETE FROM tab")
+    suspend fun deleteAll()
+
     @Query("UPDATE tab SET sortIndex = :sortIndex WHERE id = :id")
     suspend fun setSortIndex(id: Long, sortIndex: Long)
 
