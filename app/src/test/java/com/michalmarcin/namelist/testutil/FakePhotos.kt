@@ -27,6 +27,8 @@ object FakePhotos {
         "jana.jpg" to intArrayOf(0xFF8EC5FC.toInt(), 0xFFE0C3FC.toInt(), 0xFF3B6E8F.toInt()),
     )
 
+    private val transparent: Bitmap by lazy { Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) }
+
     fun bitmap(name: String): Bitmap? {
         val colors = palettes[name] ?: return null
         val size = 256
@@ -56,7 +58,8 @@ object FakePhotos {
             LocalInspectionMode provides true,
             LocalPhotoDirectory provides File("photos"),
             LocalAsyncImagePreviewHandler provides AsyncImagePreviewHandler { request ->
-                (request.data as? File)?.let { bitmap(it.name) }?.asImage()
+                // Unknown file: a transparent image, so the initials under it stay visible (as on a phone).
+                ((request.data as? File)?.let { bitmap(it.name) } ?: transparent).asImage()
             },
         ) { content() }
     }
