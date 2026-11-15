@@ -29,7 +29,7 @@ class SettingsTest {
     @Test
     fun themeIsSavedAndReadBack() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        assertEquals(ThemeMode.SYSTEM, SettingsStore(context).theme.value)
+        assertEquals(ThemeMode.LIGHT, SettingsStore(context).theme.value)
         SettingsStore(context).setTheme(ThemeMode.DARK)
         assertEquals(ThemeMode.DARK, SettingsStore(context).theme.value)
     }

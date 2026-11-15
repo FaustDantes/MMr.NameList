@@ -9,14 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 /**
- * App theme. Uses the wallpaper colors (dynamic color) on Android 12 and later,
- * and the teal and sand fallback palette elsewhere. Tests pass [dynamicColor] = false
- * so screenshots are the same on every machine.
+ * App theme: the owner's white, black and light blue palette (ADR-023).
+ * Wallpaper colors (dynamic color) are off by default and only kept as an option.
  */
 @Composable
 fun NameListTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {

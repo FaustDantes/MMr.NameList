@@ -13,17 +13,15 @@ Status: approved by the owner on 2026-11-15.
 | Item | Rule |
 |---|---|
 | Design system | Material 3 |
-| Color | Dynamic color on Android 12 and later. Fallback palette below. |
-| Modes | System, light, dark. Test both light and dark in each screenshot set. |
-| Layout | Edge-to-edge. 16 dp side margins. |
+| Color | Dynamic color on Android 12 and later. Palette (owner, 2026-11-15, ADR-023). Wallpaper colors are off. Default theme: Light.
 
-Fallback palette (seed colors; generate the full Material 3 scheme from them):
-
-| Role | Color |
-|---|---|
-| Primary | Deep teal `#00695C` |
-| Secondary | Warm sand `#C8A97E` |
-| Neutral | Material 3 neutral tones from the primary seed |
+| Role | Light | Dark |
+|---|---|---|
+| Background, surfaces | White `#FFFFFF` | Black `#000000` |
+| Text, icons | Black `#000000` | White `#FFFFFF` |
+| Buttons, FAB, selected chips | Light blue `#CFE6FF`, black text | Light blue `#CFE6FF`, black text |
+| Text buttons, accents | Blue `#0B5CAD` | Light blue `#9CCBFF` |
+| Cards | Near white `#F5F7F9` | `#121417` |
 
 ## 3. Shapes (square design)
 

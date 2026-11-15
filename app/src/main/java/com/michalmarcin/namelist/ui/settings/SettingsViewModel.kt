@@ -23,7 +23,7 @@ sealed interface BackupMessage {
 }
 
 data class SettingsUiState(
-    val theme: ThemeMode = ThemeMode.SYSTEM,
+    val theme: ThemeMode = ThemeMode.LIGHT,
     val isBusy: Boolean = false,
     val message: BackupMessage? = null,
 )

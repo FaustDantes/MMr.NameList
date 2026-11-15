@@ -21,7 +21,8 @@ class SettingsStore(context: Context) {
     }
 
     private fun readTheme(): ThemeMode =
-        ThemeMode.entries.firstOrNull { it.name == prefs.getString(KEY_THEME, null) } ?: ThemeMode.SYSTEM
+        // Default is Light: the owner wants a white background (ADR-023), even when the phone is in dark mode.
+        ThemeMode.entries.firstOrNull { it.name == prefs.getString(KEY_THEME, null) } ?: ThemeMode.LIGHT
 
     private companion object {
         const val KEY_THEME = "theme"

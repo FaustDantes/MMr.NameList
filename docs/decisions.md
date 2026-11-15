@@ -188,3 +188,11 @@ Status: accepted
 Decision: One `.zip` with `backup.json` (org.json, built into Android) and `photos/`. Saved and opened with the system file picker. Import checks the whole file first, then replaces all data in one transaction. See docs/backup-format.md.
 Reason: F12 and ADR-006 (no cloud). No new dependency. One file is easy to move to a new phone.
 Alternatives: Copy the SQLite file (breaks across schema versions), kotlinx-serialization-json (new dependency).
+
+## ADR-023: White, black and light blue
+
+Date: 2026-11-15
+Status: accepted (replaces the teal and sand palette and dynamic color)
+Decision: White background, black text, light blue (`#CFE6FF`) buttons, FAB and selected chips with black text. Text buttons use a darker blue (`#0B5CAD`) because light blue text on white fails contrast. Dynamic (wallpaper) color is off. The default theme is Light, also when the phone is in dark mode; Settings can still switch to Dark or System. The launcher icon uses the same blues.
+Reason: Owner request.
+Alternatives: Keep System as the default (a phone in dark mode would show a black background).
