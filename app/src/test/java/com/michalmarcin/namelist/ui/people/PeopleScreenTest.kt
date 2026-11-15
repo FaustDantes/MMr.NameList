@@ -2,6 +2,7 @@ package com.michalmarcin.namelist.ui.people
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -42,7 +43,12 @@ class PeopleScreenTest {
 
     @Test
     fun addButtonShowsMessage() {
+        val message = "Adding people comes in the next update."
         compose.onNodeWithText("Add person").performClick()
-        compose.onNodeWithText("Adding people comes in the next update.").assertIsDisplayed()
+        // The snackbar is shown from a coroutine, so wait until it is in the tree.
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithText(message).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(message).assertExists()
     }
 }
