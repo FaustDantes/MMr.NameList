@@ -23,15 +23,13 @@ If two documents disagree, stop and ask the owner.
 |---|---|
 | Build debug APK | `./gradlew assembleDebug` |
 | Unit and UI tests | `./gradlew testDebugUnitTest` |
-| Record screenshots | `./gradlew recordRoborazziDebug` |
-| Verify screenshots | `./gradlew verifyRoborazziDebug` |
 | Lint | `./gradlew lintDebug` |
 
 ## Reading CI results
 
 - Logs: `gh api repos/FaustDantes/MMr.NameList/actions/jobs/<job-id>/logs`. Test failures print in full.
-- Screenshots of the latest CI run: `git fetch origin ci-screenshots && git checkout origin/ci-screenshots -- .` in a scratch folder. CI force-pushes this branch on each run.
-- Copy the approved screenshots to `docs/screenshots/m<N>/` before the review tag.
+- New Room schema files: CI force-pushes them to the `ci-outputs` branch on each run (`git clone -b ci-outputs ...`). Copy new versions into `app/schemas/` and commit them.
+- No screenshots: the owner stopped them after M3 (ADR-019).
 
 ## Publishing a release
 
@@ -46,7 +44,7 @@ A tag pushed by a human (`git push origin m<N>-rc<K>`) also works.
 1. Work on one milestone at a time. Do not start the next milestone before the owner approves.
 2. Work on the `dev` branch. Never push directly to `master` after M0. See [ADR-007](docs/decisions.md#adr-007-branches).
 3. Write or update tests in the same commit as the code.
-4. Before a report, run build, all tests and screenshot tests. Report only what these runs prove. Never say "done" without evidence.
+4. Before a report, run build, all tests and lint. Report only what these runs prove. Never say "done" without evidence.
 5. Record each non-obvious decision in `docs/decisions.md` as a new ADR.
 6. Do not add a dependency without an ADR line that gives the reason.
 7. Use the latest stable library versions. Verify each version on the official release page. Do not use versions from memory.
@@ -67,4 +65,4 @@ A tag pushed by a human (`git push origin m<N>-rc<K>`) also works.
 
 ## Milestone report
 
-At the end of each milestone, send the owner a report. Use [docs/templates/milestone-report.md](docs/templates/milestone-report.md). Attach the screenshots and the APK link. Then stop and wait.
+At the end of each milestone, send the owner a report. Use [docs/templates/milestone-report.md](docs/templates/milestone-report.md). Attach the APK link. Then stop and wait.

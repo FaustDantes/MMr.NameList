@@ -5,7 +5,6 @@ Milestone: M<N> - <name>
 Status: ready for review
 Branch / tag: dev / m<N>-rc<K>
 APK: <pre-release link>
-Screenshots: docs/screenshots/m<N>/ (light and dark)
 
 Built (what the user can do now):
 - ...

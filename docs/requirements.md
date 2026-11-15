@@ -25,22 +25,20 @@ A mobile app to remember people that the user meets. The user records the name, 
 | F5 | Rearranging | Drag and drop ordering, and alphabetical sorting. |
 | F6 | All items view | One screen shows all people across all tabs. |
 | F7 | Search | Fast global search across all people and their fields. |
-| F8 | Notifications | The user sets a custom message and a time. The app shows a notification at that time. |
+| ~~F8~~ | ~~Notifications~~ | Removed by the owner on 2026-11-15 (ADR-019). |
 | F9 | Dark mode | Light, dark, and system theme. |
 
 ## 4. Extended features
 
-### F10 Geolocation (place of meeting)
+### F10 Place of meeting (changed by the owner on 2026-11-15, ADR-019)
 
-- Optional field: where the user met the person.
-- Three input methods: select a country, select a city, or use the current device location.
-- The app requests the current location only when the user selects it. If the user accepts, the field fills in automatically.
-- Location permission is optional. The app must work fully without it.
+- Optional. One text field: "City, state" (free text).
+- One GPS button: stores the current device location (coordinates). No city lookup; coordinates stay on the device.
+- The app asks for location permission only when the user taps the GPS button. The app works fully without it.
 
-### F11 Country of origin
+### ~~F11 Country of origin~~
 
-- Optional field: the country that the person comes from.
-- The user selects it from a country list. It is separate from the place of meeting.
+Removed by the owner on 2026-11-15 (ADR-019).
 
 ### F12 Local storage
 

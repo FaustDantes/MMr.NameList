@@ -5,15 +5,15 @@ import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 /**
- * Square design (ADR-010): small corner radii everywhere, no circles.
- * Avatars and icon badges use [IconSquare], a square with corners at 22 % of the size.
+ * Square design (ADR-010, ADR-018): very small corner radii everywhere, no circles or pills.
+ * Avatars and icon badges use [IconSquare], a square with corners at 12 % of the size.
  */
 internal val AppShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(6.dp),
-    medium = RoundedCornerShape(10.dp),
-    large = RoundedCornerShape(12.dp),
-    extraLarge = RoundedCornerShape(16.dp),
+    extraSmall = RoundedCornerShape(2.dp),
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(6.dp),
+    large = RoundedCornerShape(8.dp),
+    extraLarge = RoundedCornerShape(10.dp),
 )
 
-val IconSquare = RoundedCornerShape(percent = 22)
+val IconSquare = RoundedCornerShape(percent = 12)

@@ -148,3 +148,19 @@ Status: accepted
 Decision: Schema v2 adds the `tab` table and `person.tabId` (foreign key, ON DELETE SET NULL). Room auto migration; `MigrationTest` checks that people survive.
 Reason: N4 (data survives updates). The owner already has v1 data from `m1-rc1` and `m2-rc1`.
 Alternatives: Manual migration SQL.
+
+## ADR-018: Everything square, icon-only add buttons
+
+Date: 2026-11-15
+Status: accepted (makes ADR-010 stricter)
+Decision: Smaller radii: text fields and menus 2 dp, chips 4 dp, cards 6 dp, buttons and search 8 dp, dialogs 10 dp, avatars 12 %. The add-person and add-tab buttons are icon-only floating action buttons with content descriptions.
+Reason: Owner request after reviewing M1 to M3.
+Alternatives: Zero radius (looks broken at small sizes on high-density screens).
+
+## ADR-019: Scope change after M3
+
+Date: 2026-11-15
+Status: accepted
+Decision: (1) M6 Reminders and F8 removed. (2) F11 Country of origin removed. (3) M4 is one "City, state" text field plus a GPS button that stores coordinates; no city lookup. (4) No more screenshots; Roborazzi and screenshot tests removed. (5) M4, M5 and M7 are built without stops and reviewed together.
+Reason: Owner decisions.
+Alternatives: None; owner direction.

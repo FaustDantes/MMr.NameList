@@ -49,10 +49,14 @@ jobs:
             echo "::warning::Secret SIGNING_PASSWORD is not set. The release APK is not signed and no release is published."
           fi
 
-      - name: Build, test, screenshots, lint
+      - name: Build
         env:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew --stacktrace assembleRelease recordRoborazziDebug lintDebug
+        # kspDebugKotlin writes new Room schemas to app/schemas/ before the test run packs them as assets.
+        run: ./gradlew --stacktrace assembleRelease kspDebugKotlin
+
+      - name: Tests and lint
+        run: ./gradlew --stacktrace testDebugUnitTest lintDebug
 
       - name: Test summary
         if: always()
@@ -72,7 +76,6 @@ jobs:
           mkdir -p out
           apk=$(ls app/build/outputs/apk/release/*.apk 2>/dev/null | head -1 || true)
           [ -n "$apk" ] && cp "$apk" "out/MMr.NameList-${VERSION_NAME}.apk"
-          cp app/build/outputs/roborazzi/*.png out/ 2>/dev/null || true
           ls -la out
 
       - uses: actions/upload-artifact@v7
@@ -84,23 +87,21 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
-      - name: Push screenshots to the ci-screenshots branch
-        # Agents without artifact access fetch screenshots from this branch (AGENTS.md).
+      - name: Push generated Room schemas to the ci-outputs branch
+        # Agents cannot download artifacts; they fetch new schema files from this branch (AGENTS.md).
         if: always() && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ls out/*.png >/dev/null 2>&1 || { echo "No screenshots."; exit 0; }
-          mkdir -p "$RUNNER_TEMP/shots" && cp out/*.png "$RUNNER_TEMP/shots/"
-          # Room schema files are generated here; agents copy them into app/schemas/.
-          [ -d app/schemas ] && cp -r app/schemas "$RUNNER_TEMP/shots/schemas"
-          cd "$RUNNER_TEMP/shots"
-          echo "Screenshots from run ${{ github.run_number }} on ${{ github.ref_name }} (${{ github.sha }})." > README.md
-          git init -q -b ci-screenshots
+          [ -d app/schemas ] || { echo "No schemas."; exit 0; }
+          mkdir -p "$RUNNER_TEMP/outputs" && cp -r app/schemas "$RUNNER_TEMP/outputs/schemas"
+          cd "$RUNNER_TEMP/outputs"
+          echo "Outputs of run ${{ github.run_number }} on ${{ github.ref_name }} (${{ github.sha }})." > README.md
+          git init -q -b ci-outputs
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A && git commit -qm "screenshots: run ${{ github.run_number }}"
-          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ci-screenshots
+          git add -A && git commit -qm "outputs: run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ci-outputs
 
       - name: Check APK signature
         if: env.SIGNING_STORE_FILE != ''
@@ -124,6 +125,6 @@ jobs:
           case "$TAG" in *-rc*) prerelease="--prerelease";; esac
           cat > notes.md <<NOTES
           Install: download \`MMr.NameList-${TAG}.apk\` on your Android phone and open it.
-          Screenshots are attached. Milestone details: docs/milestones.md and docs/progress.md.
+          Milestone details: docs/milestones.md and docs/progress.md.
           NOTES
           gh release create "$TAG" out/* $prerelease --title "Name List ${TAG}" --notes-file notes.md --target "$GITHUB_SHA"

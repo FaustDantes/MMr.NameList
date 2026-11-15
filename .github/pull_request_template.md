@@ -11,7 +11,5 @@
 
 - [ ] `./gradlew assembleDebug` passes
 - [ ] `./gradlew testDebugUnitTest` passes
-- [ ] `./gradlew verifyRoborazziDebug` passes
-- [ ] Screenshots updated in `docs/screenshots/`
 - [ ] New decisions recorded in `docs/decisions.md`
 - [ ] `docs/progress.md` updated

@@ -2,8 +2,8 @@
 
 Each milestone ends with:
 
-1. Green CI: build, unit tests, screenshot tests.
-2. Screenshots in light and dark mode in `docs/screenshots/m<N>/`.
+1. Green CI: build, unit and UI tests, lint.
+2. ~~Screenshots~~: stopped after M3 by the owner (ADR-019). Old ones stay in `docs/screenshots/m0` to `m3`.
 3. A signed APK on a GitHub pre-release with tag `m<N>-rc<K>` on the `dev` branch.
 4. A report to the owner. Use [templates/milestone-report.md](templates/milestone-report.md).
 5. A stop. Do not start the next milestone before the owner approves.
@@ -17,20 +17,16 @@ Each milestone ends with:
 | M1 | People basics | F1, F6, F7, F9 (system theme) | Add, edit and delete a person (name, notes). All-people list. Search while typing. Sort A to Z. "Me" exists. Data survives an app restart. |
 | M2 | Photos | F2, F3 | Camera and gallery photos. Photos copied and scaled. Initials avatar when there is no photo. |
 | M3 | Tabs and ordering | F4, F5 | Create, rename, delete and reorder tabs. Move a person to a tab. Drag and drop in the list. |
-| M4 | Origin and place | F10, F11 | Country of origin. Place of meeting: country, city, or current location. The app works when location permission is denied. |
+| M4 | Place of meeting | F10 | One "City, state" field and a GPS button that stores coordinates. The app works when location permission is denied. |
 | M5 | Relationships | F13 | Add, edit and delete links. The reverse link shows on the other person. Delete a person removes the links. Inverse tests pass for all types. |
-| M6 | Reminders | F8 | Create a reminder with a message and a time. The notification shows. Alarms survive a reboot. |
+| ~~M6~~ | ~~Reminders~~ | ~~F8~~ | Removed by the owner (ADR-019). |
 | M7 | Backup and polish | F9 (switch), F12 | Export and import a zip. Settings screen. Theme switch. Accessibility check. Final screenshot set. |
 
 The app is useful after M1. The owner can stop after any milestone.
 
 ## Screenshots
 
-- Use Roborazzi with Robolectric. Screenshots run on the JVM in CI. No emulator.
-- One test class per screen. Fixed seed data with fictional names. Fixed clock.
-- Device size: standard phone, 411 x 891 dp. Light and dark.
-- Save to `docs/screenshots/m<N>/` and attach to the pre-release.
-- From M4: also ask the owner for one screenshot from the real phone. JVM screenshots do not show permission and camera problems.
+Stopped after M3 by the owner (ADR-019). Do not add screenshot tests.
 
 ## Progress
 

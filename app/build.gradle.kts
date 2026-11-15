@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.roborazzi)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
@@ -105,8 +104,6 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.robolectric)
     testImplementation(libs.compose.ui.test.junit4)
-    testImplementation(libs.roborazzi)
-    testImplementation(libs.roborazzi.compose)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.room.testing)
 }

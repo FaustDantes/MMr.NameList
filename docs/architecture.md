@@ -31,9 +31,9 @@ Use the latest stable version of each library at build time. Do not use versions
 | Navigation | Navigation Compose, type-safe routes |
 | Storage | Room (SQLite). Schema export ON. Each schema change has a tested migration. |
 | Images | Coil |
-| Settings | DataStore (theme only) |
+| Settings | SharedPreferences (theme only), see ADR-020 |
 | Dependency injection | Manual: one `AppContainer` class. No Hilt. See [ADR-002](decisions.md#adr-002-manual-dependency-injection). |
-| Tests | JUnit, Room in-memory tests, Compose UI tests on Robolectric, Roborazzi screenshots |
+| Tests | JUnit, Room in-memory and migration tests, Compose UI tests on Robolectric |
 | SDK levels | Min SDK 26. Target SDK: latest stable. |
 
 ## 4. Layers
@@ -63,10 +63,9 @@ app/src/main/java/<package>/
 
 | Entity | Fields |
 |---|---|
-| Person | id, name, photoFile (nullable), tabId (nullable), originCountry (ISO code, nullable), metCountry (ISO code, nullable), metCity (nullable), metLat, metLon (nullable), notes, isSelf, sortIndex, createdAt |
+| Person | id, name, photoFile (nullable), tabId (nullable), metCity ("City, state" text, nullable), metLat, metLon (nullable), notes, isSelf, sortIndex, createdAt. Unused since ADR-019: originCountry, metCountry. |
 | Tab | id, name, sortIndex |
 | Relationship | id, fromPersonId, toPersonId, type. Foreign keys with ON DELETE CASCADE. Unique index on (fromPersonId, toPersonId, type). |
-| Reminder | id, personId (nullable), message, triggerAt (epoch millis), done |
 
 Rules:
 
@@ -92,8 +91,7 @@ Rules:
 | Camera photos | Camera intent with a FileProvider URI. Do not declare the CAMERA permission. | No camera permission. |
 | Photo storage | Copy each photo to app-private storage, max 1024 px, JPEG. Store only the file name. | Gallery URIs can become invalid. |
 | Location | `LocationManagerCompat.getCurrentLocation`, coarse only, only on user request | No Google Play Services dependency. |
-| City from coordinates | Not in default. Save coordinates; the user types the city. | Android `Geocoder` sends coordinates to a network service. This conflicts with N3. |
-| Reminders | AlarmManager with a 10-minute window. Reschedule after reboot. Ask for notification permission at the first reminder. | No exact-alarm permission. |
+| City from coordinates | Never. Save coordinates; the user types "City, state". | Owner decision (ADR-019). `Geocoder` would send coordinates to a network service (N3). |
 | Android cloud backup | `allowBackup=false` | N3. |
 | Export and import | One `.zip` (people.json + photos/) through the system file picker. Import replaces all data after a confirmation. | User-controlled backup. |
 
@@ -133,7 +131,7 @@ Visual rules are in [design.md](design.md).
 
 The agent must get an answer before the milestone in brackets.
 
-1. **[M4] City from current location.** A: coordinates only, the user types the city (default, fully offline). B: use Geocoder with one-time consent. Coordinates go to a network service.
+1. ~~[M4] City from current location.~~ Decided: coordinates only (ADR-019).
 2. **[M5] Gendered relationship labels.** A: neutral labels only (default). B: optional gender field, show sister or brother.
-3. **[M6] Reminder precision.** A: within 10 minutes, no special permission (default). B: exact time, needs a permission that the user grants in system settings.
+3. ~~[M6] Reminder precision.~~ M6 removed (ADR-019).
 4. **[M7] Android cloud backup.** A: off (default). If the phone is lost, data is lost unless the user exported a zip. B: on, Google backs up the data.

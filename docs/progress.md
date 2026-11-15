@@ -10,9 +10,9 @@ The agent updates this file at the end of each session. Newest entry first.
 | M1 People basics | ready for review | m1-rc1 | 2026-11-15 |
 | M2 Photos | ready for review | m2-rc1 | 2026-11-15 |
 | M3 Tabs and ordering | ready for review | m3-rc1 | 2026-11-15 |
-| M4 Origin and place | not started | - | - |
+| M4 Place of meeting | not started | - | - |
 | M5 Relationships | not started | - | - |
-| M6 Reminders | not started | - | - |
+| ~~M6 Reminders~~ | removed | - | - |
 | M7 Backup and polish | not started | - | - |
 
 ## Log

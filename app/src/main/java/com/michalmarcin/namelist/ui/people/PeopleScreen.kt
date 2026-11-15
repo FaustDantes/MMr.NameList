@@ -20,7 +20,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -106,12 +106,12 @@ fun PeopleScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 onClick = { onAddPerson(state.selectedTabId) },
                 modifier = Modifier.testTag("addPerson"),
-                icon = { Icon(painterResource(R.drawable.ic_person_add), contentDescription = null) },
-                text = { Text(stringResource(R.string.add_person)) },
-            )
+            ) {
+                Icon(painterResource(R.drawable.ic_person_add), contentDescription = stringResource(R.string.add_person))
+            }
         },
     ) { padding ->
         Column(

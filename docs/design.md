@@ -27,14 +27,16 @@ Fallback palette (seed colors; generate the full Material 3 scheme from them):
 
 ## 3. Shapes (square design)
 
-The owner chose a square look on 2026-11-15 (ADR-010). No circles.
+The owner chose a square look on 2026-11-15 (ADR-010) and asked for "everything squared" later the same day (ADR-018). No circles, no pills.
 
 | Element | Shape |
 |---|---|
-| Avatars, icon badges | Square with corners at 22 % of the size (`IconSquare`) |
-| Cards, list rows | 10 dp corners |
-| Search field, floating action button, all buttons | 12 dp corners. Material 3 buttons are round by default: always pass `shape = MaterialTheme.shapes.large`. |
-| Dialogs, sheets | 16 dp corners |
+| Avatars, icon badges | Square with corners at 12 % of the size (`IconSquare`) |
+| Cards, list rows | 6 dp corners |
+| Search field, floating action button, all buttons | 8 dp corners. Material 3 buttons are round by default: always pass `shape = MaterialTheme.shapes.large`. |
+| Chips | 4 dp corners |
+| Dialogs, sheets | 10 dp corners |
+| Text fields, menus | 2 dp corners |
 
 The launcher icon shape comes from the phone's launcher. The app cannot force it to be square.
 
@@ -44,7 +46,7 @@ The launcher icon shape comes from the phone's launcher. The app cannot force it
 - **Avatar fallback**: initials in a square on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
 - **Empty states**: one short friendly sentence and one action button.
 - **Search field**: always visible at the top of the People screen.
-- **Add button**: extended floating action button, bottom right.
+- **Add buttons**: icon only (person-add icon, + icon), bottom right, with a content description for screen readers.
 
 ## 5. Accessibility
 

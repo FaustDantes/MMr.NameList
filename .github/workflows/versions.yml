@@ -27,7 +27,6 @@ jobs:
           add lifecycle "$(latest $G/androidx/lifecycle/lifecycle-runtime-compose/maven-metadata.xml)"
           add junitExt "$(latest $G/androidx/test/ext/junit/maven-metadata.xml)"
           add kotlin "$(latest $C/org/jetbrains/kotlin/kotlin-gradle-plugin/maven-metadata.xml)"
-          add roborazzi "$(latest $C/io/github/takahirom/roborazzi/roborazzi/maven-metadata.xml)"
           add robolectric "$(latest $C/org/robolectric/robolectric/maven-metadata.xml)"
           add room "$(latest $G/androidx/room/room-runtime/maven-metadata.xml)"
           add navigation "$(latest $G/androidx/navigation/navigation-compose/maven-metadata.xml)"
