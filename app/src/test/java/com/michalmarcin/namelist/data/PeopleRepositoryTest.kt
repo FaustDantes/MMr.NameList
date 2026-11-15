@@ -25,11 +25,17 @@ class PeopleRepositoryTest {
 
     private lateinit var db: AppDatabase
     private lateinit var repo: PeopleRepository
+    private val deletedPhotos = mutableListOf<String>()
 
     @Before
     fun setUp() {
         db = AppDatabase.build(ApplicationProvider.getApplicationContext(), inMemory = true)
-        repo = PeopleRepository(db.personDao(), clock = { 1_000L }, locale = { Locale.ENGLISH })
+        repo = PeopleRepository(
+            db.personDao(),
+            deletePhoto = { deletedPhotos += it },
+            clock = { 1_000L },
+            locale = { Locale.ENGLISH },
+        )
     }
 
     @After
@@ -107,5 +113,27 @@ class PeopleRepositoryTest {
         }
         assertEquals(listOf("100% Anna"), names("%"))
         assertEquals(emptyList<String>(), names("_"))
+    }
+
+    @Test
+    fun replacingAPhotoDeletesTheOldFile() = runBlocking {
+        val id = repo.save(0, "Anna", "", photoFile = "a.jpg")
+        repo.save(id, "Anna", "", photoFile = "b.jpg")
+        assertEquals("b.jpg", repo.getPerson(id)?.photoFile)
+        assertEquals(listOf("a.jpg"), deletedPhotos)
+    }
+
+    @Test
+    fun keepingThePhotoDeletesNothing() = runBlocking {
+        val id = repo.save(0, "Anna", "", photoFile = "a.jpg")
+        repo.save(id, "Anna N.", "", photoFile = "a.jpg")
+        assertEquals(emptyList<String>(), deletedPhotos)
+    }
+
+    @Test
+    fun deletingAPersonDeletesTheirPhoto() = runBlocking {
+        val id = repo.save(0, "Anna", "", photoFile = "a.jpg")
+        repo.delete(id)
+        assertEquals(listOf("a.jpg"), deletedPhotos)
     }
 }

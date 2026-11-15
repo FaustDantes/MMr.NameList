@@ -1,6 +1,25 @@
 package com.michalmarcin.namelist.ui.person
 
+import android.content.ActivityNotFoundException
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import com.michalmarcin.namelist.ui.components.Avatar
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,12 +58,34 @@ fun PersonEditRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(state.isSaved) { if (state.isSaved) onDone() }
+
+    var pendingCapture by rememberSaveable { mutableStateOf<Uri?>(null) }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) viewModel.onPhotoPicked(pendingCapture)
+    }
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        viewModel.onPhotoPicked(uri)
+    }
+
     PersonEditScreen(
         state = state,
         onNameChange = viewModel::onNameChange,
         onNotesChange = viewModel::onNotesChange,
         onSave = viewModel::save,
         onClose = onDone,
+        onCamera = {
+            val uri = viewModel.newCaptureUri()
+            pendingCapture = uri
+            try {
+                camera.launch(uri)
+            } catch (_: ActivityNotFoundException) {
+                viewModel.onNoCamera()
+            }
+        },
+        onGallery = {
+            gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onRemovePhoto = viewModel::removePhoto,
     )
 }
 
@@ -57,6 +98,9 @@ fun PersonEditScreen(
     onSave: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    onCamera: () -> Unit = {},
+    onGallery: () -> Unit = {},
+    onRemovePhoto: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -85,6 +129,7 @@ fun PersonEditScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            PhotoSection(state, onCamera, onGallery, onRemovePhoto)
             OutlinedTextField(
                 value = state.name,
                 onValueChange = onNameChange,
@@ -110,6 +155,52 @@ fun PersonEditScreen(
                     .testTag("notesField"),
                 label = { Text(stringResource(R.string.notes)) },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhotoSection(
+    state: PersonEditUiState,
+    onCamera: () -> Unit,
+    onGallery: () -> Unit,
+    onRemovePhoto: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(contentAlignment = Alignment.Center) {
+            Avatar(name = state.name.ifBlank { "?" }, size = 120.dp, photoFile = state.photoFile)
+            if (state.isImportingPhoto) CircularProgressIndicator()
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            FilledTonalButton(onClick = onCamera, modifier = Modifier.testTag("camera")) {
+                Icon(painterResource(R.drawable.ic_photo_camera), contentDescription = null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.camera))
+            }
+            FilledTonalButton(onClick = onGallery, modifier = Modifier.testTag("gallery")) {
+                Icon(painterResource(R.drawable.ic_photo_library), contentDescription = null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.gallery))
+            }
+            if (state.photoFile != null) {
+                TextButton(onClick = onRemovePhoto, modifier = Modifier.testTag("removePhoto")) {
+                    Text(stringResource(R.string.remove_photo))
+                }
+            }
+        }
+        state.photoMessage?.let { message ->
+            Text(
+                text = stringResource(
+                    when (message) {
+                        PhotoMessage.IMPORT_FAILED -> R.string.photo_import_failed
+                        PhotoMessage.NO_CAMERA -> R.string.no_camera
+                    },
+                ),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
     }

@@ -155,7 +155,7 @@ fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(name = person.name)
+            Avatar(name = person.name, photoFile = person.photoFile)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(

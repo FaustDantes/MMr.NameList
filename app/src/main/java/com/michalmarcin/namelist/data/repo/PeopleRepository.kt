@@ -12,6 +12,7 @@ enum class SortMode { MANUAL, A_TO_Z }
 
 class PeopleRepository(
     private val dao: PersonDao,
+    private val deletePhoto: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
     private val locale: () -> Locale = Locale::getDefault,
 ) {
@@ -40,8 +41,11 @@ class PeopleRepository(
 
     suspend fun getSelf(): Person? = dao.getSelf()
 
-    /** Inserts a new person when [id] is 0, else updates. Returns the id. */
-    suspend fun save(id: Long, name: String, notes: String): Long {
+    /**
+     * Inserts a new person when [id] is 0, else updates. Returns the id.
+     * A replaced or removed photo file is deleted from storage.
+     */
+    suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null): Long {
         require(name.isNotBlank()) { "Name must not be blank" }
         val existing = if (id == 0L) null else dao.get(id)
         return if (existing == null) {
@@ -49,17 +53,25 @@ class PeopleRepository(
                 Person(
                     name = name.trim(),
                     notes = notes.trim(),
+                    photoFile = photoFile,
                     sortIndex = dao.maxSortIndex() + 1,
                     createdAt = clock(),
                 ),
             )
         } else {
-            dao.update(existing.copy(name = name.trim(), notes = notes.trim()))
+            dao.update(existing.copy(name = name.trim(), notes = notes.trim(), photoFile = photoFile))
+            existing.photoFile?.takeIf { it != photoFile }?.let(deletePhoto)
             existing.id
         }
     }
 
-    suspend fun delete(id: Long): Boolean = dao.deleteById(id) > 0
+    /** Deletes the person and their photo file. "Me" cannot be deleted. */
+    suspend fun delete(id: Long): Boolean {
+        val photo = dao.get(id)?.photoFile
+        val deleted = dao.deleteById(id) > 0
+        if (deleted) photo?.let(deletePhoto)
+        return deleted
+    }
 
     private fun Person.matches(needle: String): Boolean =
         listOfNotNull(name, notes, metCity).any { normalize(it).contains(needle) }

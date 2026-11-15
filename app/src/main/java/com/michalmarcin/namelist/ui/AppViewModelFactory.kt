@@ -15,7 +15,7 @@ import com.michalmarcin.namelist.ui.person.PersonEditViewModel
 val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
     initializer { PeopleViewModel(container().peopleRepository, createSavedStateHandle()) }
     initializer { PersonDetailViewModel(container().peopleRepository, createSavedStateHandle()) }
-    initializer { PersonEditViewModel(container().peopleRepository, createSavedStateHandle()) }
+    initializer { PersonEditViewModel(container().peopleRepository, container().photoStore, createSavedStateHandle()) }
 }
 
 private fun CreationExtras.container(): AppContainer =

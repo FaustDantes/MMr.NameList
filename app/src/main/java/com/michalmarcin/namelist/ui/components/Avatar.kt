@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import java.io.File
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,9 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.michalmarcin.namelist.ui.theme.IconSquare
 
-/** Square avatar with initials. The same name always gets the same color (docs/design.md). */
+/** Folder that holds person photos. Set once in MainActivity; tests set their own. */
+val LocalPhotoDirectory = staticCompositionLocalOf<File?> { null }
+
+/**
+ * Square avatar: the photo when there is one, else initials on a color from the name.
+ * The initials stay under the photo, so a missing or broken file still shows a good avatar.
+ */
 @Composable
-fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 48.dp) {
+fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 48.dp, photoFile: String? = null) {
     val (background, content) = AvatarColors.forName(name, MaterialTheme.colorScheme.isDark())
     Box(
         modifier = modifier
@@ -33,6 +43,15 @@ fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 48.dp) {
             fontWeight = FontWeight.SemiBold,
             fontSize = (size.value * 0.38f).sp,
         )
+        val directory = LocalPhotoDirectory.current
+        if (photoFile != null && directory != null) {
+            AsyncImage(
+                model = File(directory, photoFile),
+                contentDescription = null,
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
     }
 }
 

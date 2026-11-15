@@ -3,6 +3,7 @@ package com.michalmarcin.namelist
 import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.michalmarcin.namelist.testutil.FakePhotos
 import com.michalmarcin.namelist.testutil.SampleData
 import com.michalmarcin.namelist.ui.people.PeopleScreen
 import com.michalmarcin.namelist.ui.people.PeopleUiState
@@ -27,7 +28,9 @@ class ScreenshotTest {
 
     private fun shot(name: String, dark: Boolean, content: @Composable () -> Unit) =
         captureRoboImage("build/outputs/roborazzi/${name}_${if (dark) "dark" else "light"}.png") {
-            NameListTheme(darkTheme = dark, dynamicColor = false) { content() }
+            FakePhotos.Provide {
+                NameListTheme(darkTheme = dark, dynamicColor = false) { content() }
+            }
         }
 
     private val list = PeopleUiState(people = SampleData.people, isLoading = false)
@@ -50,9 +53,18 @@ class ScreenshotTest {
 
     @Test fun personEditLight() = shot("person_edit", false) {
         PersonEditScreen(
-            PersonEditUiState(isNew = false, name = SampleData.anna.name, notes = SampleData.anna.notes),
+            PersonEditUiState(
+                isNew = false,
+                name = SampleData.anna.name,
+                notes = SampleData.anna.notes,
+                photoFile = SampleData.anna.photoFile,
+            ),
             {}, {}, {}, {},
         )
+    }
+
+    @Test fun personNewLight() = shot("person_new", false) {
+        PersonEditScreen(PersonEditUiState(isNew = true, name = "Martin Beneš"), {}, {}, {}, {})
     }
 
     @Composable

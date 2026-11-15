@@ -122,7 +122,7 @@ private fun PersonDetailContent(person: Person, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.height(8.dp))
-        Avatar(name = person.name, size = 128.dp)
+        Avatar(name = person.name, size = 144.dp, photoFile = person.photoFile)
         Spacer(Modifier.height(16.dp))
         Text(
             text = person.name,

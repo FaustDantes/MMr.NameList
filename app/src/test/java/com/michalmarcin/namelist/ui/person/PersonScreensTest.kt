@@ -76,4 +76,49 @@ class PersonScreensTest {
         compose.onNodeWithTag("save").performClick()
         assertEquals(1, saves)
     }
+
+    @Test
+    fun photoButtonsCallBackAndRemoveShowsOnlyWithPhoto() {
+        var camera = 0
+        var gallery = 0
+        var removed = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(
+                    state = PersonEditUiState(name = "Anna", photoFile = "a.jpg"),
+                    onNameChange = {},
+                    onNotesChange = {},
+                    onSave = {},
+                    onClose = {},
+                    onCamera = { camera++ },
+                    onGallery = { gallery++ },
+                    onRemovePhoto = { removed++ },
+                )
+            }
+        }
+        compose.onNodeWithTag("camera").performClick()
+        compose.onNodeWithTag("gallery").performClick()
+        compose.onNodeWithTag("removePhoto").performClick()
+        assertEquals(listOf(1, 1, 1), listOf(camera, gallery, removed))
+    }
+
+    @Test
+    fun noRemoveButtonWithoutPhoto() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("removePhoto").assertDoesNotExist()
+    }
+
+    @Test
+    fun importErrorIsShown() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(name = "Anna", photoMessage = PhotoMessage.IMPORT_FAILED), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("That photo could not be loaded. Try another one.").assertIsDisplayed()
+    }
 }

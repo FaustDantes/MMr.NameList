@@ -116,3 +116,11 @@ Status: accepted
 Decision: Navigation Compose 2.10.2 with type-safe routes (Kotlin serialization plugin), Lifecycle ViewModel Compose 2.11.0.
 Reason: Planned in docs/architecture.md. Type-safe routes catch wrong arguments at compile time.
 Alternatives: String routes.
+
+## ADR-014: Coil and ExifInterface for photos
+
+Date: 2026-11-15
+Status: accepted
+Decision: Coil 3.6.3 loads photos in the UI (memory cache, off the main thread). AndroidX ExifInterface 1.4.2 reads the camera orientation so photos are upright on Android 8 and 9, where `ImageDecoder` is not available.
+Reason: Planned in docs/architecture.md. Without EXIF handling, many camera photos show turned by 90 degrees.
+Alternatives: Own bitmap loading with an LRU cache (more code, more bugs).
