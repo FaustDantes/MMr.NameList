@@ -2,7 +2,7 @@
 
 A simple Android app to remember the people you meet: name, photo, where they come from, where you met, and how they relate to you and to each other. All data stays on your phone.
 
-**Status:** planning complete. Development starts at milestone M0. See [progress](docs/progress.md).
+**Status:** M0 released. M1 to M3 ready for review. See [progress](docs/progress.md) and [releases](../../releases).
 
 ## Features
 
@@ -57,8 +57,9 @@ Start with [AGENTS.md](AGENTS.md). [CLAUDE.md](CLAUDE.md) points to the same fil
 |   |-- progress.md
 |   |-- templates/         report templates
 |   `-- screenshots/       one folder per milestone
-|-- .github/               PR and issue templates (CI workflows come in M0)
-`-- app/                   Android app (comes in M0)
+|-- .github/               CI workflows, PR and issue templates
+|-- signing/               encrypted release keystore (ADR-008)
+`-- app/                   Android app; app/schemas/ holds Room schemas
 ```
 
 ## Install on your phone

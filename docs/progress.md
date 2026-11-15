@@ -7,15 +7,25 @@ The agent updates this file at the end of each session. Newest entry first.
 | Milestone | Status | Tag | Date |
 |---|---|---|---|
 | M0 Skeleton and CI | approved | m0 | 2026-11-15 |
-| M1 People basics | not started | - | - |
-| M2 Photos | not started | - | - |
-| M3 Tabs and ordering | not started | - | - |
+| M1 People basics | ready for review | m1-rc1 | 2026-11-15 |
+| M2 Photos | ready for review | m2-rc1 | 2026-11-15 |
+| M3 Tabs and ordering | ready for review | m3-rc1 | 2026-11-15 |
 | M4 Origin and place | not started | - | - |
 | M5 Relationships | not started | - | - |
 | M6 Reminders | not started | - | - |
 | M7 Backup and polish | not started | - | - |
 
 ## Log
+
+### 2026-11-15 (M1 to M3, one review at the end, by owner request)
+
+- Owner approved M0 and asked for M1, M2 and M3 without stops, with one report at the end, and for a square design (ADR-010).
+- M1: Room (schema v1), "Me" row, add, edit, delete, search without case and diacritics, manual or language-aware A-Z sort, detail and edit screens, type-safe navigation. ADR-011 to ADR-013.
+- M2: photos from camera (intent + FileProvider, no CAMERA permission) and gallery (Photo Picker), copied upright (EXIF) and scaled to 1024 px; unused photo files deleted. ADR-014.
+- M3: tabs (schema v2, auto migration tested from v1), tab chips, tab manager with drag handles, tab in edit and detail, long-press drag and drop in manual order. ADR-015 to ADR-017.
+- Tests: 55 pass in CI (repository, migration, photo store, UI, 17 screenshots).
+- Bugs found by tests: photo import always failed (bounds decode returned null by design); M3 buttons were round (Material 3 default ignores theme shapes).
+- Open risk: the add and rename tab dialogs are tested only as a form; Robolectric cannot test a text field inside a dialog window. Check on the phone.
 
 ### 2026-11-15 (M0)
 
