@@ -25,6 +25,8 @@ The agent updates this file at the end of each session. Newest entry first.
 - Tests: 3 UI tests and 2 screenshot tests pass in CI. Lint passes.
 - CI: build, tests, screenshots, lint on each push. Screenshots go to the `ci-screenshots` branch. Signed release on tags.
 - Signing: encrypted keystore in `signing/` (ADR-008). Release needs the `SIGNING_PASSWORD` secret.
+- Release: [m0-rc1](https://github.com/FaustDantes/MMr.NameList/releases/tag/m0-rc1), pre-release, APK 8.3 MB, signed with the release key (v2 scheme, certificate checked in CI).
+- Publishing: tags cannot be pushed from the agent sandbox; the workflow creates them (`release_tag` input, AGENTS.md).
 - Findings: current Compose needs compile SDK 37. The FAB label is not merged into the button semantics; tests click it by test tag.
 
 ### 2026-11-15
