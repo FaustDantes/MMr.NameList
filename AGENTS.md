@@ -19,8 +19,6 @@ If two documents disagree, stop and ask the owner.
 
 ## Commands
 
-The Android project starts at milestone M0. Until then, these commands do not exist yet.
-
 | Task | Command |
 |---|---|
 | Build debug APK | `./gradlew assembleDebug` |
@@ -34,6 +32,14 @@ The Android project starts at milestone M0. Until then, these commands do not ex
 - Logs: `gh api repos/FaustDantes/MMr.NameList/actions/jobs/<job-id>/logs`. Test failures print in full.
 - Screenshots of the latest CI run: `git fetch origin ci-screenshots && git checkout origin/ci-screenshots -- .` in a scratch folder. CI force-pushes this branch on each run.
 - Copy the approved screenshots to `docs/screenshots/m<N>/` before the review tag.
+
+## Publishing a release
+
+Tags cannot be pushed from the agent sandbox. Run the workflow instead; it creates the tag and the release:
+
+`gh workflow run android.yml --ref dev -f release_tag=m<N>-rc<K>`
+
+A tag pushed by a human (`git push origin m<N>-rc<K>`) also works.
 
 ## Rules
 

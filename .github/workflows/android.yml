@@ -6,6 +6,11 @@ on:
     tags: ['m*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Create this tag and publish a release (for example m1-rc1). Leave empty for a normal build.'
+        required: false
+        default: ''
 
 permissions:
   contents: write   # needed to publish releases on tags
@@ -20,7 +25,8 @@ jobs:
     timeout-minutes: 30
     env:
       VERSION_CODE: ${{ github.run_number }}
-      VERSION_NAME: ${{ github.ref_type == 'tag' && github.ref_name || format('0.0.0-{0}', github.sha) }}
+      RELEASE_TAG: ${{ inputs.release_tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+      VERSION_NAME: ${{ inputs.release_tag || (github.ref_type == 'tag' && github.ref_name) || format('0.0.0-{0}', github.sha) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -89,10 +95,10 @@ jobs:
           "$apksigner" verify --print-certs out/*.apk | grep -E "Signer #1 certificate (DN|SHA-256)"
 
       - name: Publish release
-        if: github.ref_type == 'tag' && env.SIGNING_STORE_FILE != ''
+        if: env.RELEASE_TAG != '' && env.SIGNING_STORE_FILE != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ env.RELEASE_TAG }}
         run: |
           prerelease=""
           case "$TAG" in *-rc*) prerelease="--prerelease";; esac
@@ -100,4 +106,4 @@ jobs:
           Install: download \`MMr.NameList-${TAG}.apk\` on your Android phone and open it.
           Screenshots are attached. Milestone details: docs/milestones.md and docs/progress.md.
           NOTES
-          gh release create "$TAG" out/* $prerelease --title "Name List ${TAG}" --notes-file notes.md --verify-tag
+          gh release create "$TAG" out/* $prerelease --title "Name List ${TAG}" --notes-file notes.md --target "$GITHUB_SHA"
