@@ -44,7 +44,7 @@
     <string name="where_met">Where you met</string>
     <string name="first_met">First met</string>
     <string name="first_met_on">First met: %1$s</string>
-    <string name="first_met_today">Today (if empty)</string>
+    <string name="first_met_today">Empty: today is used</string>
     <string name="pick_date">Pick a date</string>
     <string name="ok">OK</string>
     <string name="city_state">City, state</string>

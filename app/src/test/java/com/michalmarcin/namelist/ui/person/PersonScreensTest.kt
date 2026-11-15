@@ -174,7 +174,7 @@ class PersonScreensTest {
                 PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
             }
         }
-        compose.onNodeWithText("Today (if empty)").assertIsDisplayed()
+        compose.onNodeWithText("Empty: today is used").assertIsDisplayed()
         compose.onNodeWithTag("pickFirstMet").assertIsDisplayed()
         compose.onNodeWithTag("clearFirstMet").assertDoesNotExist()
     }

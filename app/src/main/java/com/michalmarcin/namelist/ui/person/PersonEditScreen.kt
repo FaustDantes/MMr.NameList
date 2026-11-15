@@ -142,12 +142,6 @@ fun PersonEditScreen(
     // F16: a new person opens with the cursor in the Name field; Name is the only required field.
     val nameFocus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    LaunchedEffect(state.isNew) {
-        if (state.isNew) {
-            nameFocus.requestFocus()
-            keyboard?.show()
-        }
-    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -175,6 +169,13 @@ fun PersonEditScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Inside the content: the Scaffold composes it later, so the field exists when the request runs.
+            LaunchedEffect(state.isNew) {
+                if (state.isNew) {
+                    nameFocus.requestFocus()
+                    keyboard?.show()
+                }
+            }
             PhotoSection(state, onCamera, onGallery, onRemovePhoto)
             OutlinedTextField(
                 value = state.name,
@@ -385,7 +386,11 @@ private fun FirstMetField(epochDay: Long?, onChange: (Long?) -> Unit) {
             .fillMaxWidth()
             .testTag("firstMetField"),
         label = { Text(stringResource(R.string.first_met)) },
-        placeholder = { Text(stringResource(R.string.first_met_today)) },
+        supportingText = if (epochDay == null) {
+            { Text(stringResource(R.string.first_met_today)) }
+        } else {
+            null
+        },
         trailingIcon = {
             if (epochDay != null) {
                 IconButton(onClick = { onChange(null) }, modifier = Modifier.testTag("clearFirstMet")) {
