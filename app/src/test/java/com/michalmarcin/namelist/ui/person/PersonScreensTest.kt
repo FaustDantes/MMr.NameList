@@ -150,20 +150,21 @@ class PersonScreensTest {
     }
 
     @Test
-    fun onlyIconNameAndTabAreOnTopAndTheRestIsCollapsed() {
+    fun nameTabAndConversationSparkAreOnTopAndTheRestIsCollapsed() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
                 PersonEditScreen(PersonEditUiState(name = "Anna", tabs = SampleData.tabs), {}, {}, {}, {})
             }
         }
         compose.onNodeWithTag("nameField").assertIsDisplayed()
+        compose.onNodeWithTag("askAboutField").assertIsDisplayed()
         compose.onNodeWithTag("tabField").assertIsDisplayed()
         compose.onNodeWithTag("detailsToggle").assertIsDisplayed()
-        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "askAboutField", "notesField")
+        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "notesField")
             .forEach { compose.onNodeWithTag(it).assertDoesNotExist() }
 
         compose.onNodeWithTag("detailsToggle").performClick()
-        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "askAboutField", "notesField")
+        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "notesField")
             .forEach { compose.onNodeWithTag(it).assertExists() }
 
         compose.onNodeWithTag("detailsToggle").performClick()
