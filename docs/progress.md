@@ -10,12 +10,21 @@ The agent updates this file at the end of each session. Newest entry first.
 | M1 People basics | ready for review | m1-rc1 | 2026-11-15 |
 | M2 Photos | ready for review | m2-rc1 | 2026-11-15 |
 | M3 Tabs and ordering | ready for review | m3-rc1 | 2026-11-15 |
-| M4 Place of meeting | not started | - | - |
-| M5 Relationships | not started | - | - |
+| M4 Place of meeting | ready for review | m7-rc1 | 2026-11-15 |
+| M5 Relationships | ready for review | m7-rc1 | 2026-11-15 |
 | ~~M6 Reminders~~ | removed | - | - |
-| M7 Backup and polish | not started | - | - |
+| M7 Backup and polish | ready for review | m7-rc1 | 2026-11-15 |
 
 ## Log
+
+### 2026-11-15 (M4, M5, M7, one review at the end, by owner request)
+
+- Owner: everything square, icon-only add buttons, M6 and F11 removed, M4 simplified, no screenshots (ADR-018, ADR-019).
+- M4: "City, state" field and GPS button; coordinates only, no lookup; "Open in maps". ADR-020.
+- M5: two-way relationships, schema v3 (auto migration, tested from v1 and v2). ADR-021.
+- M7: settings (theme, backup, about), zip backup with full check before import and safe photo names. ADR-022.
+- Tests: 71 pass in CI. Lint passes.
+- Check on the phone: GPS button (permission dialog, approximate location), add-relationship sheet, export to a file and import it back, tab add and rename dialogs.
 
 ### 2026-11-15 (M1 to M3, one review at the end, by owner request)
 

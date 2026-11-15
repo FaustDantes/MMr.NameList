@@ -2,7 +2,7 @@
 
 A simple Android app to remember the people you meet: name, photo, where they come from, where you met, and how they relate to you and to each other. All data stays on your phone.
 
-**Status:** M0 released. M1 to M3 ready for review. See [progress](docs/progress.md) and [releases](../../releases).
+**Status:** all milestones built (M6 removed). M1 to M7 ready for review. See [progress](docs/progress.md) and [releases](../../releases).
 
 ## Features
 
@@ -11,11 +11,10 @@ A simple Android app to remember the people you meet: name, photo, where they co
 | People | Fast name lists, search while typing, all-people view, A to Z or manual order |
 | Photos | Take a photo or pick one from the gallery |
 | Organization | Unlimited tabs, drag and drop |
-| Origin and place | Country of origin, place of meeting (country, city, or current location) |
+| Place of meeting | "City, state" text, or the current GPS position (stays on the phone) |
 | Relationships | Two-way links between people and to you, with relationship types |
-| Reminders | A notification with your message at a set time |
-| Privacy | Local storage only, export and import a backup file |
-| Look | Material 3, light and dark mode |
+| Privacy and backup | Local storage only; export and import one backup file |
+| Look | Square Material 3 design, light, dark or system theme |
 
 Full list with IDs: [docs/requirements.md](docs/requirements.md).
 
