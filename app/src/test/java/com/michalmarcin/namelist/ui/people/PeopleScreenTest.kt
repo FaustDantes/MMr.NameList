@@ -44,7 +44,7 @@ class PeopleScreenTest {
     @Test
     fun addButtonShowsMessage() {
         val message = "Adding people comes in the next update."
-        compose.onNodeWithText("Add person").performClick()
+        compose.onNodeWithTag("addPerson").performClick()
         // The snackbar is shown from a coroutine, so wait until it is in the tree.
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithText(message).fetchSemanticsNodes().isNotEmpty()

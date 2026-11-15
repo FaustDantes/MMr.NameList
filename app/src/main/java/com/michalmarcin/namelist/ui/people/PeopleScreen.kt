@@ -66,6 +66,7 @@ fun PeopleScreen(modifier: Modifier = Modifier) {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { scope.launch { snackbarHostState.showSnackbar(comingSoon) } },
+                modifier = Modifier.testTag("addPerson"),
                 icon = { Icon(painterResource(R.drawable.ic_person_add), contentDescription = null) },
                 text = { Text(stringResource(R.string.add_person)) },
             )
