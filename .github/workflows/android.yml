@@ -80,6 +80,8 @@ jobs:
         run: |
           ls out/*.png >/dev/null 2>&1 || { echo "No screenshots."; exit 0; }
           mkdir -p "$RUNNER_TEMP/shots" && cp out/*.png "$RUNNER_TEMP/shots/"
+          # Room schema files are generated here; agents copy them into app/schemas/.
+          [ -d app/schemas ] && cp -r app/schemas "$RUNNER_TEMP/shots/schemas"
           cd "$RUNNER_TEMP/shots"
           echo "Screenshots from run ${{ github.run_number }} on ${{ github.ref_name }} (${{ github.sha }})." > README.md
           git init -q -b ci-screenshots

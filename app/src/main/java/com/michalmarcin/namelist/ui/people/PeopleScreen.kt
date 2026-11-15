@@ -1,25 +1,29 @@
 package com.michalmarcin.namelist.ui.people
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -28,8 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,40 +40,61 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michalmarcin.namelist.R
-import com.michalmarcin.namelist.ui.theme.NameListTheme
-import kotlinx.coroutines.launch
+import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.repo.SortMode
+import com.michalmarcin.namelist.ui.AppViewModelFactory
+import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.EmptyState
 
-/** Start screen. M0: search field and empty state. The list arrives in M1. */
+@Composable
+fun PeopleRoute(
+    onAddPerson: () -> Unit,
+    onOpenPerson: (Long) -> Unit,
+    viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    PeopleScreen(
+        state = state,
+        onQueryChange = viewModel::onQueryChange,
+        onSortChange = viewModel::onSortChange,
+        onAddPerson = onAddPerson,
+        onOpenPerson = onOpenPerson,
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PeopleScreen(modifier: Modifier = Modifier) {
-    var query by rememberSaveable { mutableStateOf("") }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val comingSoon = stringResource(R.string.add_person_soon)
+fun PeopleScreen(
+    state: PeopleUiState,
+    onQueryChange: (String) -> Unit,
+    onSortChange: (SortMode) -> Unit,
+    onAddPerson: () -> Unit,
+    onOpenPerson: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 title = { Text(stringResource(R.string.people_title)) },
+                actions = { SortMenu(state.sort, onSortChange) },
                 scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { scope.launch { snackbarHostState.showSnackbar(comingSoon) } },
+                onClick = onAddPerson,
                 modifier = Modifier.testTag("addPerson"),
                 icon = { Icon(painterResource(R.drawable.ic_person_add), contentDescription = null) },
                 text = { Text(stringResource(R.string.add_person)) },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -79,25 +102,111 @@ fun PeopleScreen(modifier: Modifier = Modifier) {
                 .fillMaxSize(),
         ) {
             SearchField(
-                query = query,
-                onQueryChange = { query = it },
+                query = state.query,
+                onQueryChange = onQueryChange,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
-            EmptyState(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            )
+            when {
+                state.showEmptyState -> EmptyState(
+                    icon = R.drawable.ic_group,
+                    title = stringResource(R.string.empty_title),
+                    body = stringResource(R.string.empty_body),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                )
+                state.showNoMatches -> EmptyState(
+                    icon = R.drawable.ic_search,
+                    title = stringResource(R.string.no_matches_title),
+                    body = stringResource(R.string.no_matches_body, state.query.trim()),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                )
+                else -> PeopleList(state.people, onOpenPerson, Modifier.weight(1f))
+            }
         }
     }
 }
 
 @Composable
-private fun SearchField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun PeopleList(people: List<Person>, onOpenPerson: (Long) -> Unit, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("peopleList"),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(people, key = { it.id }) { person ->
+            PersonRow(person, onClick = { onOpenPerson(person.id) })
+        }
+    }
+}
+
+@Composable
+fun PersonRow(person: Person, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Row(
+            modifier = Modifier
+                .heightIn(min = 72.dp)
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Avatar(name = person.name)
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = person.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                val subtitle = person.metCity ?: person.notes.lineSequence().firstOrNull { it.isNotBlank() }
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortMenu(sort: SortMode, onSortChange: (SortMode) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.testTag("sortMenu")) {
+            Icon(painterResource(R.drawable.ic_sort), contentDescription = stringResource(R.string.sort))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            SortMode.entries.forEach { mode ->
+                DropdownMenuItem(
+                    text = {
+                        Text(stringResource(if (mode == SortMode.MANUAL) R.string.sort_manual else R.string.sort_a_to_z))
+                    },
+                    trailingIcon = {
+                        if (mode == sort) Icon(painterResource(R.drawable.ic_check), contentDescription = null)
+                    },
+                    onClick = {
+                        open = false
+                        onSortChange(mode)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val container = MaterialTheme.colorScheme.surfaceContainerHigh
     TextField(
         value = query,
@@ -109,7 +218,7 @@ private fun SearchField(
         placeholder = { Text(stringResource(R.string.search_placeholder)) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
         singleLine = true,
-        shape = CircleShape,
+        shape = MaterialTheme.shapes.large,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = container,
             unfocusedContainerColor = container,
@@ -117,48 +226,4 @@ private fun SearchField(
             unfocusedIndicatorColor = Color.Transparent,
         ),
     )
-}
-
-@Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_group),
-                contentDescription = null,
-                modifier = Modifier.size(56.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.empty_title),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.empty_body),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        // Keeps the empty state above the floating action button.
-        Spacer(Modifier.height(72.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PeopleScreenPreview() {
-    NameListTheme(dynamicColor = false) { PeopleScreen() }
 }

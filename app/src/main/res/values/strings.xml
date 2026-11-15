@@ -5,6 +5,24 @@
     <string name="search_placeholder">Search people</string>
     <string name="empty_title">No people yet</string>
     <string name="empty_body">Everyone you add shows up here, so you never forget a name.</string>
+    <string name="no_matches_title">No matches</string>
+    <string name="no_matches_body">Nobody matches \"%1$s\".</string>
     <string name="add_person">Add person</string>
-    <string name="add_person_soon">Adding people comes in the next update.</string>
+    <string name="sort">Sort</string>
+    <string name="sort_manual">Manual order</string>
+    <string name="sort_a_to_z">A to Z</string>
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete_title">Delete %1$s?</string>
+    <string name="delete_body">This removes the person and everything saved about them.</string>
+    <string name="new_person">New person</string>
+    <string name="edit_person">Edit person</string>
+    <string name="name">Name</string>
+    <string name="name_required">Enter a name.</string>
+    <string name="notes">Notes</string>
+    <string name="no_notes">No notes yet.</string>
 </resources>

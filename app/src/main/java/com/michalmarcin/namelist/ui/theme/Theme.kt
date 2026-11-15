@@ -27,5 +27,5 @@ fun NameListTheme(
         darkTheme -> DarkColors
         else -> LightColors
     }
-    MaterialTheme(colorScheme = colorScheme, content = content)
+    MaterialTheme(colorScheme = colorScheme, shapes = AppShapes, content = content)
 }

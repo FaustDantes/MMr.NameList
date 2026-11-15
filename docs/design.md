@@ -25,21 +25,34 @@ Fallback palette (seed colors; generate the full Material 3 scheme from them):
 | Secondary | Warm sand `#C8A97E` |
 | Neutral | Material 3 neutral tones from the primary seed |
 
-## 3. Components
+## 3. Shapes (square design)
 
-- **Person card**: rounded card, 48 dp avatar, name in `titleMedium`, one muted line below (city, or relationship to "Me").
-- **Avatar fallback**: initials on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
+The owner chose a square look on 2026-11-15 (ADR-010). No circles.
+
+| Element | Shape |
+|---|---|
+| Avatars, icon badges | Square with corners at 22 % of the size (`IconSquare`) |
+| Cards, list rows | 10 dp corners |
+| Search field, floating action button | 12 dp corners |
+| Dialogs, sheets | 16 dp corners |
+
+The launcher icon shape comes from the phone's launcher. The app cannot force it to be square.
+
+## 4. Components
+
+- **Person card**: card with 10 dp corners, 48 dp square avatar, name in `titleMedium`, one muted line below (city, or relationship to "Me").
+- **Avatar fallback**: initials in a square on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
 - **Empty states**: one short friendly sentence and one action button.
 - **Search field**: always visible at the top of the People screen.
-- **Add button**: large floating action button, bottom right.
+- **Add button**: extended floating action button, bottom right.
 
-## 4. Accessibility
+## 5. Accessibility
 
 - Touch targets 48 dp or larger.
 - Content descriptions on all icons and images.
 - Text scales with the system font size up to 200 % without cut text.
 - Do not use color as the only carrier of information.
 
-## 5. Out of scope
+## 6. Out of scope
 
 No splash animation, no onboarding, no ads, no analytics, no account screen.

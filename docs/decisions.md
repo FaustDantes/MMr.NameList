@@ -84,3 +84,35 @@ Status: accepted
 Decision: `com.michalmarcin.namelist`, based on the owner's domain.
 Reason: A reverse-domain ID that the owner controls. The ID cannot change later without a new install.
 Alternatives: `com.mmr.namelist`.
+
+## ADR-010: Square design
+
+Date: 2026-11-15
+Status: accepted
+Decision: Square shapes instead of circles: avatars and icon badges are squares with 22 % corners, cards 10 dp, search field and buttons 12 dp. See docs/design.md section 3.
+Reason: Owner request ("squared icons").
+Alternatives: Sharp-cornered glyphs (Material Symbols Sharp). Not chosen: the request was about shapes, and the current glyphs already have square forms.
+
+## ADR-011: Search and A-Z sort in Kotlin
+
+Date: 2026-11-15
+Status: accepted
+Decision: The DAO returns all people. The repository filters (lower case, no diacritics) and sorts (`java.text.Collator` for the user's language).
+Reason: SQLite `LIKE` and `NOCASE` ignore case only for ASCII. Czech names such as "Šimon" must match "simon", and "Č" must sort by Czech rules. The list is small (hundreds of people), so memory and speed are not a problem.
+Alternatives: SQLite FTS with a custom tokenizer (complex), a normalized name column (needs migrations for each new searchable field).
+
+## ADR-012: Room 2.8, not Room 3
+
+Date: 2026-11-15
+Status: accepted
+Decision: Room 2.8.5 with KSP 2.3.14. Schemas in `app/schemas/` (Room Gradle plugin).
+Reason: Room 3 is alpha (3.1.0-alpha03). AGENTS.md rule 7 requires stable versions.
+Alternatives: Room 3 alpha.
+
+## ADR-013: Navigation and ViewModel libraries
+
+Date: 2026-11-15
+Status: accepted
+Decision: Navigation Compose 2.10.2 with type-safe routes (Kotlin serialization plugin), Lifecycle ViewModel Compose 2.11.0.
+Reason: Planned in docs/architecture.md. Type-safe routes catch wrong arguments at compile time.
+Alternatives: String routes.
