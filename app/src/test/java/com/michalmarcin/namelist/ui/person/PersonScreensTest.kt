@@ -2,7 +2,6 @@ package com.michalmarcin.namelist.ui.person
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.assertIsNotFocused

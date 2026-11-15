@@ -98,7 +98,10 @@ class BackupCryptoTest {
         val file = encrypt(sample(10))
         listOf(0, 1, Int.MAX_VALUE, -5).forEach { count ->
             val bad = file.copyOf()
-            ByteBuffer.wrap(bad).position(9).putInt(count)
+            ByteBuffer.wrap(bad).apply {
+                position(9)
+                putInt(count)
+            }
             try {
                 decrypt(bad)
                 fail("Expected $count to be refused")
