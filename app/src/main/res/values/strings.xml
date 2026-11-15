@@ -125,4 +125,74 @@
     </plurals>
     <string name="map_empty">Nobody has a GPS place yet. Tap the GPS button next to "Where you met" when you add or edit a person.</string>
     <string name="map_attribution">Borders: Natural Earth</string>
+
+    <!-- F17 Backup password and encryption -->
+    <string name="backup_password">Backup password</string>
+    <string name="backup_password_explained">Encrypts exported backups with AES-256. Only you know the password. Without it nobody can open an encrypted backup, and neither can you.</string>
+    <string name="password_not_set">No password set.</string>
+    <string name="password_is_set">A password is set.</string>
+    <string name="set_password">Set password</string>
+    <string name="change_password">Change password</string>
+    <string name="remove_password">Remove password</string>
+    <string name="forgot_password">Forgot the password?</string>
+    <string name="password">Password</string>
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="password_too_short">Use at least %1$d characters.</string>
+    <string name="password_mismatch">The passwords do not match.</string>
+    <string name="password_wrong">Wrong password.</string>
+    <string name="password_lost_warning">If you forget this password, an encrypted backup cannot be opened. The app cannot recover it.</string>
+    <string name="change_password_note">Backups made before keep the old password.</string>
+    <string name="encrypt_title">Encrypt this backup?</string>
+    <string name="encrypt_body">An encrypted backup needs your backup password to open.</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="encrypt_no">Do not encrypt</string>
+    <string name="dont_show_again">Do not show this again</string>
+    <string name="export_encryption">When exporting a backup</string>
+    <string name="encrypt_ask">Ask</string>
+    <string name="encrypt_always">Always encrypt</string>
+    <string name="encrypt_never">Never encrypt</string>
+    <string name="enter_backup_password">Enter your backup password</string>
+    <string name="import_password_title">Backup password</string>
+    <string name="import_password_body">This backup is encrypted. Enter the password it was made with.</string>
+    <string name="reset_password_title">Forgot the password?</string>
+    <string name="reset_password_body">The password is removed from this app. Backups made with it stay locked and open only with that password. You can set a new password.</string>
+    <string name="wrong_backup_password">Wrong password, or the file is damaged. Nothing was changed.</string>
+    <string name="password_saved">Password saved.</string>
+    <string name="password_changed">Password changed.</string>
+    <string name="password_removed">Password removed.</string>
+    <string name="backup_encrypted_suffix">Encrypted.</string>
+
+    <!-- F18 Archive -->
+    <string name="archive">Archive</string>
+    <string name="move_to_archive">Move to archive</string>
+    <string name="restore">Restore</string>
+    <string name="archive_empty_title">The archive is empty</string>
+    <string name="archive_empty_body">People you archive wait here. They leave your lists and the map, and you can restore them.</string>
+    <string name="archive_status">Archived %1$s · in the archive for %2$s</string>
+    <string name="age_less_than_day">less than a day</string>
+    <plurals name="age_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="age_months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+    <plurals name="age_years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+
+    <!-- F19 More details -->
+    <string name="expand">Show</string>
+    <string name="collapse">Hide</string>
+    <string name="more_details">More details</string>
+    <string name="native_language">Native language</string>
+    <string name="birth_date">Date of birth</string>
+    <string name="education">Education</string>
+    <string name="current_work">Current work</string>
+    <string name="ask_about">Ask about</string>
+    <string name="last_updated">Last updated: %1$s</string>
 </resources>

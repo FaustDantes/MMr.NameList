@@ -16,6 +16,9 @@ data class EditPersonRoute(val id: Long = 0L, val tabId: Long = 0L)
 data object ManageTabsRoute
 
 @Serializable
+data object ArchiveRoute
+
+@Serializable
 data object SettingsRoute
 
 /** [focusId] = 0 shows everyone; else starts centered on that person. */

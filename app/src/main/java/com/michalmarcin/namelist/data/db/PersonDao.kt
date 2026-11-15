@@ -10,9 +10,24 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PersonDao {
 
-    /** All people except "Me", in manual order. Search and A-Z sort happen in the repository. */
-    @Query("SELECT * FROM person WHERE isSelf = 0 ORDER BY sortIndex, id")
+    /** All people except "Me" and the archive, in manual order. Search and A-Z sort happen in the repository. */
+    @Query("SELECT * FROM person WHERE isSelf = 0 AND archivedAt IS NULL ORDER BY sortIndex, id")
     fun observeOthers(): Flow<List<Person>>
+
+    /** The archive (F18), the newest first. */
+    @Query("SELECT * FROM person WHERE isSelf = 0 AND archivedAt IS NOT NULL ORDER BY archivedAt DESC, id")
+    fun observeArchived(): Flow<List<Person>>
+
+    /** "Me" and everyone who is not archived. */
+    @Query("SELECT * FROM person WHERE archivedAt IS NULL ORDER BY isSelf DESC, sortIndex, id")
+    fun observeActive(): Flow<List<Person>>
+
+    /** "Me" cannot be archived. People already in the archive keep their first timestamp. */
+    @Query("UPDATE person SET archivedAt = :now WHERE id IN (:ids) AND isSelf = 0 AND archivedAt IS NULL")
+    suspend fun archive(ids: List<Long>, now: Long): Int
+
+    @Query("UPDATE person SET archivedAt = NULL WHERE id IN (:ids)")
+    suspend fun restore(ids: List<Long>): Int
 
     @Query("SELECT * FROM person WHERE id = :id")
     fun observe(id: Long): Flow<Person?>

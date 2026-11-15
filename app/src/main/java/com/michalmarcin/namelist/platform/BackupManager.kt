@@ -13,7 +13,9 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.ZipEntry
@@ -35,17 +37,29 @@ class BackupManager(
     private val photos: PhotoStore,
 ) {
 
-    suspend fun export(uri: Uri): BackupSummary = withContext(Dispatchers.IO) {
+    /** Writes the backup to [uri]. With a [password] the file is encrypted (F17). */
+    suspend fun export(uri: Uri, password: CharArray? = null): BackupSummary = withContext(Dispatchers.IO) {
         val stream = context.contentResolver.openOutputStream(uri) ?: throw BackupException("Cannot open $uri")
-        stream.use { export(it) }
+        stream.use { export(it, password) }
     }
 
-    suspend fun import(uri: Uri): BackupSummary = withContext(Dispatchers.IO) {
+    /** Reads the backup at [uri]. Throws [BackupPasswordException] for an encrypted file without or with a wrong [password]. */
+    suspend fun import(uri: Uri, password: CharArray? = null): BackupSummary = withContext(Dispatchers.IO) {
         val stream = context.contentResolver.openInputStream(uri) ?: throw BackupException("Cannot open $uri")
-        stream.use { import(it) }
+        stream.use { import(it, password) }
     }
 
-    suspend fun export(output: OutputStream): BackupSummary = withContext(Dispatchers.IO) {
+    /** True when the file at [uri] is an encrypted backup, so the app must ask for the password first. */
+    suspend fun isEncrypted(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        val stream = context.contentResolver.openInputStream(uri) ?: throw BackupException("Cannot open $uri")
+        stream.use {
+            val head = ByteArray(BackupCrypto.MAGIC.size)
+            val read = BackupCrypto.readUpTo(it, head)
+            BackupCrypto.isEncrypted(head, read)
+        }
+    }
+
+    suspend fun export(output: OutputStream, password: CharArray? = null): BackupSummary = withContext(Dispatchers.IO) {
         val people = db.personDao().getAll()
         val tabs = db.tabDao().getAll()
         val links = db.relationshipDao().getAll()
@@ -57,7 +71,8 @@ class BackupManager(
             .put("people", JSONArray(people.map { it.toJson() }))
             .put("relationships", JSONArray(links.map { it.toJson() }))
         var photoCount = 0
-        ZipOutputStream(output).use { zip ->
+        val target = if (password == null) output else BackupCrypto.encrypt(output, password)
+        ZipOutputStream(target).use { zip ->
             zip.putNextEntry(ZipEntry(JSON_ENTRY))
             zip.write(json.toString(2).toByteArray(Charsets.UTF_8))
             zip.closeEntry()
@@ -78,13 +93,24 @@ class BackupManager(
      * Replaces all data with the backup. Nothing changes if the file is not a valid backup:
      * the file is read and checked completely before the database is touched.
      */
-    suspend fun import(input: InputStream): BackupSummary = withContext(Dispatchers.IO) {
+    suspend fun import(input: InputStream, password: CharArray? = null): BackupSummary = withContext(Dispatchers.IO) {
         val staging = File(context.cacheDir, "import-${System.nanoTime()}").apply { mkdirs() }
         try {
             var json: String? = null
             val staged = mutableListOf<String>()
+            val buffered = BufferedInputStream(input)
+            buffered.mark(BackupCrypto.MAGIC.size)
+            val head = ByteArray(BackupCrypto.MAGIC.size)
+            val headLength = BackupCrypto.readUpTo(buffered, head)
+            buffered.reset()
+            val encrypted = BackupCrypto.isEncrypted(head, headLength)
+            val source = when {
+                !encrypted -> buffered
+                password == null -> throw BackupPasswordException(BackupPasswordException.Reason.REQUIRED)
+                else -> BackupCrypto.decrypt(buffered, password)
+            }
             try {
-                ZipInputStream(input).use { zip ->
+                ZipInputStream(source).use { zip ->
                     while (true) {
                         val entry = zip.nextEntry ?: break
                         val name = entry.name
@@ -104,6 +130,10 @@ class BackupManager(
                 }
             } catch (e: ZipException) {
                 throw BackupException("Not a zip file", e)
+            } catch (e: IOException) {
+                // In an encrypted file a failed check shows here: wrong password or a changed file.
+                if (encrypted) throw BackupPasswordException(BackupPasswordException.Reason.WRONG)
+                throw e
             }
             val data = parse(json ?: throw BackupException("No $JSON_ENTRY in the file"))
 
@@ -163,6 +193,13 @@ class BackupManager(
         .put("metLat", metLat ?: JSONObject.NULL)
         .put("metLon", metLon ?: JSONObject.NULL)
         .put("firstMetOn", firstMetOn ?: JSONObject.NULL)
+        .put("nativeLanguage", nativeLanguage ?: JSONObject.NULL)
+        .put("birthDate", birthDate ?: JSONObject.NULL)
+        .put("education", education ?: JSONObject.NULL)
+        .put("currentWork", currentWork ?: JSONObject.NULL)
+        .put("askAbout", askAbout ?: JSONObject.NULL)
+        .put("lastUpdatedAt", lastUpdatedAt ?: JSONObject.NULL)
+        .put("archivedAt", archivedAt ?: JSONObject.NULL)
         .put("isSelf", isSelf)
         .put("sortIndex", sortIndex)
         .put("createdAt", createdAt)
@@ -176,7 +213,14 @@ class BackupManager(
         metCity = optStringOrNull("metCity"),
         metLat = optDoubleOrNull("metLat"),
         metLon = optDoubleOrNull("metLon"),
-        firstMetOn = if (isNull("firstMetOn") || !has("firstMetOn")) null else getLong("firstMetOn"),
+        firstMetOn = optLongOrNull("firstMetOn"),
+        nativeLanguage = optStringOrNull("nativeLanguage"),
+        birthDate = optLongOrNull("birthDate"),
+        education = optStringOrNull("education"),
+        currentWork = optStringOrNull("currentWork"),
+        askAbout = optStringOrNull("askAbout"),
+        lastUpdatedAt = optLongOrNull("lastUpdatedAt"),
+        archivedAt = optLongOrNull("archivedAt"),
         isSelf = optBoolean("isSelf", false),
         sortIndex = optLong("sortIndex"),
         createdAt = optLong("createdAt"),
@@ -197,6 +241,8 @@ class BackupManager(
     )
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key) || !has(key)) null else getString(key)
+
+    private fun JSONObject.optLongOrNull(key: String): Long? = if (isNull(key) || !has(key)) null else getLong(key)
 
     private fun JSONObject.optDoubleOrNull(key: String): Double? = if (isNull(key) || !has(key)) null else getDouble(key)
 

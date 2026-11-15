@@ -6,6 +6,7 @@ import com.michalmarcin.namelist.data.repo.PeopleRepository
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
 import com.michalmarcin.namelist.data.repo.TabsRepository
 import com.michalmarcin.namelist.platform.BackupManager
+import com.michalmarcin.namelist.platform.BackupPasswordStore
 import com.michalmarcin.namelist.platform.LocationProvider
 import com.michalmarcin.namelist.platform.SettingsStore
 import com.michalmarcin.namelist.platform.WorldMapData
@@ -22,6 +23,7 @@ class AppContainer(context: Context) {
     val photoStore: PhotoStore by lazy { PhotoStore(context) }
     val locationProvider: LocationProvider by lazy { LocationProvider(context) }
     val settingsStore: SettingsStore by lazy { SettingsStore(context) }
+    val backupPasswordStore: BackupPasswordStore by lazy { BackupPasswordStore(context) }
 
     /** Country borders for the map. Read on first use; call from a background thread. */
     val worldShapes: WorldShapes by lazy { context.assets.open(WorldMapData.ASSET).use(WorldMapData::read) }

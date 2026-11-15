@@ -2,6 +2,9 @@ package com.michalmarcin.namelist.ui.person
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -148,6 +151,108 @@ class PersonScreensTest {
     }
 
     @Test
+    fun onlyIconNameAndTabAreOnTopAndTheRestIsCollapsed() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(PersonEditUiState(name = "Anna", tabs = SampleData.tabs), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("nameField").assertIsDisplayed()
+        compose.onNodeWithTag("tabField").assertIsDisplayed()
+        compose.onNodeWithTag("detailsToggle").assertIsDisplayed()
+        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "askAboutField", "notesField")
+            .forEach { compose.onNodeWithTag(it).assertDoesNotExist() }
+
+        compose.onNodeWithTag("detailsToggle").performClick()
+        listOf("placeField", "firstMetField", "birthField", "nativeLanguageField", "educationField", "currentWorkField", "askAboutField", "notesField")
+            .forEach { compose.onNodeWithTag(it).assertExists() }
+
+        compose.onNodeWithTag("detailsToggle").performClick()
+        compose.onNodeWithTag("educationField").assertDoesNotExist()
+    }
+
+    @Test
+    fun moreDetailsShowTheirValuesAndReportChanges() {
+        val changes = mutableListOf<String>()
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(
+                    state = PersonEditUiState(
+                        name = "Anna",
+                        nativeLanguage = "Slovak",
+                        education = "MSc",
+                        currentWork = "Nurse",
+                        askAbout = "Her dog",
+                        birthDate = 7_000,
+                    ),
+                    onNameChange = {},
+                    onNotesChange = {},
+                    onSave = {},
+                    onClose = {},
+                    onNativeLanguageChange = { changes += "lang:$it" },
+                    onEducationChange = { changes += "edu:$it" },
+                    onCurrentWorkChange = { changes += "work:$it" },
+                    onAskAboutChange = { changes += "ask:$it" },
+                    onBirthDateChange = { changes += "birth:$it" },
+                )
+            }
+        }
+        compose.onNodeWithTag("detailsToggle").performClick()
+        compose.onNodeWithText("Slovak").assertExists()
+        compose.onNodeWithText("MSc").assertExists()
+        compose.onNodeWithText("Nurse").assertExists()
+        compose.onNodeWithText("Her dog").assertExists()
+        compose.onNodeWithText(formatEpochDay(7_000)).assertExists()
+        compose.onNodeWithTag("nativeLanguageField").performTextInput("!")
+        compose.onNodeWithTag("clearBirth").performClick()
+        assertEquals(listOf("lang:Slovak!", "birth:null"), changes)
+    }
+
+    @Test
+    fun detailShowsTheMoreDetailsAndTheLastUpdate() {
+        val updated = 1_700_000_000_000L
+        val person = SampleData.anna.copy(
+            nativeLanguage = "Slovak",
+            education = "MSc in design",
+            currentWork = "Nurse at a clinic",
+            askAbout = "Her trip to Japan",
+            birthDate = 7_000,
+            lastUpdatedAt = updated,
+        )
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(PersonDetailUiState(person, isLoading = false), {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("factsSection").assertExists()
+        listOf("Slovak", "MSc in design", "Nurse at a clinic", "Her trip to Japan", formatEpochDay(7_000))
+            .forEach { compose.onNodeWithText(it).assertExists() }
+        compose.onNodeWithTag("lastUpdated").assertExists()
+        compose.onNodeWithText("Last updated: " + formatDateTime(updated)).assertExists()
+    }
+
+    @Test
+    fun detailWithoutMoreDetailsHasNoFactsSection() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(PersonDetailUiState(SampleData.anna, isLoading = false), {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("factsSection").assertDoesNotExist()
+    }
+
+    @Test
+    fun detailOfAnArchivedPersonShowsSinceWhenAndHowLong() {
+        val person = SampleData.anna.copy(archivedAt = System.currentTimeMillis() - 3 * 86_400_000L - 1_000)
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonDetailScreen(PersonDetailUiState(person, isLoading = false), {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("archiveStatus").assertTextContains("in the archive for 3 days", substring = true)
+    }
+
+    @Test
     fun newPersonOpensWithTheCursorInTheNameField() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
@@ -174,6 +279,7 @@ class PersonScreensTest {
                 PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
             }
         }
+        compose.onNodeWithTag("detailsToggle").performClick()
         compose.onNodeWithText("Empty: today is used").assertIsDisplayed()
         compose.onNodeWithTag("pickFirstMet").assertIsDisplayed()
         compose.onNodeWithTag("clearFirstMet").assertDoesNotExist()
@@ -194,6 +300,7 @@ class PersonScreensTest {
                 )
             }
         }
+        compose.onNodeWithTag("detailsToggle").performClick()
         compose.onNodeWithText(formatEpochDay(20_407)).assertIsDisplayed()
         compose.onNodeWithTag("clearFirstMet").performClick()
         assertEquals(listOf<Long?>(null), changes)
@@ -229,6 +336,7 @@ class PersonScreensTest {
                 )
             }
         }
+        compose.onNodeWithTag("detailsToggle").performClick()
         compose.onNodeWithText("GPS 49.1951, 16.6068").assertIsDisplayed()
         compose.onNodeWithTag("useLocation").performClick()
         compose.onNodeWithTag("clearCoordinates").performClick()
@@ -242,6 +350,7 @@ class PersonScreensTest {
                 PersonEditScreen(PersonEditUiState(name = "Anna", locationMessage = LocationMessage.DENIED), {}, {}, {}, {})
             }
         }
+        compose.onNodeWithTag("detailsToggle").performClick()
         compose.onNodeWithText("Location is not allowed. You can still type the place.").assertIsDisplayed()
     }
 

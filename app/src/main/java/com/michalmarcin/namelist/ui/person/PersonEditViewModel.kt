@@ -34,6 +34,13 @@ data class PersonEditUiState(
     val coordinates: Coordinates? = null,
     /** Epoch day of the first meeting; null = not filled, the repository then uses today (F16). */
     val firstMetOn: Long? = null,
+    /** More details (F19). */
+    val nativeLanguage: String = "",
+    /** Epoch day; null = not filled. */
+    val birthDate: Long? = null,
+    val education: String = "",
+    val currentWork: String = "",
+    val askAbout: String = "",
     val isLocating: Boolean = false,
     val locationMessage: LocationMessage? = null,
     val isImportingPhoto: Boolean = false,
@@ -81,6 +88,11 @@ class PersonEditViewModel(
                         tabId = person?.tabId,
                         metPlace = person?.metCity.orEmpty(),
                         firstMetOn = person?.let(repository::firstMetDay),
+                        nativeLanguage = person?.nativeLanguage.orEmpty(),
+                        birthDate = person?.birthDate,
+                        education = person?.education.orEmpty(),
+                        currentWork = person?.currentWork.orEmpty(),
+                        askAbout = person?.askAbout.orEmpty(),
                         coordinates = person?.let { p ->
                             if (p.metLat != null && p.metLon != null) Coordinates(p.metLat, p.metLon) else null
                         },
@@ -98,6 +110,16 @@ class PersonEditViewModel(
     fun onTabChange(value: Long?) = state.update { it.copy(tabId = value) }
 
     fun onFirstMetChange(epochDay: Long?) = state.update { it.copy(firstMetOn = epochDay) }
+
+    fun onNativeLanguageChange(value: String) = state.update { it.copy(nativeLanguage = value) }
+
+    fun onBirthDateChange(epochDay: Long?) = state.update { it.copy(birthDate = epochDay) }
+
+    fun onEducationChange(value: String) = state.update { it.copy(education = value) }
+
+    fun onCurrentWorkChange(value: String) = state.update { it.copy(currentWork = value) }
+
+    fun onAskAboutChange(value: String) = state.update { it.copy(askAbout = value) }
 
     fun onPlaceChange(value: String) = state.update { it.copy(metPlace = value) }
 
@@ -164,6 +186,11 @@ class PersonEditViewModel(
                     metLat = current.coordinates?.latitude,
                     metLon = current.coordinates?.longitude,
                     firstMetOn = current.firstMetOn,
+                    nativeLanguage = current.nativeLanguage,
+                    birthDate = current.birthDate,
+                    education = current.education,
+                    currentWork = current.currentWork,
+                    askAbout = current.askAbout,
                 ),
             )
             sessionPhotos.clear()

@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michalmarcin.namelist.R
+import com.michalmarcin.namelist.ui.archive.ArchiveAge
+import com.michalmarcin.namelist.ui.archive.text
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
@@ -259,6 +261,41 @@ private fun PersonDetailContent(
             )
             Spacer(Modifier.height(16.dp))
         }
+        person.archivedAt?.let { archivedAt ->
+            Text(
+                text = stringResource(
+                    R.string.archive_status,
+                    formatEpochDay(millisToEpochDay(archivedAt)),
+                    ArchiveAge.of(archivedAt, System.currentTimeMillis()).text(),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("archiveStatus"),
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+        val facts = listOfNotNull(
+            person.birthDate?.let { R.string.birth_date to formatEpochDay(it) },
+            person.nativeLanguage?.let { R.string.native_language to it },
+            person.education?.let { R.string.education to it },
+            person.currentWork?.let { R.string.current_work to it },
+            person.askAbout?.let { R.string.ask_about to it },
+        )
+        if (facts.isNotEmpty()) {
+            DetailSection(title = stringResource(R.string.more_details), modifier = Modifier.testTag("factsSection")) {
+                facts.forEach { (label, value) ->
+                    Column {
+                        Text(
+                            stringResource(label),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(value, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
         val coordinates = person.coordinates()
         if (person.metCity != null || coordinates != null) {
             DetailSection(title = stringResource(R.string.where_met), modifier = Modifier.testTag("placeSection")) {
@@ -308,6 +345,16 @@ private fun PersonDetailContent(
                 } else {
                     MaterialTheme.colorScheme.onSurface
                 },
+            )
+        }
+        // F19: the time of the last save; people from before 1.1 show the day they were added.
+        (person.lastUpdatedAt ?: person.createdAt.takeIf { it > 0 })?.let { millis ->
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.last_updated, formatDateTime(millis)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("lastUpdated"),
             )
         }
         Spacer(Modifier.height(24.dp))

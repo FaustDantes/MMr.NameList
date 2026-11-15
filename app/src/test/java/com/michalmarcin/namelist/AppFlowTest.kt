@@ -48,7 +48,10 @@ class AppFlowTest {
         compose.onNodeWithTag("addPerson").performClick()
         waitForScreen("nameField")
         compose.onNodeWithTag("nameField").performTextInput(name)
-        if (notes.isNotEmpty()) compose.onNodeWithTag("notesField").performTextInput(notes)
+        if (notes.isNotEmpty()) {
+            compose.onNodeWithTag("detailsToggle").performClick()
+            compose.onNodeWithTag("notesField").performTextInput(notes)
+        }
         compose.onNodeWithTag("save").performClick()
         waitForScreen("peopleList")
         waitFor(name)

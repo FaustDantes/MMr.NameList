@@ -54,6 +54,21 @@ class PeopleViewModelTest {
     private fun names() = runBlocking { people.observePeople("", SortMode.MANUAL).first().map { it.name } }
 
     @Test
+    fun archivingTheSelectionMovesThemOutOfTheListAndClearsTheSelection() {
+        val anna = runBlocking { people.save(0, "Anna", "") }
+        val peter = runBlocking { people.save(0, "Peter", "") }
+        state { it.people.size == 2 }
+
+        vm.onToggleSelect(anna)
+        state { it.selected == setOf(anna) }
+        vm.onArchiveSelected()
+
+        val after = state { it.people.size == 1 && !it.isSelecting }
+        assertEquals(listOf(peter), after.people.map { it.id })
+        assertEquals(listOf("Anna"), runBlocking { people.observeArchived().first().map { it.name } })
+    }
+
+    @Test
     fun bulkActionsNeverTouchHiddenPeople() {
         val work = runBlocking { tabs.add("Work") }
         val anna = runBlocking { people.save(0, "Anna", "", tabId = work) }

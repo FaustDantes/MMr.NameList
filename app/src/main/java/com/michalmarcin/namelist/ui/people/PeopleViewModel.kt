@@ -98,6 +98,13 @@ class PeopleViewModel(
         viewModelScope.launch { people.deleteMany(ids) }
     }
 
+    /** Moves the selected people to the archive (F18). They leave the list at once and can be restored. */
+    fun onArchiveSelected() {
+        val ids = uiState.value.selected
+        setSelected(emptySet())
+        viewModelScope.launch { people.archive(ids) }
+    }
+
     fun onMoveSelected(tabId: Long?) {
         val ids = uiState.value.selected
         setSelected(emptySet())

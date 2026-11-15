@@ -25,6 +25,16 @@ data class Person(
     val metLon: Double? = null,
     /** Day of the first meeting as days since 1970-01-01 (local date). Null only for people saved before version 1.1. */
     val firstMetOn: Long? = null,
+    /** More details (F19). All optional. [birthDate] is an epoch day, like [firstMetOn]. */
+    val nativeLanguage: String? = null,
+    val birthDate: Long? = null,
+    val education: String? = null,
+    val currentWork: String? = null,
+    val askAbout: String? = null,
+    /** Milliseconds of the last save from the edit screen (F19). Null for people saved before version 1.1. */
+    val lastUpdatedAt: Long? = null,
+    /** Milliseconds when the person moved to the archive (F18); null = not archived. */
+    val archivedAt: Long? = null,
     val isSelf: Boolean = false,
     val sortIndex: Long = 0,
     val createdAt: Long = 0,

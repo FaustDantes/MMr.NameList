@@ -88,12 +88,32 @@ class MigrationTest {
     }
 
     @Test
+    fun version4To5AddsMoreDetailsAndArchiveColumns() {
+        helper.createDatabase(DB, 4).apply {
+            execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt, firstMetOn) VALUES (2, 'Anna', 'x', 0, 1, 5, 19000)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 5, true)
+        db.query("SELECT name, firstMetOn, nativeLanguage, birthDate, education, currentWork, askAbout, lastUpdatedAt, archivedAt FROM person WHERE id = 2").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Anna", it.getString(0))
+            assertEquals(19_000L, it.getLong(1))
+            (2..8).forEach { column -> assertTrue("column $column starts empty", it.isNull(column)) }
+        }
+        // Old people are not archived: they show in the list.
+        db.query("SELECT COUNT(*) FROM person WHERE archivedAt IS NULL").use {
+            assertTrue(it.moveToFirst())
+            assertEquals(1, it.getInt(0))
+        }
+    }
+
+    @Test
     fun version1To3InOneUpdate() {
         helper.createDatabase(DB, 1).apply {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 4, true)
+        val db = helper.runMigrationsAndValidate(DB, 5, true)
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))

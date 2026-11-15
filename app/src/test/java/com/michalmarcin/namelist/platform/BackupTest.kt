@@ -14,6 +14,7 @@ import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -58,9 +59,13 @@ class BackupTest {
         val work = tabs.add("Work")
         val anna = people.save(
             0,
-            PersonDraft("Anna Nováková", "Brno tram", "anna.jpg", work, "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000),
+            PersonDraft(
+                "Anna Nováková", "Brno tram", "anna.jpg", work, "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000,
+                nativeLanguage = "Slovak", birthDate = 7_000, education = "MSc", currentWork = "Nurse", askAbout = "Her dog",
+            ),
         )
         val peter = people.save(0, "Peter", "")
+        people.archive(listOf(peter))
         links.add(anna, peter, RelationType.PARENT)
         val out = ByteArrayOutputStream()
         val summary = backup.export(out)
@@ -70,7 +75,7 @@ class BackupTest {
 
     private fun snapshot() = runBlocking {
         Triple(
-            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${it.tabId}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.isSelf}" },
+            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${it.tabId}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.nativeLanguage}|${it.birthDate}|${it.education}|${it.currentWork}|${it.askAbout}|${it.lastUpdatedAt}|${it.archivedAt}|${it.isSelf}" },
             db.tabDao().getAll(),
             db.relationshipDao().getAll(),
         )
@@ -153,6 +158,102 @@ class BackupTest {
         val json = """{"format":"mmr.namelist.backup","version":1,"tabs":[],"relationships":[],"people":[{"id":5,"name":"Eve","createdAt":7}]}"""
         backup.import(ByteArrayInputStream(zip(mapOf("backup.json" to json.toByteArray()))))
         assertNull(db.personDao().getAll().first { it.name == "Eve" }.firstMetOn)
+    }
+
+    @Test
+    fun moreDetailsAndTheArchiveSurviveExportAndImport() = runBlocking {
+        val file = seed()
+        db.personDao().getAll().forEach { people.delete(it.id) }
+        backup.import(ByteArrayInputStream(file))
+        val all = db.personDao().getAll()
+        val anna = all.first { it.name == "Anna Nováková" }
+        assertEquals(listOf("Slovak", "MSc", "Nurse", "Her dog"), listOf(anna.nativeLanguage, anna.education, anna.currentWork, anna.askAbout))
+        assertEquals(7_000L, anna.birthDate)
+        assertNotNull(anna.lastUpdatedAt)
+        assertNotNull("the archive stamp is kept", all.first { it.name == "Peter" }.archivedAt)
+    }
+
+    @Test
+    fun backupFromVersion1_0HasNoMoreDetailsAndIsNotArchived() = runBlocking {
+        val json = """{"format":"mmr.namelist.backup","version":1,"tabs":[],"relationships":[],"people":[{"id":5,"name":"Eve"}]}"""
+        backup.import(ByteArrayInputStream(zip(mapOf("backup.json" to json.toByteArray()))))
+        val eve = db.personDao().getAll().first { it.name == "Eve" }
+        assertNull(eve.education)
+        assertNull(eve.archivedAt)
+        assertNull(eve.lastUpdatedAt)
+    }
+
+    // ---- F17: password encryption ----
+
+    private fun encryptedSeed(password: String): ByteArray = runBlocking {
+        seed() // fills the database
+        val out = ByteArrayOutputStream()
+        backup.export(out, password.toCharArray())
+        out.toByteArray()
+    }
+
+    @Test
+    fun encryptedBackupRoundTripsWithThePassword() = runBlocking {
+        val file = encryptedSeed("open sesame")
+        assertTrue(BackupCrypto.isEncrypted(file))
+        assertFalse("names must not be readable", String(file, Charsets.ISO_8859_1).contains("Anna"))
+        val before = snapshot()
+
+        people.save(0, "Someone new", "")
+        val summary = backup.import(ByteArrayInputStream(file), "open sesame".toCharArray())
+
+        assertEquals(2, summary.people)
+        assertEquals(before, snapshot())
+        assertArrayEquals(byteArrayOf(1, 2, 3, 4), photos.file("anna.jpg").readBytes())
+    }
+
+    @Test
+    fun encryptedBackupWithoutAPasswordAsksForOne() = runBlocking {
+        val file = encryptedSeed("open sesame")
+        val before = snapshot()
+        try {
+            backup.import(ByteArrayInputStream(file))
+            fail("Expected the password to be required")
+        } catch (e: BackupPasswordException) {
+            assertEquals(BackupPasswordException.Reason.REQUIRED, e.reason)
+        }
+        assertEquals(before, snapshot())
+    }
+
+    @Test
+    fun wrongPasswordChangesNothing() = runBlocking {
+        val file = encryptedSeed("open sesame")
+        people.save(0, "Someone new", "")
+        val before = snapshot()
+        try {
+            backup.import(ByteArrayInputStream(file), "open sesamE".toCharArray())
+            fail("Expected a wrong-password error")
+        } catch (e: BackupPasswordException) {
+            assertEquals(BackupPasswordException.Reason.WRONG, e.reason)
+        }
+        assertEquals(before, snapshot())
+    }
+
+    @Test
+    fun aDamagedEncryptedBackupChangesNothing() = runBlocking {
+        val file = encryptedSeed("open sesame")
+        val before = snapshot()
+        val bad = file.copyOf().also { it[it.size / 2] = (it[it.size / 2].toInt() xor 0x55).toByte() }
+        try {
+            backup.import(ByteArrayInputStream(bad), "open sesame".toCharArray())
+            fail("Expected an error")
+        } catch (_: BackupPasswordException) {
+        }
+        assertEquals(before, snapshot())
+    }
+
+    @Test
+    fun aPlainBackupStillImportsEvenWhenAPasswordIsGiven() = runBlocking {
+        val file = seed()
+        val before = snapshot()
+        people.save(0, "Someone new", "")
+        backup.import(ByteArrayInputStream(file), "unused password".toCharArray())
+        assertEquals(before, snapshot())
     }
 
     @Test

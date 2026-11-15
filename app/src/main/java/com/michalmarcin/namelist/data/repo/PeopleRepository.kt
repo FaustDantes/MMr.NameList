@@ -24,6 +24,13 @@ data class PersonDraft(
     val metLon: Double? = null,
     /** Day of the first meeting (epoch day). Null means "not filled": the repository uses today (F16). */
     val firstMetOn: Long? = null,
+    /** More details (F19). Blank text counts as empty. */
+    val nativeLanguage: String? = null,
+    /** Epoch day of the birth date. */
+    val birthDate: Long? = null,
+    val education: String? = null,
+    val currentWork: String? = null,
+    val askAbout: String? = null,
 )
 
 class PeopleRepository(
@@ -60,7 +67,16 @@ class PeopleRepository(
     fun observePerson(id: Long): Flow<Person?> = dao.observe(id)
 
     /** Everyone, "Me" first. */
-    fun observeEveryone(): Flow<List<Person>> = dao.observeAll()
+    fun observeEveryone(): Flow<List<Person>> = dao.observeActive()
+
+    /** People in the archive, the newest first (F18). */
+    fun observeArchived(): Flow<List<Person>> = dao.observeArchived()
+
+    /** Moves people to the archive and stamps the time. Returns how many moved. */
+    suspend fun archive(ids: Collection<Long>): Int = if (ids.isEmpty()) 0 else dao.archive(ids.toList(), clock())
+
+    /** Brings people back from the archive. */
+    suspend fun restore(ids: Collection<Long>): Int = if (ids.isEmpty()) 0 else dao.restore(ids.toList())
 
     suspend fun getPerson(id: Long): Person? = dao.get(id)
 
@@ -87,6 +103,13 @@ class PeopleRepository(
             metLon = if (hasCoordinates) draft.metLon else null,
             // F16: an empty date is today.
             firstMetOn = draft.firstMetOn ?: epochDay(clock()),
+            nativeLanguage = draft.nativeLanguage.clean(),
+            birthDate = draft.birthDate,
+            education = draft.education.clean(),
+            currentWork = draft.currentWork.clean(),
+            askAbout = draft.askAbout.clean(),
+            // F19: every save from the edit screen stamps the time.
+            lastUpdatedAt = clock(),
         )
         return if (existing == null) {
             dao.insert(person)
@@ -100,10 +123,13 @@ class PeopleRepository(
     /** Short form used by tests and simple callers. Keeps the place of meeting of an existing person. */
     suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null, tabId: Long? = null): Long {
         val existing = if (id == 0L) null else dao.get(id)
-        return save(
-            id,
-            PersonDraft(name, notes, photoFile, tabId, existing?.metCity, existing?.metLat, existing?.metLon, existing?.let(::firstMetDay)),
-        )
+        val kept = existing?.let {
+            PersonDraft(
+                name, notes, photoFile, tabId, it.metCity, it.metLat, it.metLon, firstMetDay(it),
+                it.nativeLanguage, it.birthDate, it.education, it.currentWork, it.askAbout,
+            )
+        }
+        return save(id, kept ?: PersonDraft(name, notes, photoFile, tabId))
     }
 
     /** Drag and drop result: puts the shown people in this order (F5). */
@@ -137,8 +163,10 @@ class PeopleRepository(
 
     private fun epochDay(millis: Long): Long = Instant.ofEpochMilli(millis).atZone(zone()).toLocalDate().toEpochDay()
 
+    private fun String?.clean(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
+
     private fun Person.matches(needle: String): Boolean =
-        listOfNotNull(name, notes, metCity).any { normalize(it).contains(needle) }
+        listOfNotNull(name, notes, metCity, nativeLanguage, education, currentWork, askAbout).any { normalize(it).contains(needle) }
 
     companion object {
         private val marks = "\\p{Mn}+".toRegex()

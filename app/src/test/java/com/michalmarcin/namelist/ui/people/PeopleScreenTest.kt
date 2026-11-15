@@ -160,6 +160,34 @@ class PeopleScreenTest {
     }
 
     @Test
+    fun bulkArchiveButtonArchivesTheSelection() {
+        var archived = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(
+                    PeopleUiState(people = SampleData.people, selected = setOf(2, 3), isLoading = false),
+                    {}, {}, {}, {},
+                    onArchiveSelected = { archived++ },
+                )
+            }
+        }
+        compose.onNodeWithTag("bulkArchive").performClick()
+        assertEquals(1, archived)
+    }
+
+    @Test
+    fun archiveButtonOpensTheArchive() {
+        var opened = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(PeopleUiState(people = SampleData.people, isLoading = false), {}, {}, {}, {}, onArchive = { opened++ })
+            }
+        }
+        compose.onNodeWithTag("archive").performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test
     fun bulkDeleteNeedsConfirmation() {
         var deletes = 0
         compose.setContent {

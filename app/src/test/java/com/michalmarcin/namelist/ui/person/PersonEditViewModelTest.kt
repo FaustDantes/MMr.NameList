@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -178,6 +179,55 @@ class PersonEditViewModelTest {
         vm.save()
         vm.uiState.await { it.isSaved }
         assertEquals(LocalDate.now().toEpochDay(), everyone().single().firstMetOn)
+    }
+
+    @Test
+    fun moreDetailsAreSavedAndLoadedAgain() {
+        val vm = viewModel()
+        vm.onNameChange("Anna")
+        vm.onNativeLanguageChange(" Slovak ")
+        vm.onBirthDateChange(7_000)
+        vm.onEducationChange("MSc")
+        vm.onCurrentWorkChange("Nurse")
+        vm.onAskAboutChange("Her dog")
+        vm.save()
+        vm.uiState.await { it.isSaved }
+
+        val saved = everyone().single()
+        assertEquals("Slovak", saved.nativeLanguage)
+        assertEquals(7_000L, saved.birthDate)
+        assertNotNull("every save stamps the time", saved.lastUpdatedAt)
+
+        val loaded = viewModel(id = saved.id).uiState.await { !it.isLoading }
+        assertEquals(listOf("Slovak", "MSc", "Nurse", "Her dog"), listOf(loaded.nativeLanguage, loaded.education, loaded.currentWork, loaded.askAbout))
+        assertEquals(7_000L, loaded.birthDate)
+    }
+
+    @Test
+    fun emptyingAMoreDetailFieldClearsIt() {
+        val id = runBlocking { people.save(0, PersonDraft("Anna", education = "MSc", birthDate = 7_000)) }
+        val vm = viewModel(id = id)
+        vm.uiState.await { !it.isLoading }
+        vm.onEducationChange("")
+        vm.onBirthDateChange(null)
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        val saved = everyone().single()
+        assertNull(saved.education)
+        assertNull(saved.birthDate)
+    }
+
+    @Test
+    fun savingAgainMovesTheLastUpdateForward() {
+        val id = runBlocking { people.save(0, PersonDraft("Anna")) }
+        val first = everyone().single().lastUpdatedAt!!
+        Thread.sleep(5)
+        val vm = viewModel(id = id)
+        vm.uiState.await { !it.isLoading }
+        vm.onNotesChange("changed")
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        assertTrue(everyone().single().lastUpdatedAt!! > first)
     }
 
     @Test

@@ -79,6 +79,7 @@ fun PeopleRoute(
     onManageTabs: () -> Unit,
     onSettings: () -> Unit,
     onMap: () -> Unit,
+    onArchive: () -> Unit,
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -93,6 +94,8 @@ fun PeopleRoute(
         onManageTabs = onManageTabs,
         onSettings = onSettings,
         onMap = onMap,
+        onArchive = onArchive,
+        onArchiveSelected = viewModel::onArchiveSelected,
         onToggleSelect = viewModel::onToggleSelect,
         onSelectAll = viewModel::onSelectAll,
         onClearSelection = viewModel::onClearSelection,
@@ -115,6 +118,8 @@ fun PeopleScreen(
     onManageTabs: () -> Unit = {},
     onSettings: () -> Unit = {},
     onMap: () -> Unit = {},
+    onArchive: () -> Unit = {},
+    onArchiveSelected: () -> Unit = {},
     onToggleSelect: (Long) -> Unit = {},
     onSelectAll: () -> Unit = {},
     onClearSelection: () -> Unit = {},
@@ -134,6 +139,7 @@ fun PeopleScreen(
                     onClear = onClearSelection,
                     onSelectAll = onSelectAll,
                     onMove = { dialog = BulkDialog.Move },
+                    onArchive = onArchiveSelected,
                     onDelete = { dialog = BulkDialog.Delete },
                 )
             } else LargeTopAppBar(
@@ -141,6 +147,9 @@ fun PeopleScreen(
                 actions = {
                     IconButton(onClick = onMap, modifier = Modifier.testTag("map")) {
                         Icon(painterResource(R.drawable.ic_map), contentDescription = stringResource(R.string.map))
+                    }
+                    IconButton(onClick = onArchive, modifier = Modifier.testTag("archive")) {
+                        Icon(painterResource(R.drawable.ic_archive), contentDescription = stringResource(R.string.archive))
                     }
                     IconButton(onClick = onManageTabs, modifier = Modifier.testTag("manageTabs")) {
                         Icon(painterResource(R.drawable.ic_folder), contentDescription = stringResource(R.string.manage_tabs))
@@ -254,6 +263,7 @@ private fun SelectionBar(
     onClear: () -> Unit,
     onSelectAll: () -> Unit,
     onMove: () -> Unit,
+    onArchive: () -> Unit,
     onDelete: () -> Unit,
 ) {
     TopAppBar(
@@ -276,6 +286,9 @@ private fun SelectionBar(
                 IconButton(onClick = onMove, modifier = Modifier.testTag("bulkMove")) {
                     Icon(painterResource(R.drawable.ic_folder), stringResource(R.string.move_to_tab))
                 }
+            }
+            IconButton(onClick = onArchive, modifier = Modifier.testTag("bulkArchive")) {
+                Icon(painterResource(R.drawable.ic_archive), stringResource(R.string.move_to_archive))
             }
             IconButton(onClick = onDelete, modifier = Modifier.testTag("bulkDelete")) {
                 Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.delete))

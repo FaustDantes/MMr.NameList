@@ -17,6 +17,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.focus.FocusRequester
@@ -110,6 +111,11 @@ fun PersonEditRoute(
         onTabChange = viewModel::onTabChange,
         onPlaceChange = viewModel::onPlaceChange,
         onFirstMetChange = viewModel::onFirstMetChange,
+        onNativeLanguageChange = viewModel::onNativeLanguageChange,
+        onBirthDateChange = viewModel::onBirthDateChange,
+        onEducationChange = viewModel::onEducationChange,
+        onCurrentWorkChange = viewModel::onCurrentWorkChange,
+        onAskAboutChange = viewModel::onAskAboutChange,
         onUseLocation = {
             if (viewModel.hasLocationPermission()) {
                 viewModel.fetchLocation()
@@ -138,7 +144,14 @@ fun PersonEditScreen(
     onUseLocation: () -> Unit = {},
     onClearCoordinates: () -> Unit = {},
     onFirstMetChange: (Long?) -> Unit = {},
+    onNativeLanguageChange: (String) -> Unit = {},
+    onBirthDateChange: (Long?) -> Unit = {},
+    onEducationChange: (String) -> Unit = {},
+    onCurrentWorkChange: (String) -> Unit = {},
+    onAskAboutChange: (String) -> Unit = {},
 ) {
+    // F19: only icon, name and tab are on top. The rest waits in a collapsed section.
+    var detailsOpen by rememberSaveable { mutableStateOf(false) }
     // F16: a new person opens with the cursor in the Name field; Name is the only required field.
     val nameFocus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -195,18 +208,38 @@ fun PersonEditScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             TabField(state.tabs, state.tabId, onTabChange)
-            PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
-            FirstMetField(state.firstMetOn, onFirstMetChange)
-            OutlinedTextField(
-                value = state.notes,
-                onValueChange = onNotesChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 140.dp)
-                    .testTag("notesField"),
-                label = { Text(stringResource(R.string.notes)) },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-            )
+            DetailsToggle(open = detailsOpen, onToggle = { detailsOpen = !detailsOpen })
+            if (detailsOpen) {
+                PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
+                DateField(
+                    epochDay = state.firstMetOn,
+                    onChange = onFirstMetChange,
+                    label = R.string.first_met,
+                    emptyHint = R.string.first_met_today,
+                    tag = "firstMet",
+                )
+                DateField(
+                    epochDay = state.birthDate,
+                    onChange = onBirthDateChange,
+                    label = R.string.birth_date,
+                    emptyHint = null,
+                    tag = "birth",
+                )
+                TextDetail(state.nativeLanguage, onNativeLanguageChange, R.string.native_language, "nativeLanguageField")
+                TextDetail(state.education, onEducationChange, R.string.education, "educationField")
+                TextDetail(state.currentWork, onCurrentWorkChange, R.string.current_work, "currentWorkField")
+                TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
+                OutlinedTextField(
+                    value = state.notes,
+                    onValueChange = onNotesChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 140.dp)
+                        .testTag("notesField"),
+                    label = { Text(stringResource(R.string.notes)) },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                )
+            }
         }
     }
 }
@@ -367,12 +400,55 @@ private fun PlaceField(
     }
 }
 
-/** F16: date of the first meeting. Empty means today; the picker allows no future dates. */
+/** The header row that opens and closes the "More details" section (F19). */
+@Composable
+private fun DetailsToggle(open: Boolean, onToggle: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onToggle)
+            .testTag("detailsToggle"),
+    ) {
+        Text(
+            text = stringResource(R.string.more_details),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            painterResource(if (open) R.drawable.ic_expand_less else R.drawable.ic_expand_more),
+            contentDescription = stringResource(if (open) R.string.collapse else R.string.expand),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+private fun TextDetail(value: String, onChange: (String) -> Unit, label: Int, tag: String) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(tag),
+        label = { Text(stringResource(label)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+    )
+}
+
+/**
+ * A date with a picker that allows no future days (F16, F19). Empty is allowed; [emptyHint] explains what it means.
+ * Test tags: "[tag]Field", "clear[Tag]" and "pick[Tag]" (first letter of [tag] in upper case).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FirstMetField(epochDay: Long?, onChange: (Long?) -> Unit) {
+private fun DateField(epochDay: Long?, onChange: (Long?) -> Unit, label: Int, emptyHint: Int?, tag: String) {
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
+    val suffix = tag.replaceFirstChar { it.uppercase() }
     // A read-only field takes the tap itself, so the picker opens on the release of a press.
     LaunchedEffect(interaction) {
         interaction.interactions.collect { if (it is PressInteraction.Release) showPicker = true }
@@ -384,20 +460,20 @@ private fun FirstMetField(epochDay: Long?, onChange: (Long?) -> Unit) {
         interactionSource = interaction,
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("firstMetField"),
-        label = { Text(stringResource(R.string.first_met)) },
-        supportingText = if (epochDay == null) {
-            { Text(stringResource(R.string.first_met_today)) }
+            .testTag("${tag}Field"),
+        label = { Text(stringResource(label)) },
+        supportingText = if (epochDay == null && emptyHint != null) {
+            { Text(stringResource(emptyHint)) }
         } else {
             null
         },
         trailingIcon = {
             if (epochDay != null) {
-                IconButton(onClick = { onChange(null) }, modifier = Modifier.testTag("clearFirstMet")) {
+                IconButton(onClick = { onChange(null) }, modifier = Modifier.testTag("clear$suffix")) {
                     Icon(painterResource(R.drawable.ic_close), stringResource(R.string.clear))
                 }
             } else {
-                IconButton(onClick = { showPicker = true }, modifier = Modifier.testTag("pickFirstMet")) {
+                IconButton(onClick = { showPicker = true }, modifier = Modifier.testTag("pick$suffix")) {
                     Icon(painterResource(R.drawable.ic_calendar), stringResource(R.string.pick_date))
                 }
             }
