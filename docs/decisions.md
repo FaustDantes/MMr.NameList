@@ -271,3 +271,15 @@ Status: accepted
 Decision: The add button on the people list is 112 dp (twice the Material default of 56 dp), color `#0B2545` (dark navy) with a white 56 dp icon, and sits at the bottom center (`FabPosition.Center`). The list has 144 dp of bottom padding so the last person is not hidden. The widget add button uses the same navy. All other buttons keep the light blue palette (ADR-023); the small "add tab" button stays as it was.
 Reason: The owner asked for a dark navy color, a bottom center position and twice the size, so people can tap it easily. The owner's color request is applied to the add buttons only, because the palette of all other buttons was chosen in ADR-023; say if all buttons should change.
 Alternatives: Navy for every button (changes ADR-023 across the app); navy only on the widget.
+
+## ADR-033: Conversation Spark, duplicate names, search by any field, version and contact
+
+Date: 2026-11-15
+Status: accepted
+Decision: F22: saving a new name that matches another person's name, ignoring case and extra spaces, first asks: open the existing person, save anyway, or change the name. Archived people count. Checked in the repository (`findSameName`), not in the Composable.
+F23: the field "Ask about" is renamed "Conversation Spark" and sits directly under the name on the edit form (not collapsed). On the person's page it is a highlighted block under the name. In the people list the first line of the spark is shown under the name, cut to five words with "…".
+F26: search matches every text field (including origin and meeting country) and every date (first met, birth, last updated, archived), written as ISO, dotted, slashed, month-name and the localized medium style. The add button is a 112 dp navy circle at the bottom right (ADR-032 is superseded for its position).
+F24: Settings shows the version and build number, the contact address info@michalmarcin.com (opens the mail app), and "Report a problem", which opens the mail app with the version, build, Android version, phone model and language. Nothing from the list is sent.
+F25: languages English (default), German, Slovak, Czech, Polish, via `values-<lang>/strings.xml` and `locales_config.xml`. Plural forms use the CLDR categories of each language.
+Reason: The owner asked for these. The mail app is used so the app needs no internet permission.
+Alternatives: A built-in form that sends the report (needs internet permission, which the app avoids); machine translation (the texts were written by hand and need a native check).

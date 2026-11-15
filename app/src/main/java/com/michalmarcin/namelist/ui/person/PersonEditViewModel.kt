@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** A person who already has the typed name (F22). */
+data class DuplicatePerson(val id: Long, val name: String, val archived: Boolean)
+
 enum class PhotoMessage { IMPORT_FAILED, NO_CAMERA }
 
 enum class LocationMessage { DENIED, UNAVAILABLE }
@@ -48,6 +51,8 @@ data class PersonEditUiState(
     val showNameError: Boolean = false,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
+    /** Set when the name already exists; the screen asks what to do. */
+    val duplicate: DuplicatePerson? = null,
 )
 
 class PersonEditViewModel(
@@ -68,6 +73,9 @@ class PersonEditViewModel(
     /** Photos imported in this edit session. Deleted again if the user does not save. */
     private val sessionPhotos = mutableSetOf<String>()
 
+    /** Name as loaded; an unchanged name of an existing person is not checked again. */
+    private var loadedName: String? = null
+
     init {
         viewModelScope.launch {
             tabs.observeTabs().collect { list ->
@@ -80,6 +88,7 @@ class PersonEditViewModel(
         if (id != 0L) {
             viewModelScope.launch {
                 val person = repository.getPerson(id)
+                loadedName = person?.name
                 state.update {
                     it.copy(
                         name = person?.name.orEmpty(),
@@ -168,13 +177,31 @@ class PersonEditViewModel(
         state.update { it.copy(photoFile = null, photoMessage = null) }
     }
 
-    fun save() {
+    fun save() = saveChecked(checkName = true)
+
+    /** The user chose "Save anyway" in the duplicate dialog. */
+    fun saveAnyway() {
+        state.update { it.copy(duplicate = null) }
+        saveChecked(checkName = false)
+    }
+
+    fun dismissDuplicate() = state.update { it.copy(duplicate = null) }
+
+    private fun saveChecked(checkName: Boolean) {
         val current = state.value
         if (current.name.isBlank()) {
             state.update { it.copy(showNameError = true) }
             return
         }
         viewModelScope.launch {
+            val nameChanged = loadedName?.let { PeopleRepository.nameKey(it) != PeopleRepository.nameKey(current.name) } ?: true
+            if (checkName && nameChanged) {
+                val same = repository.findSameName(current.name, exceptId = id)
+                if (same != null) {
+                    state.update { it.copy(duplicate = DuplicatePerson(same.id, same.name, same.archivedAt != null)) }
+                    return@launch
+                }
+            }
             repository.save(
                 id,
                 PersonDraft(

@@ -230,14 +230,14 @@ class PeopleScreenTest {
     }
 
     @Test
-    fun addButtonIsTwiceTheDefaultSizeAndInTheBottomCenter() {
+    fun addButtonIsTwiceTheDefaultSizeAndAtTheBottomRight() {
         show(PeopleUiState(people = SampleData.people, isLoading = false))
         val button = compose.onNodeWithTag("addPerson").fetchSemanticsNode()
         val root = compose.onRoot().fetchSemanticsNode()
         val density = compose.density.density
         assertEquals(112f * density, button.size.width.toFloat(), 1f)
         assertEquals(112f * density, button.size.height.toFloat(), 1f)
-        assertEquals(root.size.width / 2f, button.boundsInRoot.center.x, 2f)
+        assertTrue(button.boundsInRoot.center.x > root.size.width / 2f)
         assertTrue(button.boundsInRoot.center.y > root.size.height / 2f)
     }
 }

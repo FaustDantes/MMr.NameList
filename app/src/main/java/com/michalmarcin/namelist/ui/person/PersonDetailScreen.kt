@@ -251,6 +251,24 @@ private fun PersonDetailContent(
                 )
             }
         }
+        person.askAbout?.let { ask ->
+            // F23: what to ask next time, right below the name.
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.fillMaxWidth().testTag("askAboutBlock"),
+            ) {
+                Column(Modifier.padding(12.dp)) {
+                    Text(
+                        stringResource(R.string.ask_about),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                    Text(ask, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                }
+            }
+        }
         Spacer(Modifier.height(24.dp))
         // People saved before 1.1 have no stored date; they count from the day they were added.
         (person.firstMetOn ?: person.createdAt.takeIf { it > 0 }?.let { it / 86_400_000L })?.let { day ->
@@ -279,7 +297,6 @@ private fun PersonDetailContent(
             person.nativeLanguage?.let { R.string.native_language to it },
             person.education?.let { R.string.education to it },
             person.currentWork?.let { R.string.current_work to it },
-            person.askAbout?.let { R.string.ask_about to it },
         )
         if (facts.isNotEmpty()) {
             DetailSection(title = stringResource(R.string.more_details), modifier = Modifier.testTag("factsSection")) {

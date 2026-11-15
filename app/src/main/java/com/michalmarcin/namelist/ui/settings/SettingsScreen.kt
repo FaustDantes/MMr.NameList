@@ -3,6 +3,7 @@ package com.michalmarcin.namelist.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michalmarcin.namelist.R
+import com.michalmarcin.namelist.platform.AppInfo
 import com.michalmarcin.namelist.platform.EncryptChoice
 import com.michalmarcin.namelist.platform.ThemeMode
 import com.michalmarcin.namelist.ui.AppViewModelFactory
@@ -53,6 +56,10 @@ fun SettingsRoute(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val appInfo = remember { AppInfo.read(context) }
+    val intro = stringResource(R.string.report_intro)
+    val noMail = stringResource(R.string.no_email_app, AppInfo.CONTACT_EMAIL)
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) {
         viewModel.export(it)
     }
@@ -69,7 +76,15 @@ fun SettingsRoute(
     }
     SettingsScreen(
         state = state,
-        versionName = rememberVersionName(),
+        versionName = appInfo.versionName,
+        buildNumber = appInfo.buildNumber,
+        onContact = {
+            if (!AppInfo.composeMail(context)) Toast.makeText(context, noMail, Toast.LENGTH_LONG).show()
+        },
+        onReportBug = {
+            val sent = AppInfo.composeMail(context, appInfo.reportSubject(), appInfo.reportBody(intro))
+            if (!sent) Toast.makeText(context, noMail, Toast.LENGTH_LONG).show()
+        },
         onBack = onBack,
         onThemeChange = viewModel::setTheme,
         onExport = viewModel::onExportClicked,
@@ -92,19 +107,14 @@ fun SettingsRoute(
     )
 }
 
-@Composable
-private fun rememberVersionName(): String {
-    val context = LocalContext.current
-    return remember {
-        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: "?"
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     versionName: String,
+    buildNumber: Long = 0L,
+    onReportBug: () -> Unit = {},
+    onContact: () -> Unit = {},
     onBack: () -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
     onExport: () -> Unit,
@@ -249,7 +259,22 @@ fun SettingsScreen(
                 }
             }
             DetailSection(title = stringResource(R.string.about)) {
-                Text(stringResource(R.string.about_version, versionName), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.about_version, versionName, buildNumber),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.testTag("versionText"),
+                )
+                TextButton(shape = MaterialTheme.shapes.large, onClick = onContact, modifier = Modifier.testTag("contact")) {
+                    Text(stringResource(R.string.about_contact, AppInfo.CONTACT_EMAIL))
+                }
+                Text(
+                    stringResource(R.string.report_bug_explained),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(shape = MaterialTheme.shapes.large, onClick = onReportBug, modifier = Modifier.testTag("reportBug")) {
+                    Text(stringResource(R.string.report_bug))
+                }
                 Text(
                     stringResource(R.string.about_privacy),
                     style = MaterialTheme.typography.bodyMedium,

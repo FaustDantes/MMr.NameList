@@ -87,7 +87,7 @@
     <string name="not_a_backup">This file is not a Name List backup. Nothing was changed.</string>
     <string name="backup_failed">The file could not be read or written. Nothing was changed.</string>
     <string name="about">About</string>
-    <string name="about_version">Name List %1$s</string>
+    <string name="about_version">Name List %1$s (build %2$d)</string>
     <string name="about_privacy">All data stays on this phone. The app has no account and sends nothing to a server. Map borders: Natural Earth (public domain).</string>
     <plurals name="exported">
         <item quantity="one">Exported %d person.</item>
@@ -193,7 +193,7 @@
     <string name="birth_date">Date of birth</string>
     <string name="education">Education</string>
     <string name="current_work">Current work</string>
-    <string name="ask_about">Ask about</string>
+    <string name="ask_about">Conversation Spark</string>
     <string name="last_updated">Last updated: %1$s</string>
 
     <!-- Home-screen widget (F20) -->
@@ -201,4 +201,19 @@
     <string name="widget_hint">Tap the button to add someone you just met.</string>
     <string name="widget_last_added">Last added: %1$s</string>
     <string name="widget_recent">Recently added</string>
+
+    <!-- F22 Same name -->
+    <string name="duplicate_title">%1$s is already in your list</string>
+    <string name="duplicate_body">A person with this name already exists. You can open that person or save a second one with the same name.</string>
+    <string name="duplicate_body_archived">A person with this name is in the archive. You can open that person or save a second one with the same name.</string>
+    <string name="duplicate_open">Open existing person</string>
+    <string name="duplicate_save_anyway">Save anyway</string>
+    <string name="duplicate_change_name">Change the name</string>
+
+    <!-- F24 About, contact, problem report -->
+    <string name="about_contact">Contact: %1$s</string>
+    <string name="report_bug">Report a problem</string>
+    <string name="report_bug_explained">Opens your email app with a message to the developer. It adds the app version and the phone model, and nothing from your list.</string>
+    <string name="report_intro">Describe the problem here:</string>
+    <string name="no_email_app">No email app found. Write to %1$s.</string>
 </resources>

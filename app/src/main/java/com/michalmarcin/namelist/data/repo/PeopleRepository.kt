@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.Collator
 import java.text.Normalizer
+import java.util.Locale
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Locale
@@ -79,6 +80,16 @@ class PeopleRepository(
     suspend fun restore(ids: Collection<Long>): Int = if (ids.isEmpty()) 0 else dao.restore(ids.toList())
 
     suspend fun getPerson(id: Long): Person? = dao.get(id)
+
+    /**
+     * Another person with the same name, ignoring case and extra spaces (F22). Archived people count.
+     * "Me" never counts. [exceptId] is the person being edited.
+     */
+    suspend fun findSameName(name: String, exceptId: Long = 0L): Person? {
+        val key = nameKey(name)
+        if (key.isEmpty()) return null
+        return dao.getAll().firstOrNull { !it.isSelf && it.id != exceptId && nameKey(it.name) == key }
+    }
 
     suspend fun getSelf(): Person? = dao.getSelf()
 
@@ -165,13 +176,35 @@ class PeopleRepository(
 
     private fun String?.clean(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
 
-    private fun Person.matches(needle: String): Boolean =
-        listOfNotNull(name, notes, metCity, nativeLanguage, education, currentWork, askAbout).any { normalize(it).contains(needle) }
+    /** F26: the search looks at every text field and at every date, written in several common ways. */
+    private fun Person.matches(needle: String): Boolean {
+        val texts = listOfNotNull(name, notes, metCity, metCountry, originCountry, nativeLanguage, education, currentWork, askAbout)
+        if (texts.any { normalize(it).contains(needle) }) return true
+        val days = listOfNotNull(
+            firstMetDay(this),
+            birthDate,
+            lastUpdatedAt?.let(::epochDay),
+            archivedAt?.let(::epochDay),
+        )
+        return days.any { day -> dateTexts(day).any { normalize(it).contains(needle) } }
+    }
+
+    private fun dateTexts(epochDay: Long): List<String> {
+        val date = java.time.LocalDate.ofEpochDay(epochDay)
+        val locale = Locale.getDefault()
+        return listOf(
+            "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "d. M. yyyy", "d/M/yyyy", "M/d/yyyy", "MMMM yyyy", "d MMMM yyyy",
+        ).map { java.time.format.DateTimeFormatter.ofPattern(it, locale).format(date) } +
+            java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale).format(date)
+    }
 
     companion object {
         private val marks = "\\p{Mn}+".toRegex()
 
         /** Lower case, no diacritics, trimmed: "  Šimon " -> "simon". */
+        /** The same name written with other capitals or extra spaces gives the same key. */
+        fun nameKey(name: String): String = name.trim().replace(Regex("\\s+"), " ").lowercase()
+
         fun normalize(text: String): String =
             Normalizer.normalize(text.trim().lowercase(Locale.ROOT), Normalizer.Form.NFD).replace(marks, "")
     }

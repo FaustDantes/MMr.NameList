@@ -56,7 +56,7 @@ class SettingsTest {
         assertEquals(0, imports)
         compose.onNodeWithTag("confirmImport").performClick()
         assertEquals(1, imports)
-        compose.onNodeWithText("Name List m7-rc1").assertIsDisplayed()
+        compose.onNodeWithText("Name List m7-rc1 (build 0)").assertIsDisplayed()
     }
 
     @Test

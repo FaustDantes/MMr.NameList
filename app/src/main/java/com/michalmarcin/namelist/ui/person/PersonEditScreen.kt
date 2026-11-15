@@ -52,6 +52,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -71,6 +72,7 @@ import com.michalmarcin.namelist.ui.AppViewModelFactory
 @Composable
 fun PersonEditRoute(
     onDone: () -> Unit,
+    onOpenExisting: (Long) -> Unit = {},
     viewModel: PersonEditViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -116,6 +118,9 @@ fun PersonEditRoute(
         onEducationChange = viewModel::onEducationChange,
         onCurrentWorkChange = viewModel::onCurrentWorkChange,
         onAskAboutChange = viewModel::onAskAboutChange,
+        onSaveAnyway = viewModel::saveAnyway,
+        onDismissDuplicate = viewModel::dismissDuplicate,
+        onOpenExisting = onOpenExisting,
         onUseLocation = {
             if (viewModel.hasLocationPermission()) {
                 viewModel.fetchLocation()
@@ -149,12 +154,16 @@ fun PersonEditScreen(
     onEducationChange: (String) -> Unit = {},
     onCurrentWorkChange: (String) -> Unit = {},
     onAskAboutChange: (String) -> Unit = {},
+    onSaveAnyway: () -> Unit = {},
+    onDismissDuplicate: () -> Unit = {},
+    onOpenExisting: (Long) -> Unit = {},
 ) {
     // F19: only icon, name and tab are on top. The rest waits in a collapsed section.
     var detailsOpen by rememberSaveable { mutableStateOf(false) }
     // F16: a new person opens with the cursor in the Name field; Name is the only required field.
     val nameFocus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    state.duplicate?.let { DuplicateDialog(it, onOpenExisting, onSaveAnyway, onDismissDuplicate) }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -207,6 +216,8 @@ fun PersonEditScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
+            // F23: the question for the next talk sits right below the name.
+            TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
             TabField(state.tabs, state.tabId, onTabChange)
             DetailsToggle(open = detailsOpen, onToggle = { detailsOpen = !detailsOpen })
             if (detailsOpen) {
@@ -228,7 +239,6 @@ fun PersonEditScreen(
                 TextDetail(state.nativeLanguage, onNativeLanguageChange, R.string.native_language, "nativeLanguageField")
                 TextDetail(state.education, onEducationChange, R.string.education, "educationField")
                 TextDetail(state.currentWork, onCurrentWorkChange, R.string.current_work, "currentWorkField")
-                TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
                 OutlinedTextField(
                     value = state.notes,
                     onValueChange = onNotesChange,
@@ -506,4 +516,40 @@ private fun DateField(epochDay: Long?, onChange: (Long?) -> Unit, label: Int, em
             },
         ) { DatePicker(state = pickerState) }
     }
+}
+
+/** F22: the name exists already. Open that person, save a second one, or go back and change the name. */
+@Composable
+private fun DuplicateDialog(
+    duplicate: DuplicatePerson,
+    onOpen: (Long) -> Unit,
+    onSaveAnyway: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.duplicate_title, duplicate.name)) },
+        text = {
+            Text(stringResource(if (duplicate.archived) R.string.duplicate_body_archived else R.string.duplicate_body))
+        },
+        confirmButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = { onOpen(duplicate.id) },
+                    modifier = Modifier.testTag("openExisting"),
+                ) { Text(stringResource(R.string.duplicate_open)) }
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onSaveAnyway,
+                    modifier = Modifier.testTag("saveAnyway"),
+                ) { Text(stringResource(R.string.duplicate_save_anyway)) }
+                TextButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag("changeName"),
+                ) { Text(stringResource(R.string.duplicate_change_name)) }
+            }
+        },
+    )
 }

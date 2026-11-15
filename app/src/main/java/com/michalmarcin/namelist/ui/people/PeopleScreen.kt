@@ -36,11 +36,13 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import com.michalmarcin.namelist.ui.person.sparkPreview
 import com.michalmarcin.namelist.ui.theme.Navy
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -132,7 +134,7 @@ fun PeopleScreen(
     var dialog by remember { mutableStateOf<BulkDialog?>(null) }
     BackHandler(enabled = state.isSelecting) { onClearSelection() }
     Scaffold(
-        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButtonPosition = FabPosition.End,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (state.isSelecting) {
@@ -167,11 +169,11 @@ fun PeopleScreen(
         },
         floatingActionButton = {
             if (!state.isSelecting) {
-                // F21: twice the usual 56 dp, dark navy, bottom center (ADR-032).
+                // F21: twice the usual 56 dp, dark navy, a circle at the bottom right (ADR-032, ADR-033).
                 FloatingActionButton(
                     onClick = { onAddPerson(state.selectedTabId) },
                     modifier = Modifier.size(AddButtonSize).testTag("addPerson"),
-                    shape = MaterialTheme.shapes.large,
+                    shape = CircleShape,
                     containerColor = Navy,
                     contentColor = Color.White,
                 ) {
@@ -494,10 +496,13 @@ fun PersonRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                val subtitle = person.metCity ?: person.notes.lineSequence().firstOrNull { it.isNotBlank() }
+                // F26: the Conversation Spark comes first, as a short preview under the name.
+                val spark = sparkPreview(person.askAbout)
+                val subtitle = spark ?: person.metCity ?: person.notes.lineSequence().firstOrNull { it.isNotBlank() }
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
+                        modifier = Modifier.testTag(if (spark != null) "spark-${person.id}" else "subtitle-${person.id}"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
                         maxLines = 1,
