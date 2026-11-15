@@ -90,9 +90,15 @@ jobs:
 
       - name: Check APK signature
         if: env.SIGNING_STORE_FILE != ''
+        env:
+          # SHA-256 of the release certificate (signing/README.md).
+          EXPECTED_CERT: 3a7cb4dbffa06864b3858dc21cd4d248f0a0b2687820524aec5cb28e54a998f3
         run: |
-          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
-          "$apksigner" verify --print-certs out/*.apk | grep -E "Signer #1 certificate (DN|SHA-256)"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          echo "Using $apksigner"
+          "$apksigner" verify --verbose --print-certs out/*.apk | tee verify.txt
+          grep -qi "certificate SHA-256 digest: $EXPECTED_CERT" verify.txt \
+            || { echo "::error::APK is not signed with the release key."; exit 1; }
 
       - name: Publish release
         if: env.RELEASE_TAG != '' && env.SIGNING_STORE_FILE != ''
