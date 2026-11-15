@@ -13,12 +13,12 @@ val releaseStoreFile = System.getenv("SIGNING_STORE_FILE")?.let { file(it) }?.ta
 
 android {
     namespace = "com.michalmarcin.namelist"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.michalmarcin.namelist"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = ciVersionCode
         versionName = ciVersionName
     }
