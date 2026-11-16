@@ -299,7 +299,6 @@ private fun PhotoSection(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -> Unit) {
