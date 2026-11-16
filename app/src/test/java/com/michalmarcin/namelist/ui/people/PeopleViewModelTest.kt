@@ -70,7 +70,7 @@ class PeopleViewModelTest {
 
     @Test
     fun bulkActionsNeverTouchHiddenPeople() {
-        val work = runBlocking { tabs.add("Work") }
+        val work = runBlocking { tabs.add("Work")!! }
         val anna = runBlocking { people.save(0, "Anna", "", tabId = work) }
         val peter = runBlocking { people.save(0, "Peter", "") }
         state { it.people.size == 2 }
@@ -90,7 +90,7 @@ class PeopleViewModelTest {
 
     @Test
     fun selectAllAndMoveToTab() {
-        val family = runBlocking { tabs.add("Family") }
+        val family = runBlocking { tabs.add("Family")!! }
         runBlocking {
             people.save(0, "Anna", "")
             people.save(0, "Peter", "")

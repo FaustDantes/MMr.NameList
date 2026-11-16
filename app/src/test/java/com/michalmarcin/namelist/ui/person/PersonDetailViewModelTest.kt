@@ -7,6 +7,7 @@ import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.AddResult
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.RelationTypesRepository
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
 import com.michalmarcin.namelist.data.repo.TabsRepository
 import com.michalmarcin.namelist.testutil.MainDispatcherRule
@@ -41,8 +42,8 @@ class PersonDetailViewModelTest {
         db = AppDatabase.build(ApplicationProvider.getApplicationContext(), inMemory = true)
         people = PeopleRepository(db.personDao())
         tabs = TabsRepository(db.tabDao())
-        links = RelationshipsRepository(db.relationshipDao(), db.personDao())
-        val work = tabs.add("Work")
+        links = RelationshipsRepository(db.relationshipDao(), db.personDao(), db.relationKindDao())
+        val work = tabs.add("Work")!!
         anna = people.save(0, "Anna", "", tabId = work)
         peter = people.save(0, "Peter", "")
     }
@@ -50,7 +51,7 @@ class PersonDetailViewModelTest {
     @After
     fun tearDown() = db.close()
 
-    private fun viewModel(id: Long) = PersonDetailViewModel(people, tabs, links, SavedStateHandle(mapOf("id" to id)))
+    private fun viewModel(id: Long) = PersonDetailViewModel(people, tabs, links, RelationTypesRepository(db.relationKindDao()), SavedStateHandle(mapOf("id" to id)))
 
     @Test
     fun showsThePersonTabAndWhoCanBeLinked() {
@@ -65,12 +66,12 @@ class PersonDetailViewModelTest {
     fun addedLinkShowsAndDuplicateGivesAMessage() {
         val vm = viewModel(anna)
         vm.uiState.await { !it.isLoading }
-        vm.addRelationship(peter, RelationType.SIBLING)
+        vm.addRelationship(peter, RelationType.SIBLING.seedId)
         val withLink = vm.uiState.await { it.relations.isNotEmpty() }
-        assertEquals("Peter" to RelationType.SIBLING, withLink.relations.single().let { it.other.name to it.type })
+        assertEquals("Peter" to RelationType.SIBLING, withLink.relations.single().let { it.other.name to it.type.builtIn })
         assertNull(withLink.relationMessage)
 
-        vm.addRelationship(peter, RelationType.SIBLING)
+        vm.addRelationship(peter, RelationType.SIBLING.seedId)
         vm.uiState.await { it.relationMessage == AddResult.DUPLICATE }
         vm.clearMessage()
         vm.uiState.await { it.relationMessage == null }
@@ -80,14 +81,14 @@ class PersonDetailViewModelTest {
     fun changeAndRemoveALink() {
         val vm = viewModel(peter)
         vm.uiState.await { !it.isLoading }
-        vm.addRelationship(anna, RelationType.FRIEND)
+        vm.addRelationship(anna, RelationType.FRIEND.seedId)
         val link = vm.uiState.await { it.relations.isNotEmpty() }.relations.single()
 
         // On Peter's page: "Anna is Peter's parent", so Anna's page shows Peter as her child.
-        vm.changeRelationshipType(link.id, RelationType.PARENT)
-        vm.uiState.await { it.relations.singleOrNull()?.type == RelationType.PARENT }
+        vm.changeRelationshipType(link.id, RelationType.PARENT.seedId)
+        vm.uiState.await { it.relations.singleOrNull()?.type?.builtIn == RelationType.PARENT }
         val annaView = viewModel(anna).uiState.await { it.relations.isNotEmpty() }
-        assertEquals(RelationType.CHILD, annaView.relations.single().type)
+        assertEquals(RelationType.CHILD, annaView.relations.single().type.builtIn)
 
         vm.removeRelationship(link.id)
         vm.uiState.await { it.relations.isEmpty() }

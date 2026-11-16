@@ -7,6 +7,7 @@ import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.PeopleRepository
 import com.michalmarcin.namelist.data.repo.PersonDraft
+import com.michalmarcin.namelist.data.repo.RelationTypesRepository
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
 import com.michalmarcin.namelist.data.repo.TabsRepository
 import kotlinx.coroutines.runBlocking
@@ -48,7 +49,7 @@ class BackupTest {
         backup = BackupManager(context, db, photos)
         people = PeopleRepository(db.personDao(), deletePhoto = photos::delete)
         tabs = TabsRepository(db.tabDao())
-        links = RelationshipsRepository(db.relationshipDao(), db.personDao())
+        links = RelationshipsRepository(db.relationshipDao(), db.personDao(), db.relationKindDao())
     }
 
     @After
@@ -56,29 +57,34 @@ class BackupTest {
 
     private fun seed(): ByteArray = runBlocking {
         photos.file("anna.jpg").writeBytes(byteArrayOf(1, 2, 3, 4))
-        val work = tabs.add("Work")
+        val work = tabs.add("Work")!!
         val anna = people.save(
             0,
             PersonDraft(
-                "Anna Nováková", "Brno tram", "anna.jpg", setOf(work, tabs.add("Gym")), "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000,
+                "Anna Nováková", "Brno tram", "anna.jpg", setOf(work, tabs.add("Gym")!!), "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000,
                 nativeLanguage = "Slovak", birthDate = 7_000, education = "MSc", currentWork = "Nurse", askAbout = "Her dog",
             ),
         )
         val peter = people.save(0, "Peter", "")
         people.archive(listOf(peter))
-        links.add(anna, peter, RelationType.PARENT)
+        links.add(anna, peter, RelationType.PARENT.seedId)
+        // F30: a type the user made and a renamed built-in type are in the file too.
+        val types = RelationTypesRepository(db.relationKindDao())
+        types.rename(RelationType.FRIEND.seedId, "Buddy")
+        links.add(anna, peter, requireNotNull(types.add("Mentor")))
         val out = ByteArrayOutputStream()
         val summary = backup.export(out)
-        assertEquals(BackupSummary(people = 2, tabs = 2, relationships = 1, photos = 1), summary)
+        assertEquals(BackupSummary(people = 2, tabs = 2, relationships = 2, photos = 1), summary)
         out.toByteArray()
     }
 
     private fun snapshot() = runBlocking {
         val tabLinks = db.personDao().getAllTabLinks().groupBy({ it.personId }, { it.tabId })
-        Triple(
+        listOf(
             db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${tabLinks[it.id]}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.nativeLanguage}|${it.birthDate}|${it.education}|${it.currentWork}|${it.askAbout}|${it.lastUpdatedAt}|${it.archivedAt}|${it.isSelf}" },
             db.tabDao().getAll(),
             db.relationshipDao().getAll(),
+            db.relationKindDao().getAll(),
         )
     }
 
@@ -89,7 +95,7 @@ class BackupTest {
 
         // Change everything after the export.
         people.save(0, "Someone new", "")
-        tabs.add("Family")
+        tabs.add("Family")!!
         db.personDao().getAll().first { it.name == "Anna Nováková" }.let { people.delete(it.id) }
         assertFalse(photos.file("anna.jpg").exists())
         photos.file("orphan.jpg").writeBytes(byteArrayOf(9))
@@ -300,5 +306,33 @@ class BackupTest {
         assertEquals(setOf(7L), people.tabIdsOf(2))
         // A tab that is not in the file is dropped, not kept as a broken link.
         assertEquals(emptySet<Long>(), people.tabIdsOf(3))
+    }
+
+    @Test
+    fun backupOf1_2_0GetsTheBuiltInTypesAndMergesSameNamedTags() = runBlocking {
+        val json = """
+            {"format":"mmr.namelist.backup","version":1,"exportedAt":1,
+             "tabs":[{"id":7,"name":"Work","sortIndex":0},{"id":8,"name":"WORK","sortIndex":1}],
+             "people":[
+               {"id":1,"name":"Me","notes":"","isSelf":true,"sortIndex":0,"createdAt":0},
+               {"id":2,"name":"Anna","notes":"","isSelf":false,"sortIndex":1,"createdAt":5,"tabIds":[7,8]},
+               {"id":3,"name":"Peter","notes":"","isSelf":false,"sortIndex":2,"createdAt":6,"tabIds":[8]}],
+             "relationships":[{"id":1,"from":2,"to":3,"type":"CHILD"},{"id":2,"from":3,"to":2,"type":"GHOST"}]}
+        """.trimIndent()
+        val bytes = ByteArrayOutputStream().also { out ->
+            java.util.zip.ZipOutputStream(out).use { zip ->
+                zip.putNextEntry(java.util.zip.ZipEntry(BackupManager.JSON_ENTRY))
+                zip.write(json.toByteArray())
+                zip.closeEntry()
+            }
+        }.toByteArray()
+
+        backup.import(ByteArrayInputStream(bytes))
+
+        assertEquals(RelationType.entries, db.relationKindDao().getAll().map { it.builtIn })
+        assertEquals(listOf(RelationType.CHILD.seedId, RelationType.OTHER.seedId), db.relationshipDao().getAll().map { it.typeId })
+        assertEquals(listOf("Work"), db.tabDao().getAll().map { it.name })
+        assertEquals(setOf(7L), people.tabIdsOf(2))
+        assertEquals(setOf(7L), people.tabIdsOf(3))
     }
 }

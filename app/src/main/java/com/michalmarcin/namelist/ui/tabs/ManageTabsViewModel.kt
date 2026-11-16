@@ -28,6 +28,9 @@ class ManageTabsViewModel(private val repository: TabsRepository) : ViewModel() 
         viewModelScope.launch { repository.rename(id, name) }
     }
 
+    /** F29: a tag name may exist only once, in any case. The form uses this to block a taken name. */
+    fun isTaken(name: String, exceptId: Long?): Boolean = TabsRepository.isTaken(name, uiState.value.tabs, exceptId)
+
     fun delete(id: Long) {
         viewModelScope.launch { repository.delete(id) }
     }

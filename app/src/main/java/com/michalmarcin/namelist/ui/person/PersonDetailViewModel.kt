@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.michalmarcin.namelist.data.db.Person
-import com.michalmarcin.namelist.data.db.RelationType
+import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.data.repo.AddResult
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.RelationTypesRepository
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
 import com.michalmarcin.namelist.data.repo.TabsRepository
@@ -24,6 +25,8 @@ data class PersonDetailUiState(
     /** Names of all tabs of the person (F28). */
     val tabNames: List<String> = emptyList(),
     val relations: List<RelationView> = emptyList(),
+    /** All relationship types, in the order of Settings (F30). */
+    val relationTypes: List<RelationKind> = emptyList(),
     /** People this person can be linked to: everyone else, "Me" first. */
     val candidates: List<Person> = emptyList(),
     val relationMessage: AddResult? = null,
@@ -35,6 +38,7 @@ class PersonDetailViewModel(
     private val repository: PeopleRepository,
     tabs: TabsRepository,
     private val relationships: RelationshipsRepository,
+    relationTypes: RelationTypesRepository,
     handle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -42,10 +46,17 @@ class PersonDetailViewModel(
     private val deleted = MutableStateFlow(false)
     private val message = MutableStateFlow<AddResult?>(null)
 
-    private val base = combine(repository.observePerson(id), tabs.observeTabs(), repository.observeTabIds(id), deleted) { person, tabList, tabIds, isDeleted ->
+    private val base = combine(
+        repository.observePerson(id),
+        tabs.observeTabs(),
+        repository.observeTabIds(id),
+        relationTypes.observeTypes(),
+        deleted,
+    ) { person, tabList, tabIds, types, isDeleted ->
         PersonDetailUiState(
             person = person,
             tabNames = tabList.filter { it.id in tabIds }.map { it.name },
+            relationTypes = types,
             isLoading = false,
             isDeleted = isDeleted || person == null,
         )
@@ -56,15 +67,15 @@ class PersonDetailViewModel(
             state.copy(relations = relations, candidates = everyone.filter { it.id != id }, relationMessage = msg)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PersonDetailUiState())
 
-    fun addRelationship(otherId: Long, type: RelationType) {
+    fun addRelationship(otherId: Long, typeId: Long) {
         viewModelScope.launch {
-            val result = relationships.add(id, otherId, type)
+            val result = relationships.add(id, otherId, typeId)
             message.value = result.takeIf { it != AddResult.ADDED }
         }
     }
 
-    fun changeRelationshipType(relationId: Long, type: RelationType) {
-        viewModelScope.launch { relationships.changeType(relationId, viewerId = id, type = type) }
+    fun changeRelationshipType(relationId: Long, typeId: Long) {
+        viewModelScope.launch { relationships.changeType(relationId, viewerId = id, typeId = typeId) }
     }
 
     fun removeRelationship(relationId: Long) {

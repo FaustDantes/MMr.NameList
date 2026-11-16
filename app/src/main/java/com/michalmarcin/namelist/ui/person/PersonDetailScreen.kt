@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalContext
-import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.AddResult
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.platform.Coordinates
@@ -99,8 +98,8 @@ fun PersonDetailScreen(
     onOpenMap: (Person) -> Unit = {},
     onOpenPerson: (Long) -> Unit = {},
     onShowOnMap: (Long) -> Unit = {},
-    onAddRelationship: (Long, RelationType) -> Unit = { _, _ -> },
-    onChangeRelationshipType: (Long, RelationType) -> Unit = { _, _ -> },
+    onAddRelationship: (Long, Long) -> Unit = { _, _ -> },
+    onChangeRelationshipType: (Long, Long) -> Unit = { _, _ -> },
     onRemoveRelationship: (Long) -> Unit = {},
     onMessageShown: () -> Unit = {},
 ) {
@@ -166,6 +165,7 @@ fun PersonDetailScreen(
             AddRelationshipContent(
                 personName = person.name,
                 candidates = state.candidates,
+                types = state.relationTypes,
                 onAdd = { otherId, type ->
                     addingRelation = false
                     onAddRelationship(otherId, type)
@@ -179,10 +179,11 @@ fun PersonDetailScreen(
             Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                 ChangeTypeContent(
                     name = relation.other.name,
+                    types = state.relationTypes,
                     current = relation.type,
                     onSelect = { type ->
                         changing = null
-                        onChangeRelationshipType(relation.id, type)
+                        onChangeRelationshipType(relation.id, type.id)
                     },
                     onCancel = { changing = null },
                 )

@@ -48,10 +48,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Surface
 import com.michalmarcin.namelist.ui.tabs.TabNameForm
@@ -115,6 +116,7 @@ fun PersonEditRoute(
         onRemovePhoto = viewModel::removePhoto,
         onTabChange = viewModel::onTabToggle,
         onAddTab = viewModel::onAddTab,
+        isTagTaken = viewModel::isTagTaken,
         onPlaceChange = viewModel::onPlaceChange,
         onFirstMetChange = viewModel::onFirstMetChange,
         onNativeLanguageChange = viewModel::onNativeLanguageChange,
@@ -162,6 +164,7 @@ fun PersonEditScreen(
     onDismissDuplicate: () -> Unit = {},
     onOpenExisting: (Long) -> Unit = {},
     onAddTab: (String) -> Unit = {},
+    isTagTaken: (String) -> Boolean = { false },
 ) {
     // F19: only icon, name and tab are on top. The rest waits in a collapsed section.
     var detailsOpen by rememberSaveable { mutableStateOf(false) }
@@ -223,7 +226,7 @@ fun PersonEditScreen(
             )
             // F23: the question for the next talk sits right below the name.
             TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
-            TabField(state.tabs, state.tabIds, onTabChange, onAddTab)
+            TabField(state.tabs, state.tabIds, onTabChange, onAddTab, isTagTaken)
             DetailsToggle(open = detailsOpen, onToggle = { detailsOpen = !detailsOpen })
             if (detailsOpen) {
                 PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
@@ -305,10 +308,17 @@ private fun PhotoSection(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -> Unit, onAdd: (String) -> Unit) {
+private fun TabField(
+    tabs: List<Tab>,
+    selectedIds: Set<Long>,
+    onToggle: (Long) -> Unit,
+    onAdd: (String) -> Unit,
+    isTaken: (String) -> Boolean,
+) {
     var adding by rememberSaveable { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
     if (adding) {
         BasicAlertDialog(onDismissRequest = { adding = false }) {
             Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
@@ -320,35 +330,57 @@ private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -
                         onAdd(it)
                     },
                     onCancel = { adding = false },
+                    isTaken = isTaken,
                 )
             }
         }
     }
-    // F28: a person can be in many tabs, so the tabs are chips that switch on and off.
+    val chosen = tabs.filter { it.id in selectedIds }.joinToString(", ") { it.name }
+    // F31: one dropdown with many choices, and a plus button next to it for a new tag.
     Column(Modifier.fillMaxWidth().testTag("tabField"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             stringResource(R.string.manage_tabs),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            tabs.forEach { tab ->
-                FilterChip(
-                    selected = tab.id in selectedIds,
-                    onClick = { onToggle(tab.id) },
-                    label = { Text(tab.name) },
-                    shape = MaterialTheme.shapes.small,
-                    modifier = Modifier.testTag("tabChip-${tab.id}"),
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = { open = true },
+                    modifier = Modifier.fillMaxWidth().testTag("tagDropdown"),
+                ) {
+                    Text(
+                        chosen.ifEmpty { stringResource(R.string.no_tab) },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(painterResource(R.drawable.ic_expand_more), contentDescription = null)
+                }
+                DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                    if (tabs.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.tabs_empty_title)) },
+                            onClick = {},
+                            enabled = false,
+                        )
+                    }
+                    tabs.forEach { tab ->
+                        // The menu stays open, so the user can pick several tags in one go.
+                        DropdownMenuItem(
+                            text = { Text(tab.name) },
+                            leadingIcon = { Checkbox(checked = tab.id in selectedIds, onCheckedChange = null) },
+                            onClick = { onToggle(tab.id) },
+                            modifier = Modifier.testTag("tagOption-${tab.id}"),
+                        )
+                    }
+                }
             }
-            // A new tab can be made here, without leaving the form.
-            AssistChip(
-                onClick = { adding = true },
-                label = { Text(stringResource(R.string.add_tab)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier.testTag("addTabChip"),
-            )
+            Spacer(Modifier.width(8.dp))
+            IconButton(onClick = { adding = true }, modifier = Modifier.testTag("addTagButton")) {
+                Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_tab))
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import com.michalmarcin.namelist.ui.person.PersonDetailRoute
 import com.michalmarcin.namelist.ui.person.PersonEditRoute
 import com.michalmarcin.namelist.ui.settings.SettingsRoute as SettingsScreenRoute
 import com.michalmarcin.namelist.ui.tabs.ManageTabsRoute as ManageTabsScreenRoute
+import com.michalmarcin.namelist.ui.relationtypes.ManageRelationTypesRoute as ManageRelationTypesScreenRoute
 
 @Composable
 fun AppNavHost(startWithAdd: Boolean = false, onExit: () -> Unit = {}) {
@@ -67,10 +68,17 @@ fun AppNavHost(startWithAdd: Boolean = false, onExit: () -> Unit = {}) {
             )
         }
         composable<SettingsRoute> {
-            SettingsScreenRoute(onBack = { nav.popBackStack() })
+            SettingsScreenRoute(
+                onBack = { nav.popBackStack() },
+                onManageTags = { nav.navigate(ManageTabsRoute) },
+                onManageRelationTypes = { nav.navigate(ManageRelationTypesRoute) },
+            )
         }
         composable<ManageTabsRoute> {
             ManageTabsScreenRoute(onBack = { nav.popBackStack() })
+        }
+        composable<ManageRelationTypesRoute> {
+            ManageRelationTypesScreenRoute(onBack = { nav.popBackStack() })
         }
     }
 }

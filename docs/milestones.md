@@ -32,6 +32,7 @@ Each milestone ends with:
 | M15 | Big add button | F21 | Navy 112 dp add button at the bottom center of the people list. Release 1.2.0. |
 | M16 | Same name, spark, search, languages | F22 to F27 | Duplicate-name dialog, Conversation Spark, search by any field and date, version and report, five languages with a drop-down, 88 dp add button. Release 1.2.0. |
 | M17 | Many tabs per person | F28 | A person can be in several tabs; migration 5 to 6; backups carry all tabs. Release 1.3.0. |
+| M18 | Tags and relationship types | F29, F30, F31 | Tabs are tags with unique names; relationship types are edited in Settings; tag drop-down in the edit form; migration 6 to 7. Release 1.3.0. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

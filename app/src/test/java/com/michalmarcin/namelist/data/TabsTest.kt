@@ -43,8 +43,8 @@ class TabsTest {
 
     @Test
     fun tabFilterShowsOnlyThatTab() = runBlocking {
-        val work = tabs.add("Work")
-        val family = tabs.add("Family")
+        val work = tabs.add("Work")!!
+        val family = tabs.add("Family")!!
         people.save(0, "Anna", "", tabId = work)
         people.save(0, "Peter", "", tabId = family)
         people.save(0, "Eva", "")
@@ -55,7 +55,7 @@ class TabsTest {
 
     @Test
     fun searchIsGlobalAndIgnoresTheTab() = runBlocking {
-        val work = tabs.add("Work")
+        val work = tabs.add("Work")!!
         people.save(0, "Anna", "", tabId = work)
         people.save(0, "Peter", "")
         assertEquals(listOf("Peter"), names(tabId = work, query = "pet"))
@@ -63,7 +63,7 @@ class TabsTest {
 
     @Test
     fun deletingATabKeepsItsPeopleWithoutATab() = runBlocking {
-        val work = tabs.add("Work")
+        val work = tabs.add("Work")!!
         val anna = people.save(0, "Anna", "", tabId = work)
         tabs.delete(work)
         assertEquals(emptySet<Long>(), people.tabIdsOf(anna))
@@ -72,9 +72,9 @@ class TabsTest {
 
     @Test
     fun renameAndReorderTabs() = runBlocking {
-        val a = tabs.add("Work")
-        val b = tabs.add("Family")
-        val c = tabs.add("Sport")
+        val a = tabs.add("Work")!!
+        val b = tabs.add("Family")!!
+        val c = tabs.add("Sport")!!
         tabs.rename(a, "  Office ")
         tabs.reorder(listOf(c, a, b))
         assertEquals(listOf("Sport", "Office", "Family"), tabNames())
@@ -82,7 +82,7 @@ class TabsTest {
 
     @Test
     fun reorderInsideATabKeepsOtherPeopleInPlace() = runBlocking {
-        val work = tabs.add("Work")
+        val work = tabs.add("Work")!!
         val anna = people.save(0, "Anna", "", tabId = work)
         people.save(0, "Peter", "")
         val eva = people.save(0, "Eva", "", tabId = work)
@@ -95,8 +95,8 @@ class TabsTest {
 
     @Test
     fun aPersonInTwoTabsShowsInBothAndSurvivesLosingOne() = runBlocking {
-        val work = tabs.add("Work")
-        val gym = tabs.add("Gym")
+        val work = tabs.add("Work")!!
+        val gym = tabs.add("Gym")!!
         val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work, gym)))
         people.save(0, "Peter", "", tabId = work)
 
@@ -112,8 +112,8 @@ class TabsTest {
 
     @Test
     fun movingPeopleToATabReplacesAllTheirTabs() = runBlocking {
-        val work = tabs.add("Work")
-        val gym = tabs.add("Gym")
+        val work = tabs.add("Work")!!
+        val gym = tabs.add("Gym")!!
         val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work, gym)))
         people.moveToTab(listOf(anna), gym)
         assertEquals(setOf(gym), people.tabIdsOf(anna))
@@ -123,12 +123,24 @@ class TabsTest {
 
     @Test
     fun savingAgainKeepsAndChangesTabs() = runBlocking {
-        val work = tabs.add("Work")
-        val gym = tabs.add("Gym")
+        val work = tabs.add("Work")!!
+        val gym = tabs.add("Gym")!!
         val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work)))
         people.save(anna, PersonDraft("Anna", tabIds = setOf(work, gym)))
         assertEquals(setOf(work, gym), people.tabIdsOf(anna))
         people.save(anna, PersonDraft("Anna"))
         assertEquals(emptySet<Long>(), people.tabIdsOf(anna))
+    }
+
+    @Test
+    fun aTagNameExistsOnlyOnceInAnyCase() = runBlocking {
+        val work = tabs.add("Work")!!
+        assertNull(tabs.add("work"))
+        assertNull(tabs.add("  WORK "))
+        val gym = tabs.add("Gym")!!
+        // Renaming to a name that another tag has is refused; a new case of its own name is fine.
+        assertEquals(false, tabs.rename(gym, "wOrK"))
+        assertEquals(true, tabs.rename(work, "WORK"))
+        assertEquals(listOf("WORK", "Gym"), tabNames())
     }
 }

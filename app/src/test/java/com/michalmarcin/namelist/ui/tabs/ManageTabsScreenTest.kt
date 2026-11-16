@@ -37,7 +37,7 @@ class ManageTabsScreenTest {
     @Test
     fun emptyStateWhenNoTabs() {
         show(ManageTabsUiState(isLoading = false))
-        compose.onNodeWithText("No tabs yet").assertIsDisplayed()
+        compose.onNodeWithText("No tags yet").assertIsDisplayed()
     }
 
     @Test
@@ -61,5 +61,26 @@ class ManageTabsScreenTest {
         compose.onNodeWithTag("delete-${SampleData.tabs[1].id}").performClick()
         compose.onNodeWithTag("confirmDeleteTab").performClick()
         assertEquals(listOf(SampleData.tabs[1].id), deleted)
+    }
+
+    @Test
+    fun aTakenNameShowsAnErrorAndCannotBeSaved() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                TabNameForm(
+                    title = "Add tag",
+                    initial = "",
+                    onConfirm = { added += it },
+                    onCancel = {},
+                    isTaken = { it.trim().equals("work", ignoreCase = true) },
+                )
+            }
+        }
+        compose.onNodeWithTag("tabNameField").performTextInput("WORK")
+        compose.onNodeWithText("This name exists already.").assertExists()
+        compose.onNodeWithTag("confirmTabName").assertIsNotEnabled()
+        compose.onNodeWithTag("tabNameField").performTextInput("s")
+        compose.onNodeWithTag("confirmTabName").performClick()
+        assertEquals(listOf("WORKs"), added)
     }
 }

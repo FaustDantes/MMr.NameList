@@ -117,4 +117,26 @@ class SettingsTest {
         SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM)
         assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, SettingsStore(context).language.value)
     }
+
+    @Test
+    fun tagsAndRelationshipTypesOpenFromSettings() {
+        val opened = mutableListOf<String>()
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                SettingsScreen(
+                    state = SettingsUiState(),
+                    versionName = "1",
+                    onBack = {},
+                    onThemeChange = {},
+                    onExport = {},
+                    onImport = {},
+                    onManageTags = { opened += "tags" },
+                    onManageRelationTypes = { opened += "types" },
+                )
+            }
+        }
+        compose.onNodeWithTag("manageTagsButton").performClick()
+        compose.onNodeWithTag("manageRelationTypesButton").performClick()
+        assertEquals(listOf("tags", "types"), opened)
+    }
 }

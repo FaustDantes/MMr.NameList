@@ -60,6 +60,8 @@ import java.time.LocalDate
 @Composable
 fun SettingsRoute(
     onBack: () -> Unit,
+    onManageTags: () -> Unit = {},
+    onManageRelationTypes: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -93,6 +95,8 @@ fun SettingsRoute(
             if (!sent) Toast.makeText(context, noMail, Toast.LENGTH_LONG).show()
         },
         onBack = onBack,
+        onManageTags = onManageTags,
+        onManageRelationTypes = onManageRelationTypes,
         onThemeChange = viewModel::setTheme,
         onLanguageChange = { language ->
             viewModel.setLanguage(language)
@@ -132,6 +136,8 @@ fun SettingsScreen(
     onExport: () -> Unit,
     onImport: () -> Unit,
     onLanguageChange: (AppLanguage) -> Unit = {},
+    onManageTags: () -> Unit = {},
+    onManageRelationTypes: () -> Unit = {},
     modifier: Modifier = Modifier,
     actions: SettingsActions = SettingsActions(),
 ) {
@@ -159,6 +165,25 @@ fun SettingsScreen(
         ) {
             DetailSection(title = stringResource(R.string.language)) {
                 LanguageDropdown(state.language, onLanguageChange)
+            }
+            // F31: the lists the person picks from are edited here.
+            DetailSection(title = stringResource(R.string.lists)) {
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onManageTags,
+                    modifier = Modifier.fillMaxWidth().testTag("manageTagsButton"),
+                ) {
+                    Text(stringResource(R.string.manage_tabs), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
+                }
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onManageRelationTypes,
+                    modifier = Modifier.fillMaxWidth().testTag("manageRelationTypesButton"),
+                ) {
+                    Text(stringResource(R.string.relation_types), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
+                }
             }
             DetailSection(title = stringResource(R.string.theme)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

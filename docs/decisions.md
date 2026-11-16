@@ -307,3 +307,20 @@ Status: accepted
 Decision: German and Polish are removed (`values-de`, `values-pl`, their entries in `locales_config.xml` and in `AppLanguage`). Supersedes the language list in ADR-033 (F25) and ADR-034. A phone that is set to German or Polish now shows English. A saved choice of "de" or "pl" is read as "System language" (`AppLanguage.fromTag`). The edit form always shows the tab chips, with an "Add tab" chip that opens the tab name form, creates the tab and puts the person in it (F28). The texts reuse existing strings, so the new control is in all three languages.
 Reason: The owner asked for this on 2026-11-16. Adding a tab needed a trip to the tabs screen, and with no tabs the form showed nothing.
 Alternatives: Keep the two languages hidden (dead translations still cost upkeep).
+
+## ADR-037: Tags with unique names; relationship types as an editable list
+
+Date: 2026-11-16
+Status: accepted
+Decision:
+- "Tab" is called "tag" in the app (en: tag, sk: štítok, cs: štítek). Code, table (`tab`, `person_tab`) and backup keys keep the old name, so no data moves and older backups still import.
+- A tag name exists only once. Two names are the same when they match without case and outer spaces (`labelKey`). The name form shows "This name exists already." and cannot be saved. The repository refuses the name too. In the edit form, a taken name picks the existing tag.
+- Migration 6 to 7 and the backup import merge tags whose names differ only in case: links go to the first tag (by order), the rest are deleted.
+- Relationship types are rows in a new table `relation_type` (id, name, builtIn, sortIndex). The nine built-in types have fixed ids 1 to 9 (`RelationType.seedId`). `name` is null for a built-in type the user did not rename, so it shows in the app language. `relationship.type` (a name) becomes `relationship.typeId`. Room cannot change a column with an auto migration and keep the data, so `Migration6To7` is written by hand and tested.
+- A type name is unique in the same way. A built-in type that is not renamed blocks its label in all three languages.
+- Deleting a type turns its relationships into "Other"; a link that would then be a copy of an existing one is dropped. "Other" (the target of that move), "Parent" and "Child" (a pair: one is the other seen from the other side) can be renamed but not deleted. A type the user makes reads the same from both sides.
+- Settings has a "Tags and relationships" section that opens the tags screen and the new relationship types screen. The people list keeps its tags button.
+- The edit form shows one drop-down for tags with a check box per tag (the menu stays open for more choices) and a plus button next to it to make a new tag.
+- The backup format stays version 1: `relationTypes` and `typeId` are new optional fields; `type` stays for older app versions (a type the user made is written as OTHER there).
+Reason: The owner asked for this on 2026-11-16.
+Alternatives: Rename the code and tables to "tag" (large change and a migration for no user value). Store the type name in each relationship (a rename would have to touch every link). Let the user delete every type (deleting "Other" leaves no safe target; deleting one of parent and child breaks the reverse reading). Let custom types have a reverse type (more UI; can come later).

@@ -21,6 +21,12 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-16 (1.3.0, F29 to F31, owner request)
+
+- ADR-037: tabs are tags with unique names (case ignored); relationship types are a list in Settings; tag drop-down with a plus button in the edit form. Database 6 to 7, hand-written migration, tested.
+- Decisions I made without asking: "Other", "Parent" and "Child" cannot be deleted; deleting a type turns its links into "Other"; types you make read the same from both sides; code and tables keep the name "tab".
+- Check on the phone: update from rc2 and see that relationships keep their type; add a type, rename "Friend", delete a type in use; try a tag name in other capitals; pick two tags in the drop-down.
+
 ### 2026-11-16 (1.3.0, F28, owner request)
 
 - ADR-036: add a tab from the edit form; German and Polish removed. I read "the tabs should be also localised" as: the new add-tab control must be translated; it reuses existing strings, so it is in Slovak and Czech. Tell me if you meant something else, such as tab names.

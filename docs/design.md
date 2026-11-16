@@ -45,7 +45,7 @@ The launcher icon shape comes from the phone's launcher. The app cannot force it
 - **Avatar fallback**: initials in a square on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
 - **Empty states**: one short friendly sentence and one action button.
 - **Search field**: always visible at the top of the People screen.
-- **Add buttons**: icon only with a content description for screen readers. The people list has one 112 dp dark navy person-add button at the bottom center (ADR-032). The "add tab" button on the tabs screen stays small, light blue, bottom right.
+- **Add buttons**: icon only with a content description for screen readers. The people list has one 112 dp dark navy person-add button at the bottom center (ADR-032). The "add tag" button on the tags screen and the "add relationship type" button stay small, light blue, bottom right.
 
 ## 5. Accessibility
 

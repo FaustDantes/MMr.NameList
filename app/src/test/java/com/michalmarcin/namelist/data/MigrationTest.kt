@@ -5,6 +5,7 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.michalmarcin.namelist.data.db.AppDatabase
+import com.michalmarcin.namelist.data.db.Migration6To7
 import com.michalmarcin.namelist.data.db.PersonTabMigration
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -132,12 +133,47 @@ class MigrationTest {
     }
 
     @Test
+    fun version6To7KeepsRelationshipsAsTypeIdsAndMergesSameNamedTags() {
+        helper.createDatabase(DB, 6).apply {
+            execSQL(
+                "INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES " +
+                    "(1, 'Me', '', 1, 0, 0), (2, 'Anna', '', 0, 1, 5), (3, 'Peter', '', 0, 2, 6)",
+            )
+            execSQL("INSERT INTO relationship (id, fromPersonId, toPersonId, type) VALUES (1, 2, 3, 'PARENT'), (2, 3, 2, 'GHOST')")
+            execSQL("INSERT INTO tab (id, name, sortIndex) VALUES (1, 'Work', 0), (2, 'work ', 1), (3, 'Gym', 2)")
+            execSQL("INSERT INTO person_tab (personId, tabId) VALUES (2, 1), (2, 2), (3, 2), (3, 3)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 7, true, Migration6To7)
+        db.query("SELECT id, builtIn FROM relation_type ORDER BY id").use {
+            assertEquals(9, it.count)
+            it.moveToPosition(4)
+            assertEquals(5L, it.getLong(0))
+            assertEquals("PARENT", it.getString(1))
+        }
+        // PARENT keeps its meaning; an unknown name becomes OTHER (id 9).
+        db.query("SELECT id, typeId FROM relationship ORDER BY id").use {
+            assertTrue(it.moveToFirst())
+            assertEquals(5L, it.getLong(1))
+            assertTrue(it.moveToNext())
+            assertEquals(9L, it.getLong(1))
+        }
+        // "work " is merged into "Work"; nobody loses a tag and nobody has it twice.
+        db.query("SELECT id FROM tab ORDER BY id").use { assertEquals(2, it.count) }
+        db.query("SELECT personId, tabId FROM person_tab ORDER BY personId, tabId").use {
+            val rows = mutableListOf<Pair<Long, Long>>()
+            while (it.moveToNext()) rows += it.getLong(0) to it.getLong(1)
+            assertEquals(listOf(2L to 1L, 3L to 1L, 3L to 3L), rows)
+        }
+    }
+
+    @Test
     fun version1To3InOneUpdate() {
         helper.createDatabase(DB, 1).apply {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 6, true)
+        val db = helper.runMigrationsAndValidate(DB, 7, true, Migration6To7)
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))

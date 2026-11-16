@@ -61,6 +61,7 @@ fun ManageTabsRoute(
         onRename = viewModel::rename,
         onDelete = viewModel::delete,
         onReorder = viewModel::reorder,
+        isTaken = viewModel::isTaken,
     )
 }
 
@@ -81,6 +82,7 @@ fun ManageTabsScreen(
     onDelete: (Long) -> Unit,
     onReorder: (List<Long>) -> Unit,
     modifier: Modifier = Modifier,
+    isTaken: (name: String, exceptId: Long?) -> Boolean = { _, _ -> false },
 ) {
     var dialog by remember { mutableStateOf<TabDialog?>(null) }
     Scaffold(
@@ -130,12 +132,14 @@ fun ManageTabsScreen(
             initial = "",
             onConfirm = { onAdd(it); dialog = null },
             onDismiss = { dialog = null },
+            isTaken = { isTaken(it, null) },
         )
         is TabDialog.Rename -> NameDialog(
             title = stringResource(R.string.rename_tab),
             initial = current.tab.name,
             onConfirm = { onRename(current.tab.id, it); dialog = null },
             onDismiss = { dialog = null },
+            isTaken = { isTaken(it, current.tab.id) },
         )
         is TabDialog.Delete -> AlertDialog(
             onDismissRequest = { dialog = null },
@@ -224,25 +228,56 @@ private fun TabList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NameDialog(title: String, initial: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+fun NameDialog(
+    title: String,
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    fieldLabel: String = stringResource(R.string.tab_name),
+    isTaken: (String) -> Boolean = { false },
+) {
     BasicAlertDialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-            TabNameForm(title = title, initial = initial, onConfirm = onConfirm, onCancel = onDismiss)
+            TabNameForm(
+                title = title,
+                initial = initial,
+                onConfirm = onConfirm,
+                onCancel = onDismiss,
+                fieldLabel = fieldLabel,
+                isTaken = isTaken,
+            )
         }
     }
 }
 
-/** Content of the add and rename dialogs. Separate from the dialog window so tests can drive it. */
+/**
+ * Content of the add and rename dialogs for tags and relationship types. Separate from the dialog
+ * window so tests can drive it. A name for which [isTaken] is true shows an error and cannot be saved (F29).
+ */
 @Composable
-fun TabNameForm(title: String, initial: String, onConfirm: (String) -> Unit, onCancel: () -> Unit) {
+fun TabNameForm(
+    title: String,
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onCancel: () -> Unit,
+    fieldLabel: String = stringResource(R.string.tab_name),
+    isTaken: (String) -> Boolean = { false },
+) {
     var name by rememberSaveable { mutableStateOf(initial) }
+    val taken = name.isNotBlank() && isTaken(name)
     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall)
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(stringResource(R.string.tab_name)) },
+            label = { Text(fieldLabel) },
             singleLine = true,
+            isError = taken,
+            supportingText = if (taken) {
+                { Text(stringResource(R.string.name_taken), modifier = Modifier.testTag("nameTaken")) }
+            } else {
+                null
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("tabNameField"),
@@ -254,7 +289,7 @@ fun TabNameForm(title: String, initial: String, onConfirm: (String) -> Unit, onC
             TextButton(
                 shape = MaterialTheme.shapes.large,
                 onClick = { onConfirm(name) },
-                enabled = name.isNotBlank(),
+                enabled = name.isNotBlank() && !taken,
                 modifier = Modifier.testTag("confirmTabName"),
             ) { Text(stringResource(R.string.save)) }
         }

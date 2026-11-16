@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.michalmarcin.namelist.R
 import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.ui.components.Avatar
@@ -55,6 +56,10 @@ fun RelationType.labelRes(): Int = when (this) {
     RelationType.NEIGHBOUR -> R.string.rel_neighbour
     RelationType.OTHER -> R.string.rel_other
 }
+
+/** The name the user gave the type, or the built-in label in the app language (F30). */
+@Composable
+fun RelationKind.label(): String = name ?: stringResource((builtIn ?: RelationType.OTHER).labelRes())
 
 /** Section on the detail screen: each line reads "[name] — is this person's [type]". */
 @Composable
@@ -115,7 +120,7 @@ private fun RelationRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                stringResource(relation.type.labelRes()),
+                relation.type.label(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -147,18 +152,23 @@ private fun RelationRow(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RelationTypeChips(selected: RelationType?, onSelect: (RelationType) -> Unit, modifier: Modifier = Modifier) {
+fun RelationTypeChips(
+    types: List<RelationKind>,
+    selectedId: Long?,
+    onSelect: (RelationKind) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        RelationType.entries.forEach { type ->
+        types.forEach { type ->
             FilterChip(
-                selected = type == selected,
+                selected = type.id == selectedId,
                 onClick = { onSelect(type) },
-                label = { Text(stringResource(type.labelRes())) },
+                label = { Text(type.label()) },
                 shape = MaterialTheme.shapes.small,
-                modifier = Modifier.testTag("type-${type.name}"),
+                modifier = Modifier.testTag("type-${type.id}"),
             )
         }
     }
@@ -172,25 +182,28 @@ fun RelationTypeChips(selected: RelationType?, onSelect: (RelationType) -> Unit,
 fun AddRelationshipContent(
     personName: String,
     candidates: List<Person>,
-    onAdd: (otherId: Long, type: RelationType) -> Unit,
+    types: List<RelationKind>,
+    onAdd: (otherId: Long, typeId: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var type by rememberSaveable { mutableStateOf(RelationType.FRIEND) }
+    var typeId by rememberSaveable { mutableStateOf(RelationType.FRIEND.seedId) }
+    // "Friend" may have been deleted in Settings; then the first type is picked.
+    val type = types.firstOrNull { it.id == typeId } ?: types.firstOrNull()
     Column(modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.add_relationship), style = MaterialTheme.typography.titleLarge)
         Text(
-            stringResource(R.string.relationship_hint, personName, stringResource(type.labelRes()).lowercase()),
+            stringResource(R.string.relationship_hint, personName, type?.label().orEmpty().lowercase()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        RelationTypeChips(selected = type, onSelect = { type = it })
+        RelationTypeChips(types = types, selectedId = type?.id, onSelect = { typeId = it.id })
         LazyColumn(Modifier.fillMaxWidth().heightIn(max = 360.dp)) {
             items(candidates, key = { it.id }) { person ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 56.dp)
-                        .clickable { onAdd(person.id, type) }
+                        .clickable(enabled = type != null) { type?.let { onAdd(person.id, it.id) } }
                         .testTag("candidate-${person.id}"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -208,13 +221,14 @@ fun AddRelationshipContent(
 @Composable
 fun ChangeTypeContent(
     name: String,
-    current: RelationType,
-    onSelect: (RelationType) -> Unit,
+    types: List<RelationKind>,
+    current: RelationKind,
+    onSelect: (RelationKind) -> Unit,
     onCancel: () -> Unit,
 ) {
     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(stringResource(R.string.change_type_title, name), style = MaterialTheme.typography.titleLarge)
-        RelationTypeChips(selected = current, onSelect = onSelect)
+        RelationTypeChips(types = types, selectedId = current.id, onSelect = onSelect)
         TextButton(shape = MaterialTheme.shapes.large, onClick = onCancel, modifier = Modifier.align(Alignment.End)) {
             Text(stringResource(R.string.cancel))
         }

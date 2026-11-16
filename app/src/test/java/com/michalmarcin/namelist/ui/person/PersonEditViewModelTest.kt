@@ -93,7 +93,7 @@ class PersonEditViewModelTest {
 
     @Test
     fun newPersonIsSavedTrimmedInThePreselectedTab() {
-        val work = runBlocking { tabs.add("Work") }
+        val work = runBlocking { tabs.add("Work")!! }
         val vm = viewModel(tabId = work)
         vm.uiState.await { it.tabs.isNotEmpty() }
         assertEquals(setOf(work), vm.uiState.value.tabIds)
@@ -109,6 +109,18 @@ class PersonEditViewModelTest {
         assertEquals("Met at the tram stop", anna.notes)
         assertEquals("Brno, Morava", anna.metCity)
         assertEquals(setOf(work), runBlocking { people.tabIdsOf(anna.id) })
+    }
+
+    @Test
+    fun aTagNameThatExistsPicksTheExistingTag() {
+        val work = runBlocking { tabs.add("Work")!! }
+        val vm = viewModel()
+        vm.uiState.await { it.tabs.size == 1 }
+        assertEquals(true, vm.isTagTaken(" work"))
+        assertEquals(false, vm.isTagTaken("Gym"))
+        vm.onAddTab("WORK")
+        vm.uiState.await { it.tabIds == setOf(work) }
+        assertEquals(1, runBlocking { tabs.observeTabs().first().size })
     }
 
     @Test
@@ -128,8 +140,8 @@ class PersonEditViewModelTest {
 
     @Test
     fun aPersonCanBeInManyTabs() {
-        val work = runBlocking { tabs.add("Work") }
-        val gym = runBlocking { tabs.add("Gym") }
+        val work = runBlocking { tabs.add("Work")!! }
+        val gym = runBlocking { tabs.add("Gym")!! }
         val vm = viewModel()
         vm.uiState.await { it.tabs.size == 2 }
         vm.onNameChange("Anna")

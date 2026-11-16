@@ -117,14 +117,22 @@ class PersonEditViewModel(
 
     fun onNotesChange(value: String) = state.update { it.copy(notes = value) }
 
-    /** F28: makes a new tab from the edit form and puts the person in it. A blank name does nothing. */
+    /**
+     * F28, F31: makes a new tag from the edit form and gives it to the person. A blank name does nothing.
+     * A name that exists already (any case, F29) picks the existing tag instead of making a second one.
+     */
     fun onAddTab(name: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
             val tabId = tabs.add(name)
+                ?: state.value.tabs.firstOrNull { TabsRepository.isTaken(name, listOf(it)) }?.id
+                ?: return@launch
             state.update { it.copy(tabIds = it.tabIds + tabId) }
         }
     }
+
+    /** F29: the add-tag form uses this to block a name that another tag has. */
+    fun isTagTaken(name: String): Boolean = TabsRepository.isTaken(name, state.value.tabs)
 
     /** Puts the person in the tab, or takes them out of it (F28). */
     fun onTabToggle(tabId: Long) = state.update {

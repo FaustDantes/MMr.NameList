@@ -41,7 +41,7 @@ Use the latest stable version of each library at build time. Do not use versions
 Use three layers. Do not add a domain layer unless two or more screens share a use case.
 
 1. **UI**: Compose screens. One ViewModel per screen. State flows in one direction: the ViewModel exposes `StateFlow<UiState>`, and the screen sends events back.
-2. **Data**: Room entities, DAOs, and one repository per aggregate (People, Tabs, Relationships, Reminders, Backup).
+2. **Data**: Room entities, DAOs, and one repository per aggregate (People, Tabs, Relationship types, Relationships, Backup).
 3. **Platform**: thin wrappers for camera, photo picker, location, alarms, notifications and file export. Each wrapper has an interface, so tests can replace it.
 
 ## 5. Package layout
@@ -64,8 +64,10 @@ app/src/main/java/<package>/
 | Entity | Fields |
 |---|---|
 | Person | id, name, photoFile (nullable), tabId (nullable), metCity ("City, state" text, nullable), metLat, metLon (nullable), notes, isSelf, sortIndex, createdAt. Unused since ADR-019: originCountry, metCountry. |
-| Tab | id, name, sortIndex |
-| Relationship | id, fromPersonId, toPersonId, type. Foreign keys with ON DELETE CASCADE. Unique index on (fromPersonId, toPersonId, type). |
+| Tab (shown as "tag", ADR-037) | id, name (unique without case, checked in code), sortIndex |
+| PersonTab | personId, tabId. Many tags per person (F28). |
+| RelationKind (`relation_type`) | id, name (null = built-in label), builtIn (enum name or null), sortIndex. Built-in ids 1 to 9 (F30). |
+| Relationship | id, fromPersonId, toPersonId, typeId. Foreign keys with ON DELETE CASCADE. Unique index on (fromPersonId, toPersonId, typeId). |
 
 Rules:
 

@@ -126,3 +126,12 @@ Settings has a drop-down with a flag and the name of each language, "System lang
 
 ### F28 Many tabs per person (added by the owner on 2026-11-16)
 A person can be in several tabs, for example "Gym" and "Work". The edit form shows the tabs as chips that switch on and off. A tab shows everyone who is in it. Deleting a tab removes only the link. "Move to tab" in multi-select puts the people in that one tab (it replaces their other tabs). The detail page lists all tabs. The edit form has an "Add tab" chip, so a new tab can be made without leaving the form. Backups carry all tabs; backups of 1.2.0 and older import with their single tab (ADR-035).
+
+### F29 Tags with unique names (added by the owner on 2026-11-16)
+Tabs are called tags. Only one tag with a name can exist; capitals and outer spaces do not count. See ADR-037.
+
+### F30 Editable relationship types (added by the owner on 2026-11-16)
+The list of relationship types is edited in Settings: add, rename and delete. Names are unique in the same way as tags. "Other", "Parent" and "Child" stay. See ADR-037.
+
+### F31 Lists in Settings and a tag drop-down (added by the owner on 2026-11-16)
+Settings opens the list of tags and the list of relationship types. The edit form shows the tags in one drop-down with many choices, and a plus button next to it adds a new tag. See ADR-037.

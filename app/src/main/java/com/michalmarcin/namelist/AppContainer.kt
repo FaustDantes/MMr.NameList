@@ -1,6 +1,12 @@
 package com.michalmarcin.namelist
 
 import android.content.Context
+import android.content.res.Configuration
+import com.michalmarcin.namelist.data.db.RelationType
+import com.michalmarcin.namelist.data.repo.RelationTypesRepository
+import com.michalmarcin.namelist.platform.AppLanguage
+import com.michalmarcin.namelist.ui.person.labelRes
+import java.util.Locale
 import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.repo.PeopleRepository
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
@@ -18,7 +24,10 @@ class AppContainer(context: Context) {
     val database: AppDatabase by lazy { AppDatabase.build(context) }
     val tabsRepository: TabsRepository by lazy { TabsRepository(database.tabDao()) }
     val relationshipsRepository: RelationshipsRepository by lazy {
-        RelationshipsRepository(database.relationshipDao(), database.personDao())
+        RelationshipsRepository(database.relationshipDao(), database.personDao(), database.relationKindDao())
+    }
+    val relationTypesRepository: RelationTypesRepository by lazy {
+        RelationTypesRepository(database.relationKindDao(), builtInLabels(context))
     }
     val photoStore: PhotoStore by lazy { PhotoStore(context) }
     val locationProvider: LocationProvider by lazy { LocationProvider(context) }
@@ -31,4 +40,16 @@ class AppContainer(context: Context) {
     val peopleRepository: PeopleRepository by lazy {
         PeopleRepository(database.personDao(), deletePhoto = photoStore::delete)
     }
+}
+
+/** The label of each built-in relationship type in every app language (F30: a taken name is taken in any language). */
+private fun builtInLabels(context: Context): (RelationType) -> Set<String> {
+    val labels: Map<RelationType, Set<String>> by lazy {
+        val contexts = listOf(context) + AppLanguage.entries.mapNotNull { it.tag }.map { tag ->
+            val config = Configuration(context.resources.configuration).apply { setLocale(Locale.forLanguageTag(tag)) }
+            context.createConfigurationContext(config)
+        }
+        RelationType.entries.associateWith { type -> contexts.map { it.getString(type.labelRes()) }.toSet() }
+    }
+    return { type -> labels[type].orEmpty() }
 }

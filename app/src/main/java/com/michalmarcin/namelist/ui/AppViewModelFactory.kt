@@ -12,6 +12,7 @@ import com.michalmarcin.namelist.ui.map.MapViewModel
 import com.michalmarcin.namelist.ui.people.PeopleViewModel
 import com.michalmarcin.namelist.ui.person.PersonDetailViewModel
 import com.michalmarcin.namelist.ui.person.PersonEditViewModel
+import com.michalmarcin.namelist.ui.relationtypes.ManageRelationTypesViewModel
 import com.michalmarcin.namelist.ui.settings.SettingsViewModel
 import com.michalmarcin.namelist.ui.tabs.ManageTabsViewModel
 
@@ -25,6 +26,7 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
             container().peopleRepository,
             container().tabsRepository,
             container().relationshipsRepository,
+            container().relationTypesRepository,
             createSavedStateHandle(),
         )
     }
@@ -39,6 +41,7 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
     }
     initializer { ArchiveViewModel(container().peopleRepository) }
     initializer { ManageTabsViewModel(container().tabsRepository) }
+    initializer { ManageRelationTypesViewModel(container().relationTypesRepository) }
     initializer { MapViewModel(container().peopleRepository, createSavedStateHandle()) }
     initializer { SettingsViewModel(container().settingsStore, container().backupManager, container().backupPasswordStore) }
 }

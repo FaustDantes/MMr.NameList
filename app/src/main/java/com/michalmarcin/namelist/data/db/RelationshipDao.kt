@@ -23,8 +23,8 @@ interface RelationshipDao {
     @Insert
     suspend fun insert(relationship: Relationship): Long
 
-    @Query("UPDATE relationship SET type = :type WHERE id = :id")
-    suspend fun setType(id: Long, type: RelationType)
+    @Query("UPDATE relationship SET typeId = :typeId WHERE id = :id")
+    suspend fun setType(id: Long, typeId: Long)
 
     @Query("DELETE FROM relationship WHERE id = :id")
     suspend fun delete(id: Long)

@@ -30,7 +30,7 @@ class RelationshipsTest {
     fun setUp() = runBlocking {
         db = AppDatabase.build(ApplicationProvider.getApplicationContext(), inMemory = true)
         people = PeopleRepository(db.personDao())
-        links = RelationshipsRepository(db.relationshipDao(), db.personDao())
+        links = RelationshipsRepository(db.relationshipDao(), db.personDao(), db.relationKindDao())
         anna = people.save(0, "Anna", "")
         peter = people.save(0, "Peter", "")
     }
@@ -40,7 +40,7 @@ class RelationshipsTest {
 
     /** "name:TYPE" as seen from [personId]. */
     private fun view(personId: Long) = runBlocking {
-        links.observeFor(personId).first().map { "${it.other.name}:${it.type}" }
+        links.observeFor(personId).first().map { "${it.other.name}:${it.type.builtIn}" }
     }
 
     @Test
@@ -54,28 +54,28 @@ class RelationshipsTest {
     @Test
     fun linkShowsOnBothSidesWithTheInverse() = runBlocking {
         // "Peter is Anna's parent."
-        assertEquals(AddResult.ADDED, links.add(anna, peter, RelationType.PARENT))
+        assertEquals(AddResult.ADDED, links.add(anna, peter, RelationType.PARENT.seedId))
         assertEquals(listOf("Peter:PARENT"), view(anna))
         assertEquals(listOf("Anna:CHILD"), view(peter))
     }
 
     @Test
     fun duplicatesAreRejectedFromEitherSide() = runBlocking {
-        links.add(anna, peter, RelationType.PARENT)
-        assertEquals(AddResult.DUPLICATE, links.add(anna, peter, RelationType.PARENT))
+        links.add(anna, peter, RelationType.PARENT.seedId)
+        assertEquals(AddResult.DUPLICATE, links.add(anna, peter, RelationType.PARENT.seedId))
         // Same fact entered on Peter's page: "Anna is Peter's child".
-        assertEquals(AddResult.DUPLICATE, links.add(peter, anna, RelationType.CHILD))
+        assertEquals(AddResult.DUPLICATE, links.add(peter, anna, RelationType.CHILD.seedId))
         // A different fact is allowed.
-        assertEquals(AddResult.ADDED, links.add(anna, peter, RelationType.COLLEAGUE))
-        assertEquals(AddResult.SAME_PERSON, links.add(anna, anna, RelationType.FRIEND))
+        assertEquals(AddResult.ADDED, links.add(anna, peter, RelationType.COLLEAGUE.seedId))
+        assertEquals(AddResult.SAME_PERSON, links.add(anna, anna, RelationType.FRIEND.seedId))
     }
 
     @Test
     fun changingTypeFromTheOtherSideUpdatesBoth() = runBlocking {
-        links.add(anna, peter, RelationType.FRIEND)
+        links.add(anna, peter, RelationType.FRIEND.seedId)
         val id = links.observeFor(peter).first().single().id
         // On Peter's page: "Anna is Peter's parent".
-        links.changeType(id, viewerId = peter, type = RelationType.PARENT)
+        links.changeType(id, viewerId = peter, typeId = RelationType.PARENT.seedId)
         assertEquals(listOf("Anna:PARENT"), view(peter))
         assertEquals(listOf("Peter:CHILD"), view(anna))
     }
@@ -83,8 +83,8 @@ class RelationshipsTest {
     @Test
     fun deletingAPersonRemovesTheirLinks() = runBlocking {
         val eva = people.save(0, "Eva", "")
-        links.add(anna, peter, RelationType.SIBLING)
-        links.add(anna, eva, RelationType.FRIEND)
+        links.add(anna, peter, RelationType.SIBLING.seedId)
+        links.add(anna, eva, RelationType.FRIEND.seedId)
         people.delete(peter)
         assertEquals(listOf("Eva:FRIEND"), view(anna))
     }
@@ -92,14 +92,14 @@ class RelationshipsTest {
     @Test
     fun linkToMe() = runBlocking {
         val me = requireNotNull(people.getSelf()).id
-        links.add(anna, me, RelationType.FRIEND)
+        links.add(anna, me, RelationType.FRIEND.seedId)
         assertEquals(listOf("Me:FRIEND"), view(anna))
         assertEquals(listOf("Anna:FRIEND"), view(me))
     }
 
     @Test
     fun removeLink() = runBlocking {
-        links.add(anna, peter, RelationType.SIBLING)
+        links.add(anna, peter, RelationType.SIBLING.seedId)
         links.delete(links.observeFor(anna).first().single().id)
         assertEquals(emptyList<String>(), view(peter))
     }

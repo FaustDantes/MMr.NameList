@@ -7,8 +7,11 @@ import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.db.Converters
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.data.db.PersonTab
+import com.michalmarcin.namelist.data.db.RelationKind
+import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.db.Relationship
 import com.michalmarcin.namelist.data.db.Tab
+import com.michalmarcin.namelist.data.db.labelKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -64,6 +67,8 @@ class BackupManager(
         val people = db.personDao().getAll()
         val tabs = db.tabDao().getAll()
         val links = db.relationshipDao().getAll()
+        val types = db.relationKindDao().getAll()
+        val builtInOf = types.associate { it.id to it.builtIn }
         val tabLinks = db.personDao().getAllTabLinks().groupBy({ it.personId }, { it.tabId })
         val json = JSONObject()
             .put("format", FORMAT)
@@ -71,7 +76,8 @@ class BackupManager(
             .put("exportedAt", System.currentTimeMillis())
             .put("tabs", JSONArray(tabs.map { it.toJson() }))
             .put("people", JSONArray(people.map { it.toJson(tabLinks[it.id].orEmpty()) }))
-            .put("relationships", JSONArray(links.map { it.toJson() }))
+            .put("relationTypes", JSONArray(types.map { it.toJson() }))
+            .put("relationships", JSONArray(links.map { it.toJson(builtInOf[it.typeId]) }))
         var photoCount = 0
         val target = if (password == null) output else BackupCrypto.encrypt(output, password)
         ZipOutputStream(target).use { zip ->
@@ -141,8 +147,10 @@ class BackupManager(
 
             db.withTransaction {
                 db.relationshipDao().deleteAll()
+                db.relationKindDao().deleteAll()
                 db.personDao().deleteAll()
                 db.tabDao().deleteAll()
+                db.relationKindDao().insertAll(data.relationTypes)
                 db.tabDao().insertAll(data.tabs)
                 db.personDao().insertAll(data.people)
                 db.personDao().insertTabLinks(data.tabLinks)
@@ -168,6 +176,7 @@ class BackupManager(
         val people: List<Person>,
         val relationships: List<Relationship>,
         val tabLinks: List<PersonTab>,
+        val relationTypes: List<RelationKind>,
     )
 
     private fun parse(text: String): Data = try {
@@ -175,20 +184,32 @@ class BackupManager(
         if (root.optString("format") != FORMAT) throw BackupException("Not a Name List backup")
         val version = root.optInt("version", -1)
         if (version < 1 || version > VERSION) throw BackupException("Unsupported backup version $version")
-        val tabs = root.getJSONArray("tabs").objects().map { it.toTab() }
+        // F29: a tag name exists once. A tag of an older backup with the name of an earlier tag is merged into it.
+        val allTabs = root.getJSONArray("tabs").objects().map { it.toTab() }
+        val firstOfName = allTabs.groupBy { labelKey(it.name) }.mapValues { it.value.first().id }
+        val tabAlias = allTabs.associate { it.id to firstOfName.getValue(labelKey(it.name)) }
+        val tabs = allTabs.filter { tabAlias[it.id] == it.id }
         val people = root.getJSONArray("people").objects().map { it.toPerson() }
         val ids = people.map { it.id }.toSet()
         val tabIds = tabs.map { it.id }.toSet()
-        val links = root.getJSONArray("relationships").objects().map { it.toRelationship() }
+        // F30: backups of 1.2.0 and older have no "relationTypes"; they get the built-in types.
+        val relationTypes = root.optJSONArray("relationTypes")?.objects()?.map { it.toRelationKind() }
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { list -> list + RelationKind.builtIns.filter { kind -> list.none { it.id == kind.id } && kind.builtIn == RelationType.OTHER } }
+            ?: RelationKind.builtIns
+        val typeIds = relationTypes.map { it.id }.toSet()
+        val links = root.getJSONArray("relationships").objects().map { it.toRelationship(typeIds) }
             .filter { it.fromPersonId in ids && it.toPersonId in ids }
+            .distinctBy { Triple(it.fromPersonId, it.toPersonId, it.typeId) }
         // F28: "tabIds" lists all tabs of a person. Backups of 1.2.0 and older have only the single "tabId".
         val tabLinks = root.getJSONArray("people").objects().flatMap { person ->
             val personId = person.getLong("id")
             val many = person.optJSONArray("tabIds")?.let { array -> (0 until array.length()).map { array.getLong(it) } }
-            (many ?: listOfNotNull(person.optLongOrNull("tabId"))).filter { it in tabIds }.map { PersonTab(personId, it) }
+            (many ?: listOfNotNull(person.optLongOrNull("tabId"))).mapNotNull { tabAlias[it] }
+                .filter { it in tabIds }.distinct().map { PersonTab(personId, it) }
         }
         // The old single column is not used any more (ADR-035).
-        Data(tabs, people.map { it.copy(tabId = null) }, links, tabLinks)
+        Data(tabs, people.map { it.copy(tabId = null) }, links, tabLinks, relationTypes)
     } catch (e: JSONException) {
         throw BackupException("Damaged backup data", e)
     }
@@ -244,18 +265,38 @@ class BackupManager(
         tabId = null,
     )
 
-    private fun Relationship.toJson() = JSONObject()
+    private fun RelationKind.toJson() = JSONObject()
+        .put("id", id)
+        .put("name", name ?: JSONObject.NULL)
+        .put("builtIn", builtIn?.name ?: JSONObject.NULL)
+        .put("sortIndex", sortIndex)
+
+    private fun JSONObject.toRelationKind() = RelationKind(
+        id = getLong("id"),
+        name = optStringOrNull("name"),
+        builtIn = converters.nameToRelationType(optStringOrNull("builtIn")),
+        sortIndex = optLong("sortIndex"),
+    )
+
+    // "type" stays for older versions of the app: the built-in type, or OTHER for a type the user made.
+    private fun Relationship.toJson(builtIn: RelationType?) = JSONObject()
         .put("id", id)
         .put("from", fromPersonId)
         .put("to", toPersonId)
-        .put("type", type.name)
+        .put("typeId", typeId)
+        .put("type", (builtIn ?: RelationType.OTHER).name)
 
-    private fun JSONObject.toRelationship() = Relationship(
-        id = getLong("id"),
-        fromPersonId = getLong("from"),
-        toPersonId = getLong("to"),
-        type = converters.nameToRelationType(getString("type")),
-    )
+    /** "typeId" since 1.3.0; older backups name a built-in type in "type". An unknown type becomes OTHER. */
+    private fun JSONObject.toRelationship(typeIds: Set<Long>): Relationship {
+        val byId = optLongOrNull("typeId")?.takeIf { it in typeIds }
+        val byName = converters.nameToRelationType(optStringOrNull("type"))?.seedId?.takeIf { it in typeIds }
+        return Relationship(
+            id = getLong("id"),
+            fromPersonId = getLong("from"),
+            toPersonId = getLong("to"),
+            typeId = byId ?: byName ?: RelationType.OTHER.seedId,
+        )
+    }
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key) || !has(key)) null else getString(key)
 

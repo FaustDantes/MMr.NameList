@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.platform.Coordinates
@@ -140,15 +141,41 @@ class PersonScreensTest {
     }
 
     @Test
-    fun withoutTabsTheFormStillOffersToAddOne() {
+    fun withoutTagsTheFormStillOffersToAddOne() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
                 PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
             }
         }
         compose.onNodeWithTag("tabField").assertIsDisplayed()
-        compose.onNodeWithTag("addTabChip").assertIsDisplayed()
-        compose.onNodeWithText("Add tab").assertIsDisplayed()
+        compose.onNodeWithTag("addTagButton").assertIsDisplayed()
+        compose.onNodeWithText("No tag").assertIsDisplayed()
+    }
+
+    @Test
+    fun tagsArePickedInOneDropdownWithManyChoices() {
+        val toggled = mutableListOf<Long>()
+        val (first, second) = SampleData.tabs
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PersonEditScreen(
+                    state = PersonEditUiState(name = "Anna", tabs = SampleData.tabs, tabIds = setOf(first.id, second.id)),
+                    onNameChange = {},
+                    onNotesChange = {},
+                    onSave = {},
+                    onClose = {},
+                    onTabChange = { toggled += it },
+                )
+            }
+        }
+        // All chosen tags show in the closed field; the tag list is not on the form itself.
+        compose.onNodeWithText("${first.name}, ${second.name}").assertIsDisplayed()
+        compose.onNodeWithTag("tagOption-${first.id}").assertDoesNotExist()
+        compose.onNodeWithTag("tagDropdown").performClick()
+        compose.onNodeWithTag("tagOption-${first.id}").performClick()
+        // The menu stays open for the next choice.
+        compose.onNodeWithTag("tagOption-${second.id}").performClick()
+        assertEquals(listOf(first.id, second.id), toggled)
     }
 
     @Test
@@ -390,7 +417,7 @@ class PersonScreensTest {
                 PersonDetailScreen(
                     PersonDetailUiState(
                         SampleData.anna,
-                        relations = listOf(RelationView(9, peter, RelationType.SIBLING)),
+                        relations = listOf(RelationView(9, peter, RelationKind.builtIns.first { it.builtIn == RelationType.SIBLING })),
                         isLoading = false,
                     ),
                     {}, {}, {},
@@ -420,19 +447,34 @@ class PersonScreensTest {
 
     @Test
     fun addRelationshipPicksTypeThenPerson() {
-        var added: Pair<Long, RelationType>? = null
+        var added: Pair<Long, Long>? = null
         compose.setContent {
             NameListTheme(dynamicColor = false) {
                 AddRelationshipContent(
                     personName = "Anna",
                     candidates = SampleData.people.drop(1),
+                    types = RelationKind.builtIns,
                     onAdd = { id, type -> added = id to type },
                 )
             }
         }
-        compose.onNodeWithTag("type-PARENT").performClick()
+        compose.onNodeWithTag("type-${RelationType.PARENT.seedId}").performClick()
         compose.onNodeWithText("Tap the person who is Anna's parent.").assertIsDisplayed()
         compose.onNodeWithTag("candidate-3").performClick()
-        assertEquals(3L to RelationType.PARENT, added)
+        assertEquals(3L to RelationType.PARENT.seedId, added)
+    }
+
+    @Test
+    fun aRenamedOrNewRelationshipTypeShowsItsOwnName() {
+        val types = RelationKind.builtIns.map { if (it.builtIn == RelationType.FRIEND) it.copy(name = "Buddy") else it } +
+            RelationKind(id = 10, name = "Mentor", sortIndex = 9)
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                AddRelationshipContent(personName = "Anna", candidates = SampleData.people.drop(1), types = types, onAdd = { _, _ -> })
+            }
+        }
+        compose.onNodeWithText("Buddy").assertIsDisplayed()
+        compose.onNodeWithText("Friend").assertDoesNotExist()
+        compose.onNodeWithTag("type-10").assertExists()
     }
 }

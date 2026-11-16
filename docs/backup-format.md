@@ -6,7 +6,7 @@ Settings, Backup, Export writes one file. Import replaces all data with it. The 
 
 | Entry | Content |
 |---|---|
-| `backup.json` | All people, tabs and relationships |
+| `backup.json` | All people, tags (`tabs`), relationship types and relationships |
 | `photos/<file name>` | One file per person photo, the same name as in `photoFile` |
 
 ## backup.json (version 1)
@@ -23,13 +23,19 @@ Settings, Backup, Export writes one file. Import replaces all data with it. The 
       "education": null, "currentWork": null, "askAbout": null, "lastUpdatedAt": null,
       "archivedAt": null, "isSelf": true, "sortIndex": 0, "createdAt": 1794700000000, "tabId": null }
   ],
-  "relationships": [{ "id": 1, "from": 2, "to": 3, "type": "PARENT" }]
+  "relationTypes": [{ "id": 5, "name": null, "builtIn": "PARENT", "sortIndex": 4 },
+                    { "id": 10, "name": "Mentor", "builtIn": null, "sortIndex": 9 }],
+  "relationships": [{ "id": 1, "from": 2, "to": 3, "typeId": 5, "type": "PARENT" }]
 }
 ```
 
 - `firstMetOn` and `birthDate` are days since 1970-01-01. `lastUpdatedAt` and `archivedAt` are milliseconds. All of these fields are optional; files from version 1.0.0 do not have them and import without them. Archived people are in the file (`archivedAt` set) and stay archived after an import.
 - A relationship (from = A, to = B, type = T) means "B is A's T" (ADR-021).
-- Types are stored by name. An unknown type reads as `OTHER`.
+- Tags are in `tabs`; the app calls them tags since 1.3.0 (ADR-037). Each person lists its tags in `tabIds` (F28); `tabId` is the lowest one, for older app versions.
+- `relationTypes` (since 1.3.0, F30): `name` is null for a built-in type the user did not rename; `builtIn` is null for a type the user made. Built-in types have fixed ids 1 to 9.
+- A relationship names its type in `typeId`. `type` stays for older app versions: the built-in type, or `OTHER` for a type the user made.
+- A file without `relationTypes` (1.2.0 and older) gets the nine built-in types, and `type` is read by name. An unknown type reads as `OTHER`.
+- Tags whose names differ only in case are merged on import (F29). The file format version stays 1: all new fields are optional, so older apps still read new files.
 
 ## Encrypted file (F17, ADR-028)
 
