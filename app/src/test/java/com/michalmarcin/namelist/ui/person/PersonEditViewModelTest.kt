@@ -96,7 +96,7 @@ class PersonEditViewModelTest {
         val work = runBlocking { tabs.add("Work") }
         val vm = viewModel(tabId = work)
         vm.uiState.await { it.tabs.isNotEmpty() }
-        assertEquals(work, vm.uiState.value.tabId)
+        assertEquals(setOf(work), vm.uiState.value.tabIds)
 
         vm.onNameChange("  Anna Nováková ")
         vm.onNotesChange("Met at the tram stop ")
@@ -108,7 +108,29 @@ class PersonEditViewModelTest {
         assertEquals("Anna Nováková", anna.name)
         assertEquals("Met at the tram stop", anna.notes)
         assertEquals("Brno, Morava", anna.metCity)
-        assertEquals(work, anna.tabId)
+        assertEquals(setOf(work), runBlocking { people.tabIdsOf(anna.id) })
+    }
+
+    @Test
+    fun aPersonCanBeInManyTabs() {
+        val work = runBlocking { tabs.add("Work") }
+        val gym = runBlocking { tabs.add("Gym") }
+        val vm = viewModel()
+        vm.uiState.await { it.tabs.size == 2 }
+        vm.onNameChange("Anna")
+        vm.onTabToggle(work)
+        vm.onTabToggle(gym)
+        vm.onTabToggle(work)
+        vm.onTabToggle(work)
+        assertEquals(setOf(gym, work), vm.uiState.value.tabIds)
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        assertEquals(setOf(gym, work), runBlocking { people.tabIdsOf(everyone().single().id) })
+
+        // Open the saved person again: both tabs are loaded.
+        val again = viewModel(id = everyone().single().id)
+        again.uiState.await { !it.isLoading && it.tabs.size == 2 }
+        assertEquals(setOf(gym, work), again.uiState.value.tabIds)
     }
 
     @Test

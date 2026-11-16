@@ -56,7 +56,7 @@ class PersonDetailViewModelTest {
     fun showsThePersonTabAndWhoCanBeLinked() {
         val state = viewModel(anna).uiState.await { !it.isLoading && it.candidates.isNotEmpty() }
         assertEquals("Anna", state.person?.name)
-        assertEquals("Work", state.tabName)
+        assertEquals(listOf("Work"), state.tabNames)
         // Everyone except Anna herself, "Me" first.
         assertEquals(listOf("Me", "Peter"), state.candidates.map { it.name })
     }

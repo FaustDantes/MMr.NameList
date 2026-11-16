@@ -3,6 +3,7 @@ package com.michalmarcin.namelist.data.repo
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.data.db.PersonDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.text.Collator
 import java.text.Normalizer
@@ -17,7 +18,8 @@ data class PersonDraft(
     val name: String,
     val notes: String = "",
     val photoFile: String? = null,
-    val tabId: Long? = null,
+    /** The tabs of the person (F28). Can be empty. */
+    val tabIds: Set<Long> = emptySet(),
     /** "City, state" as the user typed it (F10). */
     val metPlace: String? = null,
     val metLat: Double? = null,
@@ -47,12 +49,13 @@ class PeopleRepository(
      * and names such as "Šimon" or "Čeněk" must match "simon" and sort by the user's language (ADR-011).
      */
     fun observePeople(query: String, sort: SortMode, tabId: Long? = null): Flow<List<Person>> =
-        dao.observeOthers().map { people ->
+        combine(dao.observeOthers(), dao.observeTabLinks()) { people, links ->
             val needle = normalize(query)
+            val inTab = if (tabId == null) emptySet() else links.filter { it.tabId == tabId }.map { it.personId }.toSet()
             // Search is global (F7): a search query ignores the selected tab.
             val found = when {
                 needle.isNotEmpty() -> people.filter { it.matches(needle) }
-                tabId != null -> people.filter { it.tabId == tabId }
+                tabId != null -> people.filter { it.id in inTab }
                 else -> people
             }
             when (sort) {
@@ -107,7 +110,7 @@ class PeopleRepository(
             name = draft.name.trim(),
             notes = draft.notes.trim(),
             photoFile = draft.photoFile,
-            tabId = draft.tabId,
+            tabId = null,
             metCity = place,
             metLat = if (hasCoordinates) draft.metLat else null,
             metLon = if (hasCoordinates) draft.metLon else null,
@@ -121,25 +124,32 @@ class PeopleRepository(
             // F19: every save from the edit screen stamps the time.
             lastUpdatedAt = clock(),
         )
-        return if (existing == null) {
+        val savedId = if (existing == null) {
             dao.insert(person)
         } else {
             dao.update(person)
             existing.photoFile?.takeIf { it != draft.photoFile }?.let(deletePhoto)
             existing.id
         }
+        dao.setTabs(savedId, draft.tabIds)
+        return savedId
     }
+
+    /** The tabs of a person (F28). */
+    fun observeTabIds(id: Long): Flow<Set<Long>> = dao.observeTabIds(id).map { it.toSet() }
+
+    suspend fun tabIdsOf(id: Long): Set<Long> = dao.tabIdsOf(id).toSet()
 
     /** Short form used by tests and simple callers. Keeps the place of meeting of an existing person. */
     suspend fun save(id: Long, name: String, notes: String, photoFile: String? = null, tabId: Long? = null): Long {
         val existing = if (id == 0L) null else dao.get(id)
         val kept = existing?.let {
             PersonDraft(
-                name, notes, photoFile, tabId, it.metCity, it.metLat, it.metLon, firstMetDay(it),
+                name, notes, photoFile, setOfNotNull(tabId), it.metCity, it.metLat, it.metLon, firstMetDay(it),
                 it.nativeLanguage, it.birthDate, it.education, it.currentWork, it.askAbout,
             )
         }
-        return save(id, kept ?: PersonDraft(name, notes, photoFile, tabId))
+        return save(id, kept ?: PersonDraft(name, notes, photoFile, setOfNotNull(tabId)))
     }
 
     /** Drag and drop result: puts the shown people in this order (F5). */
@@ -155,9 +165,9 @@ class PeopleRepository(
         return deleted
     }
 
-    /** Moves several people to [tabId]; null removes their tab (M8). */
+    /** Puts several people in the one tab [tabId]; null removes all their tabs (M8). */
     suspend fun moveToTab(ids: Collection<Long>, tabId: Long?) {
-        if (ids.isNotEmpty()) dao.setTab(ids.toList(), tabId)
+        if (ids.isNotEmpty()) dao.setTabForAll(ids.toList(), tabId)
     }
 
     /** Deletes the person and their photo file. "Me" cannot be deleted. */

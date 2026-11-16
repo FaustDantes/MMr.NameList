@@ -145,7 +145,7 @@ fun PersonDetailScreen(
         if (person != null) {
             PersonDetailContent(
                 person = person,
-                tabName = state.tabName,
+                tabName = state.tabNames.joinToString(", ").ifEmpty { null },
                 onOpenMap = onOpenMap,
                 onShowOnMap = onShowOnMap,
                 modifier = Modifier.padding(padding),

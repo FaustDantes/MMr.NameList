@@ -38,5 +38,6 @@ data class Person(
     val isSelf: Boolean = false,
     val sortIndex: Long = 0,
     val createdAt: Long = 0,
+    /** Old single tab (before 1.3.0). Not used any more; the tabs of a person are in `person_tab` (ADR-035). */
     val tabId: Long? = null,
 )

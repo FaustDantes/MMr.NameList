@@ -21,6 +21,12 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-16 (1.3.0, F28, owner request)
+
+- F28 and ADR-035: many tabs per person. Database 5 to 6 with a data-copying auto migration.
+- Decision I made without asking: "Move to tab" in multi-select replaces all tabs with the chosen one. Say if you want "add to tab" as a second action.
+- Check on the phone: update from 1.2.0 and see that people keep their tab; give one person two tabs; open each tab; export and import a backup.
+
 ### 2026-11-15 (1.2.0, F22 to F27, owner request)
 
 - F22 to F27 in ADR-033 and ADR-034. Review builds v1.2.0-rc2 and rc3.

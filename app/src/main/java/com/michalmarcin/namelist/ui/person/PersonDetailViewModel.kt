@@ -21,7 +21,8 @@ import kotlinx.coroutines.launch
 
 data class PersonDetailUiState(
     val person: Person? = null,
-    val tabName: String? = null,
+    /** Names of all tabs of the person (F28). */
+    val tabNames: List<String> = emptyList(),
     val relations: List<RelationView> = emptyList(),
     /** People this person can be linked to: everyone else, "Me" first. */
     val candidates: List<Person> = emptyList(),
@@ -41,10 +42,10 @@ class PersonDetailViewModel(
     private val deleted = MutableStateFlow(false)
     private val message = MutableStateFlow<AddResult?>(null)
 
-    private val base = combine(repository.observePerson(id), tabs.observeTabs(), deleted) { person, tabList, isDeleted ->
+    private val base = combine(repository.observePerson(id), tabs.observeTabs(), repository.observeTabIds(id), deleted) { person, tabList, tabIds, isDeleted ->
         PersonDetailUiState(
             person = person,
-            tabName = tabList.firstOrNull { it.id == person?.tabId }?.name,
+            tabNames = tabList.filter { it.id in tabIds }.map { it.name },
             isLoading = false,
             isDeleted = isDeleted || person == null,
         )

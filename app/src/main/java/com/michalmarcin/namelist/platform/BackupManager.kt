@@ -6,6 +6,7 @@ import androidx.room.withTransaction
 import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.db.Converters
 import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.db.PersonTab
 import com.michalmarcin.namelist.data.db.Relationship
 import com.michalmarcin.namelist.data.db.Tab
 import kotlinx.coroutines.Dispatchers
@@ -63,12 +64,13 @@ class BackupManager(
         val people = db.personDao().getAll()
         val tabs = db.tabDao().getAll()
         val links = db.relationshipDao().getAll()
+        val tabLinks = db.personDao().getAllTabLinks().groupBy({ it.personId }, { it.tabId })
         val json = JSONObject()
             .put("format", FORMAT)
             .put("version", VERSION)
             .put("exportedAt", System.currentTimeMillis())
             .put("tabs", JSONArray(tabs.map { it.toJson() }))
-            .put("people", JSONArray(people.map { it.toJson() }))
+            .put("people", JSONArray(people.map { it.toJson(tabLinks[it.id].orEmpty()) }))
             .put("relationships", JSONArray(links.map { it.toJson() }))
         var photoCount = 0
         val target = if (password == null) output else BackupCrypto.encrypt(output, password)
@@ -143,6 +145,7 @@ class BackupManager(
                 db.tabDao().deleteAll()
                 db.tabDao().insertAll(data.tabs)
                 db.personDao().insertAll(data.people)
+                db.personDao().insertTabLinks(data.tabLinks)
                 db.relationshipDao().insertAll(data.relationships)
                 if (data.people.none { it.isSelf }) {
                     db.personDao().insert(Person(name = AppDatabase.SELF_NAME, isSelf = true, createdAt = System.currentTimeMillis()))
@@ -160,7 +163,12 @@ class BackupManager(
         }
     }
 
-    private data class Data(val tabs: List<Tab>, val people: List<Person>, val relationships: List<Relationship>)
+    private data class Data(
+        val tabs: List<Tab>,
+        val people: List<Person>,
+        val relationships: List<Relationship>,
+        val tabLinks: List<PersonTab>,
+    )
 
     private fun parse(text: String): Data = try {
         val root = JSONObject(text)
@@ -173,7 +181,14 @@ class BackupManager(
         val tabIds = tabs.map { it.id }.toSet()
         val links = root.getJSONArray("relationships").objects().map { it.toRelationship() }
             .filter { it.fromPersonId in ids && it.toPersonId in ids }
-        Data(tabs, people.map { if (it.tabId != null && it.tabId !in tabIds) it.copy(tabId = null) else it }, links)
+        // F28: "tabIds" lists all tabs of a person. Backups of 1.2.0 and older have only the single "tabId".
+        val tabLinks = root.getJSONArray("people").objects().flatMap { person ->
+            val personId = person.getLong("id")
+            val many = person.optJSONArray("tabIds")?.let { array -> (0 until array.length()).map { array.getLong(it) } }
+            (many ?: listOfNotNull(person.optLongOrNull("tabId"))).filter { it in tabIds }.map { PersonTab(personId, it) }
+        }
+        // The old single column is not used any more (ADR-035).
+        Data(tabs, people.map { it.copy(tabId = null) }, links, tabLinks)
     } catch (e: JSONException) {
         throw BackupException("Damaged backup data", e)
     }
@@ -184,7 +199,7 @@ class BackupManager(
 
     private fun JSONObject.toTab() = Tab(id = getLong("id"), name = getString("name"), sortIndex = optLong("sortIndex"))
 
-    private fun Person.toJson() = JSONObject()
+    private fun Person.toJson(tabIds: List<Long>) = JSONObject()
         .put("id", id)
         .put("name", name)
         .put("notes", notes)
@@ -203,7 +218,9 @@ class BackupManager(
         .put("isSelf", isSelf)
         .put("sortIndex", sortIndex)
         .put("createdAt", createdAt)
-        .put("tabId", tabId ?: JSONObject.NULL)
+        // "tabId" (the lowest tab) stays for older versions of the app; "tabIds" has all of them.
+        .put("tabId", tabIds.minOrNull() ?: JSONObject.NULL)
+        .put("tabIds", JSONArray(tabIds.sorted()))
 
     private fun JSONObject.toPerson() = Person(
         id = getLong("id"),
@@ -224,7 +241,7 @@ class BackupManager(
         isSelf = optBoolean("isSelf", false),
         sortIndex = optLong("sortIndex"),
         createdAt = optLong("createdAt"),
-        tabId = if (isNull("tabId") || !has("tabId")) null else getLong("tabId"),
+        tabId = null,
     )
 
     private fun Relationship.toJson() = JSONObject()

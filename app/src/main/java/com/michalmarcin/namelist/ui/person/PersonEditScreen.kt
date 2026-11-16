@@ -23,10 +23,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.remember
 import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.platform.LocationProvider
@@ -52,6 +48,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -110,7 +109,7 @@ fun PersonEditRoute(
             gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
         onRemovePhoto = viewModel::removePhoto,
-        onTabChange = viewModel::onTabChange,
+        onTabChange = viewModel::onTabToggle,
         onPlaceChange = viewModel::onPlaceChange,
         onFirstMetChange = viewModel::onFirstMetChange,
         onNativeLanguageChange = viewModel::onNativeLanguageChange,
@@ -144,7 +143,7 @@ fun PersonEditScreen(
     onCamera: () -> Unit = {},
     onGallery: () -> Unit = {},
     onRemovePhoto: () -> Unit = {},
-    onTabChange: (Long?) -> Unit = {},
+    onTabChange: (Long) -> Unit = {},
     onPlaceChange: (String) -> Unit = {},
     onUseLocation: () -> Unit = {},
     onClearCoordinates: () -> Unit = {},
@@ -218,7 +217,7 @@ fun PersonEditScreen(
             )
             // F23: the question for the next talk sits right below the name.
             TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
-            TabField(state.tabs, state.tabId, onTabChange)
+            TabField(state.tabs, state.tabIds, onTabChange)
             DetailsToggle(open = detailsOpen, onToggle = { detailsOpen = !detailsOpen })
             if (detailsOpen) {
                 PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
@@ -301,38 +300,25 @@ private fun PhotoSection(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TabField(tabs: List<Tab>, selectedId: Long?, onChange: (Long?) -> Unit) {
+private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -> Unit) {
     if (tabs.isEmpty()) return
-    var expanded by remember { mutableStateOf(false) }
-    val label = tabs.firstOrNull { it.id == selectedId }?.name ?: stringResource(R.string.no_tab)
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-        OutlinedTextField(
-            value = label,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(R.string.tab)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .fillMaxWidth()
-                .testTag("tabField"),
+    // F28: a person can be in many tabs, so the tabs are chips that switch on and off.
+    Column(Modifier.fillMaxWidth().testTag("tabField"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.manage_tabs),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.no_tab)) },
-                onClick = {
-                    onChange(null)
-                    expanded = false
-                },
-            )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             tabs.forEach { tab ->
-                DropdownMenuItem(
-                    text = { Text(tab.name) },
-                    onClick = {
-                        onChange(tab.id)
-                        expanded = false
-                    },
+                FilterChip(
+                    selected = tab.id in selectedIds,
+                    onClick = { onToggle(tab.id) },
+                    label = { Text(tab.name) },
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.testTag("tabChip-${tab.id}"),
                 )
             }
         }

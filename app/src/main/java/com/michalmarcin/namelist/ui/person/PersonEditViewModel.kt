@@ -31,7 +31,8 @@ data class PersonEditUiState(
     val name: String = "",
     val notes: String = "",
     val photoFile: String? = null,
-    val tabId: Long? = null,
+    /** The tabs of the person (F28). */
+    val tabIds: Set<Long> = emptySet(),
     val tabs: List<Tab> = emptyList(),
     val metPlace: String = "",
     val coordinates: Coordinates? = null,
@@ -66,7 +67,7 @@ class PersonEditViewModel(
     private val route = handle.toRoute<EditPersonRoute>()
     private val id = route.id
     private val state = MutableStateFlow(
-        PersonEditUiState(isNew = id == 0L, isLoading = id != 0L, tabId = route.tabId.takeIf { it != 0L }),
+        PersonEditUiState(isNew = id == 0L, isLoading = id != 0L, tabIds = setOfNotNull(route.tabId.takeIf { it != 0L })),
     )
     val uiState: StateFlow<PersonEditUiState> = state.asStateFlow()
 
@@ -81,7 +82,7 @@ class PersonEditViewModel(
             tabs.observeTabs().collect { list ->
                 state.update { current ->
                     // A tab deleted meanwhile is cleared.
-                    current.copy(tabs = list, tabId = current.tabId?.takeIf { id -> list.any { it.id == id } })
+                    current.copy(tabs = list, tabIds = current.tabIds.filter { id -> list.any { it.id == id } }.toSet())
                 }
             }
         }
@@ -94,7 +95,7 @@ class PersonEditViewModel(
                         name = person?.name.orEmpty(),
                         notes = person?.notes.orEmpty(),
                         photoFile = person?.photoFile,
-                        tabId = person?.tabId,
+                        tabIds = repository.tabIdsOf(id),
                         metPlace = person?.metCity.orEmpty(),
                         firstMetOn = person?.let(repository::firstMetDay),
                         nativeLanguage = person?.nativeLanguage.orEmpty(),
@@ -116,7 +117,10 @@ class PersonEditViewModel(
 
     fun onNotesChange(value: String) = state.update { it.copy(notes = value) }
 
-    fun onTabChange(value: Long?) = state.update { it.copy(tabId = value) }
+    /** Puts the person in the tab, or takes them out of it (F28). */
+    fun onTabToggle(tabId: Long) = state.update {
+        it.copy(tabIds = if (tabId in it.tabIds) it.tabIds - tabId else it.tabIds + tabId)
+    }
 
     fun onFirstMetChange(epochDay: Long?) = state.update { it.copy(firstMetOn = epochDay) }
 
@@ -208,7 +212,7 @@ class PersonEditViewModel(
                     name = current.name,
                     notes = current.notes,
                     photoFile = current.photoFile,
-                    tabId = current.tabId,
+                    tabIds = current.tabIds,
                     metPlace = current.metPlace,
                     metLat = current.coordinates?.latitude,
                     metLon = current.coordinates?.longitude,

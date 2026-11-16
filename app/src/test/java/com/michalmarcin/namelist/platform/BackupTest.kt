@@ -60,7 +60,7 @@ class BackupTest {
         val anna = people.save(
             0,
             PersonDraft(
-                "Anna Nováková", "Brno tram", "anna.jpg", work, "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000,
+                "Anna Nováková", "Brno tram", "anna.jpg", setOf(work, tabs.add("Gym")), "Brno, Morava", 49.1951, 16.6068, firstMetOn = 19_000,
                 nativeLanguage = "Slovak", birthDate = 7_000, education = "MSc", currentWork = "Nurse", askAbout = "Her dog",
             ),
         )
@@ -69,13 +69,14 @@ class BackupTest {
         links.add(anna, peter, RelationType.PARENT)
         val out = ByteArrayOutputStream()
         val summary = backup.export(out)
-        assertEquals(BackupSummary(people = 2, tabs = 1, relationships = 1, photos = 1), summary)
+        assertEquals(BackupSummary(people = 2, tabs = 2, relationships = 1, photos = 1), summary)
         out.toByteArray()
     }
 
     private fun snapshot() = runBlocking {
+        val tabLinks = db.personDao().getAllTabLinks().groupBy({ it.personId }, { it.tabId })
         Triple(
-            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${it.tabId}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.nativeLanguage}|${it.birthDate}|${it.education}|${it.currentWork}|${it.askAbout}|${it.lastUpdatedAt}|${it.archivedAt}|${it.isSelf}" },
+            db.personDao().getAll().map { "${it.id}|${it.name}|${it.notes}|${it.photoFile}|${tabLinks[it.id]}|${it.metCity}|${it.metLat}|${it.firstMetOn}|${it.nativeLanguage}|${it.birthDate}|${it.education}|${it.currentWork}|${it.askAbout}|${it.lastUpdatedAt}|${it.archivedAt}|${it.isSelf}" },
             db.tabDao().getAll(),
             db.relationshipDao().getAll(),
         )
@@ -273,5 +274,31 @@ class BackupTest {
             }
         }
         return out.toByteArray()
+    }
+
+    @Test
+    fun backupOf1_2_0WithASingleTabIdStillImportsIntoOneTab() = runBlocking {
+        val json = """
+            {"format":"mmr.namelist.backup","version":1,"exportedAt":1,
+             "tabs":[{"id":7,"name":"Work","sortIndex":0}],
+             "people":[
+               {"id":1,"name":"Me","notes":"","isSelf":true,"sortIndex":0,"createdAt":0,"tabId":null},
+               {"id":2,"name":"Anna","notes":"","isSelf":false,"sortIndex":1,"createdAt":5,"tabId":7},
+               {"id":3,"name":"Peter","notes":"","isSelf":false,"sortIndex":2,"createdAt":6,"tabId":99}],
+             "relationships":[]}
+        """.trimIndent()
+        val bytes = ByteArrayOutputStream().also { out ->
+            java.util.zip.ZipOutputStream(out).use { zip ->
+                zip.putNextEntry(java.util.zip.ZipEntry(BackupManager.JSON_ENTRY))
+                zip.write(json.toByteArray())
+                zip.closeEntry()
+            }
+        }.toByteArray()
+
+        backup.import(ByteArrayInputStream(bytes))
+
+        assertEquals(setOf(7L), people.tabIdsOf(2))
+        // A tab that is not in the file is dropped, not kept as a broken link.
+        assertEquals(emptySet<Long>(), people.tabIdsOf(3))
     }
 }

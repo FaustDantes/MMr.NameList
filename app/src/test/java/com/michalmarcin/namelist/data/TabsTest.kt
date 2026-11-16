@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.data.db.AppDatabase
 import com.michalmarcin.namelist.data.repo.PeopleRepository
+import com.michalmarcin.namelist.data.repo.PersonDraft
 import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.data.repo.TabsRepository
 import kotlinx.coroutines.flow.first
@@ -65,7 +66,7 @@ class TabsTest {
         val work = tabs.add("Work")
         val anna = people.save(0, "Anna", "", tabId = work)
         tabs.delete(work)
-        assertNull(people.getPerson(anna)?.tabId)
+        assertEquals(emptySet<Long>(), people.tabIdsOf(anna))
         assertEquals(listOf("Anna"), names())
     }
 
@@ -90,5 +91,44 @@ class TabsTest {
         people.reorder(listOf(eva, anna))
         assertEquals(listOf("Eva", "Anna"), names(work))
         assertEquals(listOf("Eva", "Peter", "Anna", "Tom"), names())
+    }
+
+    @Test
+    fun aPersonInTwoTabsShowsInBothAndSurvivesLosingOne() = runBlocking {
+        val work = tabs.add("Work")
+        val gym = tabs.add("Gym")
+        val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work, gym)))
+        people.save(0, "Peter", "", tabId = work)
+
+        assertEquals(listOf("Anna", "Peter"), names(tabId = work))
+        assertEquals(listOf("Anna"), names(tabId = gym))
+        assertEquals(setOf(work, gym), people.tabIdsOf(anna))
+
+        tabs.delete(work)
+        assertEquals(setOf(gym), people.tabIdsOf(anna))
+        assertEquals(listOf("Anna"), names(tabId = gym))
+        assertEquals(listOf("Anna", "Peter"), names())
+    }
+
+    @Test
+    fun movingPeopleToATabReplacesAllTheirTabs() = runBlocking {
+        val work = tabs.add("Work")
+        val gym = tabs.add("Gym")
+        val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work, gym)))
+        people.moveToTab(listOf(anna), gym)
+        assertEquals(setOf(gym), people.tabIdsOf(anna))
+        people.moveToTab(listOf(anna), null)
+        assertEquals(emptySet<Long>(), people.tabIdsOf(anna))
+    }
+
+    @Test
+    fun savingAgainKeepsAndChangesTabs() = runBlocking {
+        val work = tabs.add("Work")
+        val gym = tabs.add("Gym")
+        val anna = people.save(0, PersonDraft("Anna", tabIds = setOf(work)))
+        people.save(anna, PersonDraft("Anna", tabIds = setOf(work, gym)))
+        assertEquals(setOf(work, gym), people.tabIdsOf(anna))
+        people.save(anna, PersonDraft("Anna"))
+        assertEquals(emptySet<Long>(), people.tabIdsOf(anna))
     }
 }

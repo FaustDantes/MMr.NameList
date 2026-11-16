@@ -133,7 +133,7 @@ class PersonScreensTest {
     fun detailShowsTabLabel() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
-                PersonDetailScreen(PersonDetailUiState(SampleData.anna, tabName = "Work", isLoading = false), {}, {}, {})
+                PersonDetailScreen(PersonDetailUiState(SampleData.anna, tabNames = listOf("Work"), isLoading = false), {}, {}, {})
             }
         }
         compose.onNodeWithText("Work").assertIsDisplayed()

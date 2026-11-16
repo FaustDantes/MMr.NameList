@@ -86,8 +86,38 @@ interface PersonDao {
     @Query("DELETE FROM person WHERE id IN (:ids) AND isSelf = 0")
     suspend fun deleteByIds(ids: List<Long>): Int
 
-    @Query("UPDATE person SET tabId = :tabId WHERE id IN (:ids)")
-    suspend fun setTab(ids: List<Long>, tabId: Long?)
+    // Tabs of a person (F28)
+    @Query("SELECT * FROM person_tab")
+    fun observeTabLinks(): Flow<List<PersonTab>>
+
+    @Query("SELECT tabId FROM person_tab WHERE personId = :id")
+    fun observeTabIds(id: Long): Flow<List<Long>>
+
+    @Query("SELECT tabId FROM person_tab WHERE personId = :id")
+    suspend fun tabIdsOf(id: Long): List<Long>
+
+    @Query("SELECT * FROM person_tab ORDER BY personId, tabId")
+    suspend fun getAllTabLinks(): List<PersonTab>
+
+    @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
+    suspend fun insertTabLinks(links: List<PersonTab>)
+
+    @Query("DELETE FROM person_tab WHERE personId IN (:ids)")
+    suspend fun clearTabs(ids: List<Long>)
+
+    /** The person is in exactly these tabs. */
+    @Transaction
+    suspend fun setTabs(personId: Long, tabIds: Collection<Long>) {
+        clearTabs(listOf(personId))
+        insertTabLinks(tabIds.map { PersonTab(personId, it) })
+    }
+
+    /** Puts all [ids] in the one tab [tabId], or in no tab when it is null (M8). */
+    @Transaction
+    suspend fun setTabForAll(ids: List<Long>, tabId: Long?) {
+        clearTabs(ids)
+        if (tabId != null) insertTabLinks(ids.map { PersonTab(it, tabId) })
+    }
 
     /** "Me" cannot be deleted. */
     @Query("DELETE FROM person WHERE id = :id AND isSelf = 0")

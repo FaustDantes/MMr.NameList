@@ -5,6 +5,7 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.michalmarcin.namelist.data.db.AppDatabase
+import com.michalmarcin.namelist.data.db.PersonTabMigration
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -21,7 +22,7 @@ class MigrationTest {
     val helper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
         AppDatabase::class.java,
-        emptyList(),
+        listOf(PersonTabMigration()),
         FrameworkSQLiteOpenHelperFactory(),
     )
 
@@ -108,12 +109,35 @@ class MigrationTest {
     }
 
     @Test
+    fun version5To6CopiesTheSingleTabIntoTheNewTable() {
+        helper.createDatabase(DB, 5).apply {
+            execSQL("INSERT INTO tab (id, name, sortIndex) VALUES (1, 'Work', 0)")
+            execSQL(
+                "INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt, tabId) VALUES " +
+                    "(1, 'Me', '', 1, 0, 0, NULL), (2, 'Anna', '', 0, 1, 5, 1), (3, 'Peter', '', 0, 2, 6, NULL)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 6, true, PersonTabMigration())
+        db.query("SELECT personId, tabId FROM person_tab").use {
+            assertEquals(1, it.count)
+            assertTrue(it.moveToFirst())
+            assertEquals(2L, it.getLong(0))
+            assertEquals(1L, it.getLong(1))
+        }
+        db.query("SELECT COUNT(*) FROM person").use {
+            it.moveToFirst()
+            assertEquals(3, it.getInt(0))
+        }
+    }
+
+    @Test
     fun version1To3InOneUpdate() {
         helper.createDatabase(DB, 1).apply {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 5, true)
+        val db = helper.runMigrationsAndValidate(DB, 6, true, PersonTabMigration())
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))

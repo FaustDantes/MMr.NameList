@@ -31,6 +31,7 @@ Each milestone ends with:
 | M14 | Widget | F20 | Resizable home-screen widget (1 x 1, 4 x 1, 4 x 2) with a navy add button that opens the quick-add form; saving returns to the home screen. |
 | M15 | Big add button | F21 | Navy 112 dp add button at the bottom center of the people list. Release 1.2.0. |
 | M16 | Same name, spark, search, languages | F22 to F27 | Duplicate-name dialog, Conversation Spark, search by any field and date, version and report, five languages with a drop-down, 88 dp add button. Release 1.2.0. |
+| M17 | Many tabs per person | F28 | A person can be in several tabs; migration 5 to 6; backups carry all tabs. Release 1.3.0. |
 
 The app is useful after M1. The owner can stop after any milestone.
 

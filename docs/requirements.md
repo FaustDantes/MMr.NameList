@@ -123,3 +123,6 @@ F22 warning when a new name equals an existing one (case ignored), with a button
 
 ### F27 Language choice (added by the owner on 2026-11-15)
 Settings has a drop-down with a flag and the name of each language, "System language" first. The choice applies at once (ADR-034).
+
+### F28 Many tabs per person (added by the owner on 2026-11-16)
+A person can be in several tabs, for example "Gym" and "Work". The edit form shows the tabs as chips that switch on and off. A tab shows everyone who is in it. Deleting a tab removes only the link. "Move to tab" in multi-select puts the people in that one tab (it replaces their other tabs). The detail page lists all tabs. Backups carry all tabs; backups of 1.2.0 and older import with their single tab (ADR-035).

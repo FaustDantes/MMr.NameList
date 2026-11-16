@@ -21,7 +21,7 @@ interface TabDao {
     @Query("UPDATE tab SET name = :name WHERE id = :id")
     suspend fun rename(id: Long, name: String)
 
-    /** People in the tab keep their data; their tabId becomes null (foreign key SET NULL). */
+    /** People in the tab keep their data; only their links to the tab go (foreign key CASCADE). */
     @Query("DELETE FROM tab WHERE id = :id")
     suspend fun delete(id: Long)
 

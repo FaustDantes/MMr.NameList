@@ -291,3 +291,11 @@ Status: accepted
 Decision: The language is saved in `SettingsStore` (`AppLanguage`: system, en, de, sk, cs, pl). `MainActivity.attachBaseContext` wraps the context with the saved locale and sets the default locale, so texts and dates follow it. A change recreates the activity. Flags are emoji; each entry also shows the language name in its own language. No new dependency: `AppCompatDelegate` would add androidx.appcompat. The widget follows the system language, because it runs outside the activity. The add button is 88 dp (was 112 dp), still a navy circle at the bottom right (supersedes the size in ADR-032 and ADR-033).
 Reason: The owner asked for a visible language list with flags and for a smaller add button. A system option stays first so the app can follow the phone again.
 Alternatives: `AppCompatDelegate.setApplicationLocales` (new dependency); only the Android 13 system language screen (hidden from most users; the owner could not find it).
+
+## ADR-035: Many tabs per person
+
+Date: 2026-11-16
+Status: accepted
+Decision: New table `person_tab(personId, tabId)` with a composite key and cascade delete on both sides. Database version 6, auto migration with `PersonTabMigration`, which copies each `person.tabId` into the new table. The column `person.tabId` stays in the schema, unused and set to null on every save, so the migration cannot lose data and a later version can drop it. Backup format version stays 1: people get an added `tabIds` array and keep `tabId` (the lowest tab) for older versions of the app; import reads `tabIds`, else `tabId`, and drops links to tabs that are not in the file. Bulk "Move to tab" keeps its meaning: it replaces all tabs of the people with the one chosen tab.
+Reason: The owner chose "more than one tab per person" from the market review (tags in Clay and Contacts+, groups in NameRoll).
+Alternatives: Store a list in one column (cannot be filtered in SQL, breaks foreign keys); drop `person.tabId` at once (needs a table copy and risks data loss); add a separate "add to tab" bulk action (not asked).

@@ -2,6 +2,11 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
+## 1.3.0 (2026-11-16)
+
+- A person can be in several tabs. In the edit form, tap the tab names to switch them on and off. A tab shows everyone who is in it.
+- Existing people keep their tab. Backups carry all tabs, and older backups still import.
+
 ## 1.2.0 (2026-11-15)
 
 - Home-screen widget: add a person with one tap. Long press the home screen, choose Widgets, then Name List. Resize it to 1 x 1 (button only), 4 x 1 (button and the newest person) or 4 x 2 (button and the initials of the three newest people).
