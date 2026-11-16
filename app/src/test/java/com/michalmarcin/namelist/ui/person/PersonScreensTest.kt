@@ -140,13 +140,15 @@ class PersonScreensTest {
     }
 
     @Test
-    fun tabFieldHiddenWithoutTabs() {
+    fun withoutTabsTheFormStillOffersToAddOne() {
         compose.setContent {
             NameListTheme(dynamicColor = false) {
                 PersonEditScreen(PersonEditUiState(name = "Anna"), {}, {}, {}, {})
             }
         }
-        compose.onNodeWithTag("tabField").assertDoesNotExist()
+        compose.onNodeWithTag("tabField").assertIsDisplayed()
+        compose.onNodeWithTag("addTabChip").assertIsDisplayed()
+        compose.onNodeWithText("Add tab").assertIsDisplayed()
     }
 
     @Test

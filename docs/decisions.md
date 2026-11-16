@@ -299,3 +299,11 @@ Status: accepted
 Decision: New table `person_tab(personId, tabId)` with a composite key and cascade delete on both sides. Database version 6, auto migration with `PersonTabMigration`, which copies each `person.tabId` into the new table. The column `person.tabId` stays in the schema, unused and set to null on every save, so the migration cannot lose data and a later version can drop it. Backup format version stays 1: people get an added `tabIds` array and keep `tabId` (the lowest tab) for older versions of the app; import reads `tabIds`, else `tabId`, and drops links to tabs that are not in the file. Bulk "Move to tab" keeps its meaning: it replaces all tabs of the people with the one chosen tab.
 Reason: The owner chose "more than one tab per person" from the market review (tags in Clay and Contacts+, groups in NameRoll).
 Alternatives: Store a list in one column (cannot be filtered in SQL, breaks foreign keys); drop `person.tabId` at once (needs a table copy and risks data loss); add a separate "add to tab" bulk action (not asked).
+
+## ADR-036: Languages reduced to English, Slovak, Czech; add a tab from the edit form
+
+Date: 2026-11-16
+Status: accepted
+Decision: German and Polish are removed (`values-de`, `values-pl`, their entries in `locales_config.xml` and in `AppLanguage`). Supersedes the language list in ADR-033 (F25) and ADR-034. A phone that is set to German or Polish now shows English. A saved choice of "de" or "pl" is read as "System language" (`AppLanguage.fromTag`). The edit form always shows the tab chips, with an "Add tab" chip that opens the tab name form, creates the tab and puts the person in it (F28). The texts reuse existing strings, so the new control is in all three languages.
+Reason: The owner asked for this on 2026-11-16. Adding a tab needed a trip to the tabs screen, and with no tabs the form showed nothing.
+Alternatives: Keep the two languages hidden (dead translations still cost upkeep).

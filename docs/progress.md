@@ -23,6 +23,7 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ### 2026-11-16 (1.3.0, F28, owner request)
 
+- ADR-036: add a tab from the edit form; German and Polish removed. I read "the tabs should be also localised" as: the new add-tab control must be translated; it reuses existing strings, so it is in Slovak and Czech. Tell me if you meant something else, such as tab names.
 - F28 and ADR-035: many tabs per person. Database 5 to 6 with a data-copying auto migration.
 - Decision I made without asking: "Move to tab" in multi-select replaces all tabs with the chosen one. Say if you want "add to tab" as a second action.
 - Check on the phone: update from 1.2.0 and see that people keep their tab; give one person two tabs; open each tab; export and import a backup.

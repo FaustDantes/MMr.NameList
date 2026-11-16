@@ -5,6 +5,8 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 ## 1.3.0 (2026-11-16)
 
 - A person can be in several tabs. In the edit form, tap the tab names to switch them on and off. A tab shows everyone who is in it.
+- The edit form has an "Add tab" button, so you can make a new tab while you add or edit a person.
+- German and Polish are removed. The app speaks English, Slovak and Czech. A phone set to German or Polish shows English.
 - Existing people keep their tab. Backups carry all tabs, and older backups still import.
 
 ## 1.2.0 (2026-11-15)

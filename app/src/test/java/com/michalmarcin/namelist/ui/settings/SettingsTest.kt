@@ -94,19 +94,26 @@ class SettingsTest {
         }
         compose.onNodeWithText("\uD83C\uDF10 System language").assertIsDisplayed()
         compose.onNodeWithTag("languageButton").performClick()
-        compose.onNodeWithText("\uD83C\uDDE9\uD83C\uDDEA Deutsch").assertIsDisplayed()
+        compose.onNodeWithText("\uD83C\uDDEC\uD83C\uDDE7 English").assertIsDisplayed()
         compose.onNodeWithText("\uD83C\uDDE8\uD83C\uDDFF Čeština").assertIsDisplayed()
-        compose.onNodeWithTag("language-POLISH").assertIsDisplayed()
+        compose.onNodeWithTag("language-SLOVAK").assertIsDisplayed()
         compose.onNodeWithTag("language-SLOVAK").performClick()
         assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SLOVAK, chosen)
+    }
+
+    @Test
+    fun aRemovedLanguageFallsBackToTheSystemLanguage() {
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, com.michalmarcin.namelist.platform.AppLanguage.fromTag("de"))
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, com.michalmarcin.namelist.platform.AppLanguage.fromTag("pl"))
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.CZECH, com.michalmarcin.namelist.platform.AppLanguage.fromTag("cs"))
     }
 
     @Test
     fun languageIsSavedAndReadBack() {
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.app.Application>()
         assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, SettingsStore(context).language.value)
-        SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.POLISH)
-        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.POLISH, SettingsStore(context).language.value)
+        SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.CZECH)
+        assertEquals(com.michalmarcin.namelist.platform.AppLanguage.CZECH, SettingsStore(context).language.value)
         SettingsStore(context).setLanguage(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM)
         assertEquals(com.michalmarcin.namelist.platform.AppLanguage.SYSTEM, SettingsStore(context).language.value)
     }

@@ -51,6 +51,10 @@ import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Surface
+import com.michalmarcin.namelist.ui.tabs.TabNameForm
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -110,6 +114,7 @@ fun PersonEditRoute(
         },
         onRemovePhoto = viewModel::removePhoto,
         onTabChange = viewModel::onTabToggle,
+        onAddTab = viewModel::onAddTab,
         onPlaceChange = viewModel::onPlaceChange,
         onFirstMetChange = viewModel::onFirstMetChange,
         onNativeLanguageChange = viewModel::onNativeLanguageChange,
@@ -156,6 +161,7 @@ fun PersonEditScreen(
     onSaveAnyway: () -> Unit = {},
     onDismissDuplicate: () -> Unit = {},
     onOpenExisting: (Long) -> Unit = {},
+    onAddTab: (String) -> Unit = {},
 ) {
     // F19: only icon, name and tab are on top. The rest waits in a collapsed section.
     var detailsOpen by rememberSaveable { mutableStateOf(false) }
@@ -217,7 +223,7 @@ fun PersonEditScreen(
             )
             // F23: the question for the next talk sits right below the name.
             TextDetail(state.askAbout, onAskAboutChange, R.string.ask_about, "askAboutField")
-            TabField(state.tabs, state.tabIds, onTabChange)
+            TabField(state.tabs, state.tabIds, onTabChange, onAddTab)
             DetailsToggle(open = detailsOpen, onToggle = { detailsOpen = !detailsOpen })
             if (detailsOpen) {
                 PlaceField(state, onPlaceChange, onUseLocation, onClearCoordinates)
@@ -299,10 +305,25 @@ private fun PhotoSection(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -> Unit) {
-    if (tabs.isEmpty()) return
+private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -> Unit, onAdd: (String) -> Unit) {
+    var adding by rememberSaveable { mutableStateOf(false) }
+    if (adding) {
+        BasicAlertDialog(onDismissRequest = { adding = false }) {
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                TabNameForm(
+                    title = stringResource(R.string.add_tab),
+                    initial = "",
+                    onConfirm = {
+                        adding = false
+                        onAdd(it)
+                    },
+                    onCancel = { adding = false },
+                )
+            }
+        }
+    }
     // F28: a person can be in many tabs, so the tabs are chips that switch on and off.
     Column(Modifier.fillMaxWidth().testTag("tabField"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -320,6 +341,14 @@ private fun TabField(tabs: List<Tab>, selectedIds: Set<Long>, onToggle: (Long) -
                     modifier = Modifier.testTag("tabChip-${tab.id}"),
                 )
             }
+            // A new tab can be made here, without leaving the form.
+            AssistChip(
+                onClick = { adding = true },
+                label = { Text(stringResource(R.string.add_tab)) },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.testTag("addTabChip"),
+            )
         }
     }
 }

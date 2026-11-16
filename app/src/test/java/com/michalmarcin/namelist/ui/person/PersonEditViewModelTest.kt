@@ -112,6 +112,21 @@ class PersonEditViewModelTest {
     }
 
     @Test
+    fun aTabMadeInTheFormIsCreatedAndSelected() {
+        val vm = viewModel()
+        vm.onNameChange("Anna")
+        vm.onAddTab("   ")
+        vm.onAddTab(" Gym ")
+        vm.uiState.await { it.tabs.size == 1 && it.tabIds.size == 1 }
+        val gym = vm.uiState.value.tabs.single()
+        assertEquals("Gym", gym.name)
+        assertEquals(setOf(gym.id), vm.uiState.value.tabIds)
+        vm.save()
+        vm.uiState.await { it.isSaved }
+        assertEquals(setOf(gym.id), runBlocking { people.tabIdsOf(everyone().single().id) })
+    }
+
+    @Test
     fun aPersonCanBeInManyTabs() {
         val work = runBlocking { tabs.add("Work") }
         val gym = runBlocking { tabs.add("Gym") }

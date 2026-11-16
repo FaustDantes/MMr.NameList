@@ -58,7 +58,7 @@ data class PersonEditUiState(
 
 class PersonEditViewModel(
     private val repository: PeopleRepository,
-    tabs: TabsRepository,
+    private val tabs: TabsRepository,
     private val photos: PhotoStore,
     private val location: LocationProvider,
     handle: SavedStateHandle,
@@ -116,6 +116,15 @@ class PersonEditViewModel(
     fun onNameChange(value: String) = state.update { it.copy(name = value, showNameError = false) }
 
     fun onNotesChange(value: String) = state.update { it.copy(notes = value) }
+
+    /** F28: makes a new tab from the edit form and puts the person in it. A blank name does nothing. */
+    fun onAddTab(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val tabId = tabs.add(name)
+            state.update { it.copy(tabIds = it.tabIds + tabId) }
+        }
+    }
 
     /** Puts the person in the tab, or takes them out of it (F28). */
     fun onTabToggle(tabId: Long) = state.update {

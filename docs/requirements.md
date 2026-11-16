@@ -119,10 +119,10 @@ A widget for the phone's home screen with one big add button. The button opens t
 The add button on the people list is dark navy, twice the usual size (112 dp) and at the bottom center, so it is easy to hit with the thumb (ADR-032).
 
 ### F22 to F26 (added by the owner on 2026-11-15)
-F22 warning when a new name equals an existing one (case ignored), with a button that opens the existing person. F23 "Conversation Spark" field (was "Ask about") directly under the name, and its first words under the name in the list. F24 version, build number, contact address and "Report a problem" in Settings. F25 languages English, German, Slovak, Czech, Polish. F26 search over every field and every date. See ADR-033.
+F22 warning when a new name equals an existing one (case ignored), with a button that opens the existing person. F23 "Conversation Spark" field (was "Ask about") directly under the name, and its first words under the name in the list. F24 version, build number, contact address and "Report a problem" in Settings. F25 languages English, Slovak, Czech (German and Polish were removed on 2026-11-16, ADR-036). F26 search over every field and every date. See ADR-033.
 
 ### F27 Language choice (added by the owner on 2026-11-15)
 Settings has a drop-down with a flag and the name of each language, "System language" first. The choice applies at once (ADR-034).
 
 ### F28 Many tabs per person (added by the owner on 2026-11-16)
-A person can be in several tabs, for example "Gym" and "Work". The edit form shows the tabs as chips that switch on and off. A tab shows everyone who is in it. Deleting a tab removes only the link. "Move to tab" in multi-select puts the people in that one tab (it replaces their other tabs). The detail page lists all tabs. Backups carry all tabs; backups of 1.2.0 and older import with their single tab (ADR-035).
+A person can be in several tabs, for example "Gym" and "Work". The edit form shows the tabs as chips that switch on and off. A tab shows everyone who is in it. Deleting a tab removes only the link. "Move to tab" in multi-select puts the people in that one tab (it replaces their other tabs). The detail page lists all tabs. The edit form has an "Add tab" chip, so a new tab can be made without leaving the form. Backups carry all tabs; backups of 1.2.0 and older import with their single tab (ADR-035).

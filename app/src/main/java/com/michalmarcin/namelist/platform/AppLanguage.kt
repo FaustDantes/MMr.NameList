@@ -12,10 +12,8 @@ import java.util.Locale
 enum class AppLanguage(val tag: String?, val flag: String, val nativeName: String) {
     SYSTEM(null, "🌐", ""),
     ENGLISH("en", "🇬🇧", "English"),
-    GERMAN("de", "🇩🇪", "Deutsch"),
     SLOVAK("sk", "🇸🇰", "Slovenčina"),
     CZECH("cs", "🇨🇿", "Čeština"),
-    POLISH("pl", "🇵🇱", "Polski"),
     ;
 
     companion object {
