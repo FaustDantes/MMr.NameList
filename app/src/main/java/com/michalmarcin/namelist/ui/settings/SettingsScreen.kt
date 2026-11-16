@@ -166,25 +166,6 @@ fun SettingsScreen(
             DetailSection(title = stringResource(R.string.language)) {
                 LanguageDropdown(state.language, onLanguageChange)
             }
-            // F31: the lists the person picks from are edited here.
-            DetailSection(title = stringResource(R.string.lists)) {
-                OutlinedButton(
-                    shape = MaterialTheme.shapes.large,
-                    onClick = onManageTags,
-                    modifier = Modifier.fillMaxWidth().testTag("manageTagsButton"),
-                ) {
-                    Text(stringResource(R.string.manage_tabs), modifier = Modifier.weight(1f))
-                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
-                }
-                OutlinedButton(
-                    shape = MaterialTheme.shapes.large,
-                    onClick = onManageRelationTypes,
-                    modifier = Modifier.fillMaxWidth().testTag("manageRelationTypesButton"),
-                ) {
-                    Text(stringResource(R.string.relation_types), modifier = Modifier.weight(1f))
-                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
-                }
-            }
             DetailSection(title = stringResource(R.string.theme)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ThemeMode.entries.forEach { mode ->
@@ -297,6 +278,25 @@ fun SettingsScreen(
                             .padding(top = 8.dp)
                             .testTag("backupMessage"),
                     )
+                }
+            }
+            // F31: the lists the person picks from are edited here.
+            DetailSection(title = stringResource(R.string.lists)) {
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onManageTags,
+                    modifier = Modifier.fillMaxWidth().testTag("manageTagsButton"),
+                ) {
+                    Text(stringResource(R.string.manage_tabs), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
+                }
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onManageRelationTypes,
+                    modifier = Modifier.fillMaxWidth().testTag("manageRelationTypesButton"),
+                ) {
+                    Text(stringResource(R.string.relation_types), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
                 }
             }
             DetailSection(title = stringResource(R.string.about)) {

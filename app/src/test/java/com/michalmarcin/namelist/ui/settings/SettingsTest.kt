@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.michalmarcin.namelist.platform.SettingsStore
@@ -135,8 +136,8 @@ class SettingsTest {
                 )
             }
         }
-        compose.onNodeWithTag("manageTagsButton").performClick()
-        compose.onNodeWithTag("manageRelationTypesButton").performClick()
+        compose.onNodeWithTag("manageTagsButton").performScrollTo().performClick()
+        compose.onNodeWithTag("manageRelationTypesButton").performScrollTo().performClick()
         assertEquals(listOf("tags", "types"), opened)
     }
 }
