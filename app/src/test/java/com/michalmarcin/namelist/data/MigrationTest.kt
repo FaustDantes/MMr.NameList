@@ -118,7 +118,7 @@ class MigrationTest {
             )
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 6, true, PersonTabMigration())
+        val db = helper.runMigrationsAndValidate(DB, 6, true)
         db.query("SELECT personId, tabId FROM person_tab").use {
             assertEquals(1, it.count)
             assertTrue(it.moveToFirst())
@@ -137,7 +137,7 @@ class MigrationTest {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 6, true, PersonTabMigration())
+        val db = helper.runMigrationsAndValidate(DB, 6, true)
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))
