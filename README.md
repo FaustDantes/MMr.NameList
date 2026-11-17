@@ -2,7 +2,7 @@
 
 A simple Android app to remember the people you meet. All data stays on your phone.
 
-**Status:** 1.3.0 is the latest release; 1.4.0 is in testing. See the [changelog](CHANGELOG.md), [progress](docs/progress.md) and [releases](../../releases).
+**Status:** 1.4.0 is the latest release. See the [changelog](CHANGELOG.md), [progress](docs/progress.md) and [releases](../../releases).
 
 <table>
   <tr>

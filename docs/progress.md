@@ -19,9 +19,14 @@ The agent updates this file at the end of each session. Newest entry first.
 | M10 to M13 First meeting, backup password, archive, more details | approved | v1.1.0 | 2026-11-15 |
 | M14 Widget, M15 Big add button | approved | v1.2.0 | 2026-11-15 |
 | M16 to M19 Same name, tags, Line design, welcome | approved | v1.3.0 | 2026-11-17 |
-| M20 Learn names | review | v1.4.0-rc1 | 2026-11-17 |
+| M20 Learn names | approved | v1.4.0 | 2026-11-17 |
 
 ## Log
+
+### 2026-11-17 (release 1.4.0)
+
+- Owner approved v1.4.0-rc1 ("Perfect, let's make release"). Release date set in CHANGELOG.md. `master` is fast-forwarded to `dev`, then the workflow publishes `v1.4.0`.
+- Open: learning results in the backup file; a round of only missed people. Both wait for the owner.
 
 ### 2026-11-17 (M20, F35 learn names, owner request)
 
