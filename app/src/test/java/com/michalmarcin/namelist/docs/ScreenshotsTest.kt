@@ -1,6 +1,7 @@
 package com.michalmarcin.namelist.docs
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -44,6 +45,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import java.nio.ByteBuffer
 
 /**
  * Screenshots for the README (owner request 2026-11-17, ADR-040). Not a check: it draws the real
@@ -91,6 +93,13 @@ class ScreenshotsTest {
     private fun shoot(file: String, dark: Boolean = false, content: @Composable () -> Unit) {
         fakePhoto("anna.png", Color.rgb(120, 140, 168), Color.rgb(70, 86, 110))
         fakePhoto("martin.png", Color.rgb(118, 160, 146), Color.rgb(62, 98, 86))
+        // Decode once on the test thread before the image loader decodes on its own threads. The native
+        // graphics code sets itself up on first use; when that first use was on a loader thread, the test
+        // process sometimes stopped with "JniConstants: Class not found: java/nio/...".
+        BitmapFactory.decodeFile(File(photos, "anna.png").path)?.let { decoded ->
+            decoded.copyPixelsToBuffer(ByteBuffer.allocate(decoded.byteCount))
+            decoded.recycle()
+        }
         compose.setContent {
             CompositionLocalProvider(LocalPhotoDirectory provides photos) {
                 NameListTheme(darkTheme = dark, dynamicColor = false) { content() }

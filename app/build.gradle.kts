@@ -66,9 +66,6 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.testLogging { events("started", "skipped", "failed") }
-                // One graphics mode for every test class, so the native runtime is not loaded in two modes
-                // in one test process (crash "JniConstants: Class not found", ADR-042).
-                it.systemProperty("robolectric.graphicsMode", "NATIVE")
             }
         }
     }
