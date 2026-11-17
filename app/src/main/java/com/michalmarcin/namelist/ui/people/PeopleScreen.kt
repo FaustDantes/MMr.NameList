@@ -66,6 +66,7 @@ import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.intro.IntroDialog
 import com.michalmarcin.namelist.ui.components.hasPhoto
 import com.michalmarcin.namelist.ui.components.lineFieldColors
 import com.michalmarcin.namelist.ui.components.topHairline
@@ -90,6 +91,9 @@ fun PeopleRoute(
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val showIntro by viewModel.showIntro.collectAsStateWithLifecycle()
+    // F34: the welcome, once.
+    if (showIntro) IntroDialog(onConfirm = viewModel::dismissIntro)
     PeopleScreen(
         state = state,
         onQueryChange = viewModel::onQueryChange,

@@ -40,6 +40,16 @@ class SettingsStore(context: Context) {
     private fun readEncryptChoice(): EncryptChoice =
         EncryptChoice.entries.firstOrNull { it.name == prefs.getString(KEY_ENCRYPT, null) } ?: EncryptChoice.ASK
 
+    private val introState = MutableStateFlow(prefs.getBoolean(KEY_INTRO_SEEN, false))
+
+    /** F34: true once the user confirmed the intro. The intro then never shows again. */
+    val introSeen: StateFlow<Boolean> = introState.asStateFlow()
+
+    fun markIntroSeen() {
+        prefs.edit().putBoolean(KEY_INTRO_SEEN, true).apply()
+        introState.value = true
+    }
+
     fun setTheme(mode: ThemeMode) {
         prefs.edit().putString(KEY_THEME, mode.name).apply()
         themeState.value = mode
@@ -57,5 +67,6 @@ class SettingsStore(context: Context) {
         private const val KEY_LANGUAGE = "language"
         private const val KEY_THEME = "theme"
         private const val KEY_ENCRYPT = "encrypt_backup"
+        private const val KEY_INTRO_SEEN = "intro_seen"
     }
 }

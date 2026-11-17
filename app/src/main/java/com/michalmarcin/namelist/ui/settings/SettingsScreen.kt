@@ -285,6 +285,15 @@ fun SettingsScreen(
             }
             // F31: the lists the person picks from are edited here.
             DetailSection(title = stringResource(R.string.lists)) {
+                // ADR-039, ADR-041: the archive first, then tags and relationship types.
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onArchive,
+                    modifier = Modifier.fillMaxWidth().testTag("archiveButton"),
+                ) {
+                    Text(stringResource(R.string.archive), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
+                }
                 OutlinedButton(
                     shape = MaterialTheme.shapes.large,
                     onClick = onManageTags,
@@ -299,15 +308,6 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().testTag("manageRelationTypesButton"),
                 ) {
                     Text(stringResource(R.string.relation_types), modifier = Modifier.weight(1f))
-                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
-                }
-                // ADR-039: the archive moved here from the people list.
-                OutlinedButton(
-                    shape = MaterialTheme.shapes.large,
-                    onClick = onArchive,
-                    modifier = Modifier.fillMaxWidth().testTag("archiveButton"),
-                ) {
-                    Text(stringResource(R.string.archive), modifier = Modifier.weight(1f))
                     Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
                 }
             }

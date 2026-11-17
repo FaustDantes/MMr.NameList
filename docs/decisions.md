@@ -361,3 +361,14 @@ Status: accepted
 Decision: `ScreenshotsTest` (Robolectric, native graphics, no new dependency) draws six screens with fictional people: people list in light and dark, a person, the edit form, Settings, and the three widgets. It writes PNG files to `app/build/screenshots`; CI copies them to the `ci-outputs` branch next to the Room schemas. The agent copies them to `docs/screenshots/` when a screen changes. The README starts with these screenshots and a short "About the app" text (what it is for, setup, advantages, disadvantages, ideas for later). The two photos are drawn shapes, not people (AGENTS.md rule 9). Supersedes point (4) of ADR-019 for README screenshots only; there are still no screenshots per milestone.
 Reason: The owner asked for screenshots and an About section on 2026-11-17.
 Alternatives: Roborazzi again (a dependency for six images). Pictures from the design canvas (they would not show the real app).
+
+## ADR-041: Archive first in Lists; a one-time welcome
+
+Date: 2026-11-17
+Status: accepted
+Decision:
+- Settings, Lists: Archive, then Tags, then Relationship types.
+- A welcome dialog on the people list with four points: save people in seconds (app or widget), the Conversation Spark, finding anyone again (search, sort, tags, relationships), private by design (all on the phone, backup file). It closes only with "Get started"; tapping outside and Back do nothing. A flag in the settings (`intro_seen`) keeps it from showing again. People who update from an earlier version see it once too, because they have no flag yet.
+- No example people. The owner first asked for three example people on a new install, then withdrew it the same day in favour of the welcome.
+Reason: Owner requests on 2026-11-17.
+Alternatives: A screen-by-screen tour (longer, and the app has few screens). Example people (withdrawn by the owner).

@@ -19,7 +19,7 @@ import com.michalmarcin.namelist.ui.tabs.ManageTabsViewModel
 /** Creates all ViewModels from the [AppContainer] (ADR-002). */
 val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
     initializer {
-        PeopleViewModel(container().peopleRepository, container().tabsRepository, createSavedStateHandle())
+        PeopleViewModel(container().peopleRepository, container().tabsRepository, createSavedStateHandle(), container().settingsStore)
     }
     initializer {
         PersonDetailViewModel(

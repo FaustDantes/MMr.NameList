@@ -1,5 +1,7 @@
 package com.michalmarcin.namelist.ui.people
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.michalmarcin.namelist.platform.SettingsStore
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,7 +43,17 @@ class PeopleViewModel(
     private val people: PeopleRepository,
     tabs: TabsRepository,
     private val handle: SavedStateHandle,
+    private val settings: SettingsStore? = null,
 ) : ViewModel() {
+
+    /** F34: show the intro until the user confirms it once. Tests without settings never see it. */
+    val showIntro: StateFlow<Boolean> = (settings?.introSeen ?: MutableStateFlow(true))
+        .map { seen -> !seen }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settings?.introSeen?.value == false)
+
+    fun dismissIntro() {
+        settings?.markIntroSeen()
+    }
 
     private val query = handle.getStateFlow(KEY_QUERY, "")
     private val sort = handle.getStateFlow(KEY_SORT, SortMode.MANUAL.name).map { SortMode.valueOf(it) }

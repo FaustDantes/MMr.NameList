@@ -240,4 +240,15 @@
         <item quantity="other">%d lidí</item>
     </plurals>
     <string name="widget_add_description">Name List: přidat člověka</string>
+    <string name="intro_title">Vítejte v Name List</string>
+    <string name="intro_subtitle">Pamatujte si lidi, které potkáte.</string>
+    <string name="intro_1_title">Uložte člověka za pár sekund</string>
+    <string name="intro_1_text">Přidejte jméno v aplikaci nebo přes widget na ploše, když chcete i s fotkou.</string>
+    <string name="intro_2_title">Vězte, o čem mluvit</string>
+    <string name="intro_2_text">Jiskra rozhovoru drží jednu věc, na kterou se příště zeptat, přímo pod jménem.</string>
+    <string name="intro_3_title">Najděte kohokoli</string>
+    <string name="intro_3_text">Hledejte v každém poli i datu, řaďte seznam, seskupte lidi štítky a propojte je.</string>
+    <string name="intro_4_title">Soukromí na prvním místě</string>
+    <string name="intro_4_text">Vše zůstává ve vašem telefonu. Zálohu do jednoho souboru uděláte, kdy chcete.</string>
+    <string name="intro_confirm">Začít</string>
 </resources>

@@ -9,7 +9,8 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 - The add button is a blue square at the bottom right.
 - New app icon: three lines on black, the middle one blue.
 - The people list has only the Settings button at the top. Under the title you see how many people are listed and the sort order; tap the order to change it.
-- The archive is in Settings, under Lists, next to Tags and Relationship types. The map opens from a person's place.
+- The archive is in Settings, under Lists, above Tags and Relationship types.
+- A short welcome on the first start says what the app can do. It shows once. The map opens from a person's place.
 - Widgets show the app icon and the name Name List, and follow the phone's light or dark mode. The small widget is the app icon with a plus.
 
 - Tabs are now called tags. A person can have several tags, and a tag shows everyone who has it.

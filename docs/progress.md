@@ -21,6 +21,11 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-17 (1.3.0, F34, owner request)
+
+- ADR-041: Archive first in Settings, Lists; one-time welcome dialog with four points, closed only by "Get started". Example people were asked for and then withdrawn by the owner; nothing of them is in the code.
+- Check on the phone: the welcome on the first start (also after an update), that Back and tapping outside do not close it, that it does not come back after a restart.
+
 ### 2026-11-17 (1.3.0, F33, owner request)
 
 - ADR-039: only Settings in the people list top bar; "N people · order" line under the title; archive in Settings, Lists; map only from a person's place (owner's canvas comment); tags edited only in Settings.

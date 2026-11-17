@@ -141,3 +141,6 @@ The app uses the "Line" look in light and dark: white or black, hairlines instea
 
 ### F33 Simpler people list top, new app icon (added by the owner on 2026-11-17)
 Only Settings in the top bar of the people list; the sort choice under the title; the map only from a person's place; the archive and tag editing in Settings. New "Line list" app icon; widgets show the app icon and name and follow light or dark mode. See ADR-039.
+
+### F34 Welcome shown once (added by the owner on 2026-11-17)
+On the first start, a dialog with four points says what the app does and how it helps. It closes only when the user confirms it and never shows again. See ADR-041.

@@ -232,4 +232,15 @@
         <item quantity="other">%d people</item>
     </plurals>
     <string name="widget_add_description">Name List: add a person</string>
+    <string name="intro_title">Welcome to Name List</string>
+    <string name="intro_subtitle">Remember the people you meet.</string>
+    <string name="intro_1_title">Save people in seconds</string>
+    <string name="intro_1_text">Add a name from the app or the home-screen widget, with a photo if you like.</string>
+    <string name="intro_2_title">Know what to talk about</string>
+    <string name="intro_2_text">The Conversation Spark keeps one thing to ask next time, right under the name.</string>
+    <string name="intro_3_title">Find anyone again</string>
+    <string name="intro_3_text">Search every field and date, sort the list, group people with tags and link them.</string>
+    <string name="intro_4_title">Private by design</string>
+    <string name="intro_4_text">Everything stays on your phone. Export one backup file whenever you want.</string>
+    <string name="intro_confirm">Get started</string>
 </resources>
