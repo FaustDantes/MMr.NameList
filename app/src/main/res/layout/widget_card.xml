@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 4 x 2 (ADR-039): a header with the app icon and name, the three newest people, the add button. -->
+<!-- 4 x 2 (ADR-039): a header with the app icon and name, the three newest people, and the add button beside them. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:paddingStart="14dp"
     android:paddingTop="12dp"
     android:paddingEnd="10dp"
@@ -12,8 +12,8 @@
 
     <LinearLayout
         android:id="@+id/widget_text"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -116,7 +116,8 @@
         android:id="@+id/widget_add"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_gravity="end"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="12dp"
         android:background="@drawable/widget_add_background"
         android:contentDescription="@string/add_person">
 
