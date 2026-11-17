@@ -114,7 +114,9 @@ class WidgetTest {
     fun everySizeHasAnAddButtonWithADescription() {
         for (size in WidgetSize.entries) {
             val add = render(size, WidgetContent.from(people)).findViewById<android.view.View>(R.id.widget_add)
-            assertEquals("Add person", add.contentDescription.toString())
+            // The 1 x 1 widget is only the app icon, so it names the app too (ADR-039).
+            val expected = if (size == WidgetSize.ICON) "Name List: add a person" else "Add person"
+            assertEquals(expected, add.contentDescription.toString())
             assertTrue(add.hasOnClickListeners())
         }
     }
