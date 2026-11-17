@@ -2,7 +2,7 @@
 
 A simple Android app to remember the people you meet. All data stays on your phone.
 
-**Status:** 1.2.0 is the latest release; 1.3.0 is in testing. See the [changelog](CHANGELOG.md), [progress](docs/progress.md) and [releases](../../releases).
+**Status:** 1.3.0 is the latest release; 1.4.0 is in testing. See the [changelog](CHANGELOG.md), [progress](docs/progress.md) and [releases](../../releases).
 
 <table>
   <tr>
@@ -15,9 +15,14 @@ A simple Android app to remember the people you meet. All data stays on your pho
     <td><img src="docs/screenshots/05-settings.png" width="220" alt="Settings"></td>
     <td><img src="docs/screenshots/06-widgets.png" width="220" alt="The three home-screen widgets"></td>
   </tr>
+  <tr>
+    <td><img src="docs/screenshots/07-learn-card.png" width="220" alt="A flash card with the details of a person"></td>
+    <td><img src="docs/screenshots/08-learn-result.png" width="220" alt="The result of a learning round with the progress chart"></td>
+    <td></td>
+  </tr>
 </table>
 
-<sub>Screenshots of version 1.3.0, drawn by the tests from the real screens with fictional people. The two "photos" are drawn shapes, not people.</sub>
+<sub>Screenshots of version 1.4.0, drawn by the tests from the real screens with fictional people. The two "photos" are drawn shapes, not people.</sub>
 
 ## About the app
 

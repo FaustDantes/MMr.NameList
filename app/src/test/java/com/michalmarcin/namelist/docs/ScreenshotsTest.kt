@@ -16,7 +16,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.michalmarcin.namelist.data.db.LearnRound
 import com.michalmarcin.namelist.data.db.Person
+import com.michalmarcin.namelist.data.repo.LearnCard
+import com.michalmarcin.namelist.ui.learn.LearnScreen
+import com.michalmarcin.namelist.ui.learn.LearnUiState
 import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.db.Tab
@@ -156,10 +160,49 @@ class ScreenshotsTest {
     }
 
     @Test
+    fun learnCard() = shoot("07-learn-card.png") {
+        LearnScreen(
+            state = LearnUiState.Card(
+                card = LearnCard(
+                    personId = 2,
+                    name = "Anna Nováková",
+                    tags = listOf("Work", "Gym"),
+                    spark = "Her dog Max, a border collie. Training for the Brno half marathon.",
+                    place = "Brno tram, line 4",
+                    notes = "Likes hiking and strong coffee.",
+                ),
+                number = 3,
+                total = 10,
+                flipped = false,
+            ),
+            onBack = {}, onFlip = {}, onAnswer = {}, onNewRound = {}, onOpenPerson = {},
+        )
+    }
+
+    @Test
+    fun learnResult() = shoot("08-learn-result.png") {
+        val day = 86_400_000L
+        val start = 1_763_000_000_000L
+        val scores = listOf(4, 5, 5, 7, 6, 8)
+        LearnScreen(
+            state = LearnUiState.Result(
+                known = 8,
+                total = 10,
+                missed = listOf(
+                    LearnCard(5, "Tomáš Dvořák", emptyList(), "Climbing trip to Arco", null, null),
+                    LearnCard(6, "Eva Svobodová", emptyList(), "Twins started school", null, null),
+                ),
+                history = scores.mapIndexed { i, k -> LearnRound(finishedAt = start + i * 2 * day, known = k, total = 10) },
+            ),
+            onBack = {}, onFlip = {}, onAnswer = {}, onNewRound = {}, onOpenPerson = {},
+        )
+    }
+
+    @Test
     fun settings() = shoot("05-settings.png") {
         SettingsScreen(
             state = SettingsUiState(),
-            versionName = "1.3.0",
+            versionName = "1.4.0",
             onBack = {},
             onThemeChange = {},
             onExport = {},
