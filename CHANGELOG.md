@@ -2,7 +2,7 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
-## 1.3.0 (2026-11-16)
+## 1.3.0 (2026-11-17)
 
 - New look, "Line": white (or black in dark mode), thin lines instead of cards, one blue accent, new fonts (Space Grotesk and Inter).
 - People without a photo show only their name; the coloured initials are gone, also on the map and the widget.

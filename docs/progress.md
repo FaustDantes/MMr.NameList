@@ -21,6 +21,12 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-17 (release 1.3.0)
+
+- Owner approved 1.3.0 ("it works well, let's release it"). Release date set in CHANGELOG.md. `master` is fast-forwarded to `dev`, then the workflow builds and publishes `v1.3.0`.
+- AGENTS.md rule change (rule 12): the line about screenshots now says that README screenshots are allowed (ADR-040). Per-milestone screenshots stay stopped (ADR-019).
+- Owner asked what an iOS version needs. Answer given in chat. No decision made. ADR-001 stays open only if the owner asks for iOS.
+
 ### 2026-11-17 (1.3.0, F34, owner request)
 
 - ADR-041: Archive first in Settings, Lists; one-time welcome dialog with four points, closed only by "Get started". Example people were asked for and then withdrawn by the owner; nothing of them is in the code.

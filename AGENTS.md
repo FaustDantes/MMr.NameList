@@ -29,7 +29,7 @@ If two documents disagree, stop and ask the owner.
 
 - Logs: `gh api repos/FaustDantes/MMr.NameList/actions/jobs/<job-id>/logs`. Test failures print in full.
 - New Room schema files: CI force-pushes them to the `ci-outputs` branch on each run (`git clone -b ci-outputs ...`). Copy new versions into `app/schemas/` and commit them.
-- No screenshots: the owner stopped them after M3 (ADR-019).
+- Screenshots: only the README screenshots, made by `ScreenshotsTest` and pushed to `ci-outputs` (ADR-040). The owner stopped per-milestone screenshots after M3 (ADR-019).
 
 ## Publishing a release
 
