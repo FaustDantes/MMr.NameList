@@ -1,0 +1,91 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "aa903c7fa05f142fa28d8c1285b531d1",
+    "entities": [
+      {
+        "tableName": "person",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `notes` TEXT NOT NULL, `photoFile` TEXT, `originCountry` TEXT, `metCountry` TEXT, `metCity` TEXT, `metLat` REAL, `metLon` REAL, `isSelf` INTEGER NOT NULL, `sortIndex` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photoFile",
+            "columnName": "photoFile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "originCountry",
+            "columnName": "originCountry",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "metCountry",
+            "columnName": "metCountry",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "metCity",
+            "columnName": "metCity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "metLat",
+            "columnName": "metLat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "metLon",
+            "columnName": "metLon",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "isSelf",
+            "columnName": "isSelf",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortIndex",
+            "columnName": "sortIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aa903c7fa05f142fa28d8c1285b531d1')"
+    ]
+  }
+}
