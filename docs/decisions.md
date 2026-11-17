@@ -353,3 +353,11 @@ Decision:
 - Widgets show the app icon and the name "Name List", and follow the phone: white in light mode, black in dark mode (`values-night/colors.xml`). 1 x 1: the app icon with a plus badge. 4 x 1: icon, name, newest person, add button. 4 x 2: header with icon and name, the three newest names, add button; the hint shows only while nobody is saved. This replaces the "always black" widget of ADR-038. The widget follows the phone's mode, not the theme chosen in the app, because the launcher draws it.
 Reason: The owner asked for these on 2026-11-17 after reviewing the designs.
 Alternatives: Keep the map in Settings (the owner did not want it there). Let the widget follow the app's theme setting (the launcher cannot read it without extra work on every theme change).
+
+## ADR-040: Screenshots for the README again
+
+Date: 2026-11-17
+Status: accepted
+Decision: `ScreenshotsTest` (Robolectric, native graphics, no new dependency) draws six screens with fictional people: people list in light and dark, a person, the edit form, Settings, and the three widgets. It writes PNG files to `app/build/screenshots`; CI copies them to the `ci-outputs` branch next to the Room schemas. The agent copies them to `docs/screenshots/` when a screen changes. The README starts with these screenshots and a short "About the app" text (what it is for, setup, advantages, disadvantages, ideas for later). The two photos are drawn shapes, not people (AGENTS.md rule 9). Supersedes point (4) of ADR-019 for README screenshots only; there are still no screenshots per milestone.
+Reason: The owner asked for screenshots and an About section on 2026-11-17.
+Alternatives: Roborazzi again (a dependency for six images). Pictures from the design canvas (they would not show the real app).
