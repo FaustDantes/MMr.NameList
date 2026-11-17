@@ -3,6 +3,7 @@ package com.michalmarcin.namelist.ui.map
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -56,7 +57,7 @@ class WorldMapTest {
     }
 
     @Test
-    fun mapScreenShowsInitialsAndOpensPerson() {
+    fun mapScreenShowsPinsWithoutInitialsAndOpensPerson() {
         var opened = -1L
         compose.setContent {
             NameListTheme {
@@ -64,7 +65,9 @@ class WorldMapTest {
             }
         }
         compose.onNodeWithText("Map: 2 people").assertIsDisplayed()
-        compose.onNodeWithText("AA").assertIsDisplayed()
+        // ADR-038: no initials on the map; the pin carries the name for screen readers.
+        compose.onNodeWithText("AA").assertDoesNotExist()
+        compose.onNodeWithContentDescription(lisbon.name).assertIsDisplayed()
         compose.onNodeWithTag("marker-12").performClick()
         assertEquals(12L, opened)
     }
