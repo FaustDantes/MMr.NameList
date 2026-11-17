@@ -98,7 +98,7 @@ class PeopleScreenTest {
         val learn = compose.onNodeWithTag("learn").assertIsDisplayed().getBoundsInRoot()
         val add = compose.onNodeWithTag("addPerson").getBoundsInRoot()
         assertEquals(16f, learn.left.value, 1f)
-        assertEquals(64f, learn.width.value, 1f)
+        assertEquals(64f, (learn.right - learn.left).value, 1f)
         assertEquals(add.top.value, learn.top.value, 1f)
         assertTrue(learn.right < add.left)
         compose.onNodeWithContentDescription("Learn names").performClick()
