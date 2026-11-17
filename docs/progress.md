@@ -21,6 +21,12 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-17 (1.3.0, F33, owner request)
+
+- ADR-039: only Settings in the people list top bar; "N people · order" line under the title; archive in Settings, Lists; map only from a person's place (owner's canvas comment); tags edited only in Settings.
+- New "Line list" app icon (option 4); widgets show the icon and app name, white or black with the phone's mode.
+- Check on the phone: the new icon on the home screen and in the app drawer (also with themed icons on); the three widget sizes in light and dark mode; sort from the new line; open the archive from Settings; open the map from a person.
+
 ### 2026-11-17 (1.3.0, F32, owner request)
 
 - ADR-038: Line design from the design canvas, light (default) and dark. Photos only, no initials anywhere. Space Grotesk and Inter bundled (SIL OFL, licenses/).

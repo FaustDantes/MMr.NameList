@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Themed icon: one shape, details cut out with evenOdd. -->
+<!-- Themed icon: the same rows in one color. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FF000000" android:fillType="evenOdd"
-        android:pathData="M39,33h30a8,8 0 0 1 8,8v26a8,8 0 0 1 -8,8h-30a8,8 0 0 1 -8,-8v-26a8,8 0 0 1 8,-8z M46,43a6,6 0 1 1 0,12a6,6 0 1 1 0,-12z M36,67c0,-5.5 4.5,-8.5 10,-8.5s10,3 10,8.5z M60.5,45h10a1.5,1.5 0 0 1 0,3h-10a1.5,1.5 0 0 1 0,-3z M60.5,53h7a1.5,1.5 0 0 1 0,3h-7a1.5,1.5 0 0 1 0,-3z M60.5,61h10a1.5,1.5 0 0 1 0,3h-10a1.5,1.5 0 0 1 0,-3z" />
+    <group android:scaleX="0.9" android:scaleY="0.9" android:translateX="9" android:translateY="9">
+    <path android:fillColor="#FF000000" android:pathData="M24,30h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M24,62h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M41.75,32.75h34.5a1.75,1.75 0 0 1 0,3.5h-34.5a1.75,1.75 0 0 1 0,-3.5z M41.75,64.75h30.5a1.75,1.75 0 0 1 0,3.5h-30.5a1.75,1.75 0 0 1 0,-3.5z" />
+    <path android:fillColor="#FF000000" android:pathData="M24,46h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M42.5,48h25a2.5,2.5 0 0 1 0,5h-25a2.5,2.5 0 0 1 0,-5z" />
+    </group>
 </vector>

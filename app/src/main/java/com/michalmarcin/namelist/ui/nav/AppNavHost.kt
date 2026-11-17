@@ -30,10 +30,7 @@ fun AppNavHost(startWithAdd: Boolean = false, onExit: () -> Unit = {}) {
             PeopleScreenRoute(
                 onAddPerson = { tabId -> nav.navigate(EditPersonRoute(tabId = tabId ?: 0L)) },
                 onOpenPerson = { id -> nav.navigate(PersonRoute(id)) },
-                onManageTabs = { nav.navigate(ManageTabsRoute) },
                 onSettings = { nav.navigate(SettingsRoute) },
-                onMap = { nav.navigate(MapRoute()) },
-                onArchive = { nav.navigate(ArchiveRoute) },
             )
         }
         composable<PersonRoute> {
@@ -72,6 +69,7 @@ fun AppNavHost(startWithAdd: Boolean = false, onExit: () -> Unit = {}) {
                 onBack = { nav.popBackStack() },
                 onManageTags = { nav.navigate(ManageTabsRoute) },
                 onManageRelationTypes = { nav.navigate(ManageRelationTypesRoute) },
+                onArchive = { nav.navigate(ArchiveRoute) },
             )
         }
         composable<ManageTabsRoute> {

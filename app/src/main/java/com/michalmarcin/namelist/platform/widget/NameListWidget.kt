@@ -107,10 +107,13 @@ class NameListWidget : AppWidgetProvider() {
                         views.setViewVisibility(tile, if (name == null) android.view.View.GONE else android.view.View.VISIBLE)
                         if (name != null) views.setTextViewText(tile, name)
                     }
-                    views.setViewVisibility(
-                        R.id.widget_recent,
-                        if (content.recentNames.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE,
-                    )
+                    // With people: their names and the "Recently added" label. Without: the hint.
+                    val hasRecent = content.recentNames.isNotEmpty()
+                    val shown = android.view.View.VISIBLE
+                    val hidden = android.view.View.GONE
+                    views.setViewVisibility(R.id.widget_recent, if (hasRecent) shown else hidden)
+                    views.setViewVisibility(R.id.widget_recent_label, if (hasRecent) shown else hidden)
+                    views.setViewVisibility(R.id.widget_hint, if (hasRecent) hidden else shown)
                 }
             }
             return views

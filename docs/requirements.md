@@ -138,3 +138,6 @@ Settings opens the list of tags and the list of relationship types. The edit for
 
 ### F32 Line design (added by the owner on 2026-11-17)
 The app uses the "Line" look in light and dark: white or black, hairlines instead of cards, one blue accent, Space Grotesk and Inter. A photo shows only for people who have one; there are no initials. See ADR-038 and docs/design.md.
+
+### F33 Simpler people list top, new app icon (added by the owner on 2026-11-17)
+Only Settings in the top bar of the people list; the sort choice under the title; the map only from a person's place; the archive and tag editing in Settings. New "Line list" app icon; widgets show the app icon and name and follow light or dark mode. See ADR-039.

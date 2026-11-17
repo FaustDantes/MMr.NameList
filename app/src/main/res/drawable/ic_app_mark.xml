@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app icon as one drawable, for the widgets (ADR-039). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#000000" android:pathData="M24,0h52a24,24 0 0 1 24,24v52a24,24 0 0 1 -24,24h-52a24,24 0 0 1 -24,-24v-52a24,24 0 0 1 24,-24z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M24,30h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M24,62h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M41.75,32.75h34.5a1.75,1.75 0 0 1 0,3.5h-34.5a1.75,1.75 0 0 1 0,-3.5z M41.75,64.75h30.5a1.75,1.75 0 0 1 0,3.5h-30.5a1.75,1.75 0 0 1 0,-3.5z" />
+    <path android:fillColor="#5AA9FF" android:pathData="M24,46h5a2,2 0 0 1 2,2v5a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-5a2,2 0 0 1 2,-2z M42.5,48h25a2.5,2.5 0 0 1 0,5h-25a2.5,2.5 0 0 1 0,-5z" />
+</vector>

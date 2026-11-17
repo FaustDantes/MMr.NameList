@@ -340,3 +340,16 @@ Decision:
 - Widgets are black in light and dark mode, with the blue add button and the names of the newest people.
 Reason: The owner asked for a new, futuristic look on 2026-11-17, chose Line, asked for a light mode and for photos only on profiles that have one.
 Alternatives: Downloadable Google Fonts (needs Google Play services and a provider certificate; fails offline on first start). Keep initials for people without a photo (the owner did not want them).
+
+## ADR-039: One icon in the top bar, sort under the title, "Line list" app icon
+
+Date: 2026-11-17
+Status: accepted
+Decision:
+- The people list shows only the Settings icon in its top bar. The map icon is gone: the map opens only from a person's place (the small map on the detail page), as the owner asked in a canvas comment. The archive opens from Settings, Lists. Tags are edited only in Settings, Lists, Tags; there is no edit icon on the people list.
+- Under the title is one line: "42 people · Manual order ⌄". Tapping the order opens the two choices (manual, A to Z). The count is the number of people in the list shown.
+- The Settings section "Tags and relationships" is now "Lists": Tags, Relationship types, Archive.
+- New app icon "Line list" (option 4 of five on the design canvas): black background, three rows of a square and a line, the middle row in blue `#5AA9FF`. Adaptive icon with a one-color version for themed icons. `ic_app_mark` is the same icon as one drawable for the widgets.
+- Widgets show the app icon and the name "Name List", and follow the phone: white in light mode, black in dark mode (`values-night/colors.xml`). 1 x 1: the app icon with a plus badge. 4 x 1: icon, name, newest person, add button. 4 x 2: header with icon and name, the three newest names, add button; the hint shows only while nobody is saved. This replaces the "always black" widget of ADR-038. The widget follows the phone's mode, not the theme chosen in the app, because the launcher draws it.
+Reason: The owner asked for these on 2026-11-17 after reviewing the designs.
+Alternatives: Keep the map in Settings (the owner did not want it there). Let the widget follow the app's theme setting (the launcher cannot read it without extra work on every theme change).

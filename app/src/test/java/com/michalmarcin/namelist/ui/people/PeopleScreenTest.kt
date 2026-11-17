@@ -178,14 +178,20 @@ class PeopleScreenTest {
     }
 
     @Test
-    fun archiveButtonOpensTheArchive() {
+    fun topBarHasOnlySettingsAndTheSortLineShowsTheCount() {
         var opened = 0
         compose.setContent {
             NameListTheme(dynamicColor = false) {
-                PeopleScreen(PeopleUiState(people = SampleData.people, isLoading = false), {}, {}, {}, {}, onArchive = { opened++ })
+                PeopleScreen(PeopleUiState(people = SampleData.people, isLoading = false), {}, {}, {}, {}, onSettings = { opened++ })
             }
         }
-        compose.onNodeWithTag("archive").performClick()
+        // ADR-039: no map, archive or tags icon; the sort choice sits under the title.
+        compose.onNodeWithTag("map").assertDoesNotExist()
+        compose.onNodeWithTag("archive").assertDoesNotExist()
+        compose.onNodeWithTag("manageTabs").assertDoesNotExist()
+        compose.onNodeWithText("${SampleData.people.size} people").assertIsDisplayed()
+        compose.onNodeWithText("Manual order").assertIsDisplayed()
+        compose.onNodeWithTag("settings").performClick()
         assertEquals(1, opened)
     }
 

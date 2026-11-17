@@ -6,7 +6,11 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 
 - New look, "Line": white (or black in dark mode), thin lines instead of cards, one blue accent, new fonts (Space Grotesk and Inter).
 - People without a photo show only their name; the coloured initials are gone, also on the map and the widget.
-- The add button is a blue square at the bottom right. The widget is black with a blue add button and shows names.
+- The add button is a blue square at the bottom right.
+- New app icon: three lines on black, the middle one blue.
+- The people list has only the Settings button at the top. Under the title you see how many people are listed and the sort order; tap the order to change it.
+- The archive is in Settings, under Lists, next to Tags and Relationship types. The map opens from a person's place.
+- Widgets show the app icon and the name Name List, and follow the phone's light or dark mode. The small widget is the app icon with a plus.
 
 - Tabs are now called tags. A person can have several tags, and a tag shows everyone who has it.
 - A tag name exists only once; capitals do not count. Tags with the same name from earlier versions are merged.

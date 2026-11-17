@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 1 x 1 (ADR-039): the app icon with a plus badge, so it reads as "Name List: add person". -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:id="@+id/widget_add"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/widget_add_background"
-        android:contentDescription="@string/add_person">
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/widget_add_description">
 
         <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_add"
-            android:tint="#000000" />
+            android:src="@drawable/ic_app_mark" />
+
+        <FrameLayout
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="bottom|end"
+            android:background="@drawable/widget_badge_background">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_add"
+                android:tint="@color/widget_accent" />
+        </FrameLayout>
     </FrameLayout>
 </FrameLayout>

@@ -226,11 +226,18 @@
     <string name="no_email_app">Nebyla nalezena e-mailová aplikace. Napište na %1$s.</string>
     <string name="language">Jazyk</string>
     <string name="language_system">Jazyk systému</string>
-    <string name="lists">Štítky a vztahy</string>
+    <string name="lists">Seznamy</string>
     <string name="relation_types">Typy vztahů</string>
     <string name="add_relation_type">Přidat typ vztahu</string>
     <string name="relation_type_name">Název typu vztahu</string>
     <string name="rename">Přejmenovat</string>
     <string name="name_taken">Tento název už existuje.</string>
     <string name="delete_relation_type_body">Vztahy tohoto typu se změní na Jiné.</string>
+    <plurals name="people_count">
+        <item quantity="one">%d člověk</item>
+        <item quantity="few">%d lidé</item>
+        <item quantity="many">%d lidí</item>
+        <item quantity="other">%d lidí</item>
+    </plurals>
+    <string name="widget_add_description">Name List: přidat člověka</string>
 </resources>

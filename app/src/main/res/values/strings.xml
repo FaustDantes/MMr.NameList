@@ -220,11 +220,16 @@
     <!-- F27 Language -->
     <string name="language">Language</string>
     <string name="language_system">System language</string>
-    <string name="lists">Tags and relationships</string>
+    <string name="lists">Lists</string>
     <string name="relation_types">Relationship types</string>
     <string name="add_relation_type">Add relationship type</string>
     <string name="relation_type_name">Relationship type name</string>
     <string name="rename">Rename</string>
     <string name="name_taken">This name exists already.</string>
     <string name="delete_relation_type_body">Relationships of this type become Other.</string>
+    <plurals name="people_count">
+        <item quantity="one">%d person</item>
+        <item quantity="other">%d people</item>
+    </plurals>
+    <string name="widget_add_description">Name List: add a person</string>
 </resources>

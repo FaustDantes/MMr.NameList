@@ -86,10 +86,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 fun PeopleRoute(
     onAddPerson: (tabId: Long?) -> Unit,
     onOpenPerson: (Long) -> Unit,
-    onManageTabs: () -> Unit,
     onSettings: () -> Unit,
-    onMap: () -> Unit,
-    onArchive: () -> Unit,
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -101,10 +98,7 @@ fun PeopleRoute(
         onOpenPerson = onOpenPerson,
         onSelectTab = viewModel::onSelectTab,
         onReorder = viewModel::onReorder,
-        onManageTabs = onManageTabs,
         onSettings = onSettings,
-        onMap = onMap,
-        onArchive = onArchive,
         onArchiveSelected = viewModel::onArchiveSelected,
         onToggleSelect = viewModel::onToggleSelect,
         onSelectAll = viewModel::onSelectAll,
@@ -125,10 +119,7 @@ fun PeopleScreen(
     modifier: Modifier = Modifier,
     onSelectTab: (Long?) -> Unit = {},
     onReorder: (List<Long>) -> Unit = {},
-    onManageTabs: () -> Unit = {},
     onSettings: () -> Unit = {},
-    onMap: () -> Unit = {},
-    onArchive: () -> Unit = {},
     onArchiveSelected: () -> Unit = {},
     onToggleSelect: (Long) -> Unit = {},
     onSelectAll: () -> Unit = {},
@@ -155,17 +146,9 @@ fun PeopleScreen(
                 )
             } else LargeTopAppBar(
                 title = { Text(stringResource(R.string.people_title)) },
+                // ADR-039: Settings is the only icon. Tags and the archive open from Settings;
+                // the map opens from a person's place.
                 actions = {
-                    IconButton(onClick = onMap, modifier = Modifier.testTag("map")) {
-                        Icon(painterResource(R.drawable.ic_map), contentDescription = stringResource(R.string.map))
-                    }
-                    IconButton(onClick = onArchive, modifier = Modifier.testTag("archive")) {
-                        Icon(painterResource(R.drawable.ic_archive), contentDescription = stringResource(R.string.archive))
-                    }
-                    IconButton(onClick = onManageTabs, modifier = Modifier.testTag("manageTabs")) {
-                        Icon(painterResource(R.drawable.ic_folder), contentDescription = stringResource(R.string.manage_tabs))
-                    }
-                    SortMenu(state.sort, onSortChange)
                     IconButton(onClick = onSettings, modifier = Modifier.testTag("settings")) {
                         Icon(painterResource(R.drawable.ic_settings), contentDescription = stringResource(R.string.settings))
                     }
@@ -198,6 +181,12 @@ fun PeopleScreen(
                 .padding(padding)
                 .fillMaxSize(),
         ) {
+            SortLine(
+                count = state.people.size,
+                sort = state.sort,
+                onSortChange = onSortChange,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
             SearchField(
                 query = state.query,
                 onQueryChange = onQueryChange,
@@ -554,12 +543,42 @@ fun PersonRow(
     }
 }
 
+/** ADR-039: under the title, "42 people · Manual order ⌄". Tapping the order opens the two choices. */
+@Composable
+private fun SortLine(count: Int, sort: SortMode, onSortChange: (SortMode) -> Unit, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            pluralStringResource(R.plurals.people_count, count, count),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.testTag("peopleCount"),
+        )
+        Text(" · ", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+        SortMenu(sort, onSortChange)
+    }
+}
+
 @Composable
 private fun SortMenu(sort: SortMode, onSortChange: (SortMode) -> Unit) {
     var open by remember { mutableStateOf(false) }
+    val label = stringResource(if (sort == SortMode.MANUAL) R.string.sort_manual else R.string.sort_a_to_z)
+    val sortLabel = stringResource(R.string.sort)
     Box {
-        IconButton(onClick = { open = true }, modifier = Modifier.testTag("sortMenu")) {
-            Icon(painterResource(R.drawable.ic_sort), contentDescription = stringResource(R.string.sort))
+        Row(
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .clickable(onClickLabel = sortLabel) { open = true }
+                .testTag("sortMenu"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Icon(
+                painterResource(R.drawable.ic_expand_more),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             SortMode.entries.forEach { mode ->

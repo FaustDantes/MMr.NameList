@@ -62,6 +62,7 @@ fun SettingsRoute(
     onBack: () -> Unit,
     onManageTags: () -> Unit = {},
     onManageRelationTypes: () -> Unit = {},
+    onArchive: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,6 +98,7 @@ fun SettingsRoute(
         onBack = onBack,
         onManageTags = onManageTags,
         onManageRelationTypes = onManageRelationTypes,
+        onArchive = onArchive,
         onThemeChange = viewModel::setTheme,
         onLanguageChange = { language ->
             viewModel.setLanguage(language)
@@ -138,6 +140,7 @@ fun SettingsScreen(
     onLanguageChange: (AppLanguage) -> Unit = {},
     onManageTags: () -> Unit = {},
     onManageRelationTypes: () -> Unit = {},
+    onArchive: () -> Unit = {},
     modifier: Modifier = Modifier,
     actions: SettingsActions = SettingsActions(),
 ) {
@@ -296,6 +299,15 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().testTag("manageRelationTypesButton"),
                 ) {
                     Text(stringResource(R.string.relation_types), modifier = Modifier.weight(1f))
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
+                }
+                // ADR-039: the archive moved here from the people list.
+                OutlinedButton(
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onArchive,
+                    modifier = Modifier.fillMaxWidth().testTag("archiveButton"),
+                ) {
+                    Text(stringResource(R.string.archive), modifier = Modifier.weight(1f))
                     Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
                 }
             }

@@ -81,12 +81,21 @@ class WidgetTest {
         assertEquals(android.view.View.VISIBLE, view.findViewById<TextView>(R.id.widget_tile_1).visibility)
         assertEquals(android.view.View.GONE, view.findViewById<TextView>(R.id.widget_tile_2).visibility)
         assertEquals(android.view.View.VISIBLE, view.findViewById<android.view.View>(R.id.widget_recent).visibility)
+        // ADR-039: with people, the hint gives way to the names.
+        assertEquals(android.view.View.GONE, view.findViewById<android.view.View>(R.id.widget_hint).visibility)
     }
 
     @Test
     fun cardHidesTheRecentLabelWhenNobodyIsThere() {
         val view = render(WidgetSize.CARD, WidgetContent.from(emptyList()))
         assertEquals(android.view.View.GONE, view.findViewById<android.view.View>(R.id.widget_recent).visibility)
+        assertEquals(android.view.View.VISIBLE, view.findViewById<android.view.View>(R.id.widget_hint).visibility)
+    }
+
+    @Test
+    fun theSmallWidgetSaysItIsNameList() {
+        val view = render(WidgetSize.ICON, WidgetContent.from(people))
+        assertEquals("Name List: add a person", view.findViewById<android.view.View>(R.id.widget_add).contentDescription)
     }
 
     @Test

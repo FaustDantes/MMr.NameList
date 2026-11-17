@@ -140,4 +140,24 @@ class SettingsTest {
         compose.onNodeWithTag("manageRelationTypesButton").performScrollTo().performClick()
         assertEquals(listOf("tags", "types"), opened)
     }
+
+    @Test
+    fun theArchiveOpensFromSettings() {
+        var opened = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                SettingsScreen(
+                    state = SettingsUiState(),
+                    versionName = "1",
+                    onBack = {},
+                    onThemeChange = {},
+                    onExport = {},
+                    onImport = {},
+                    onArchive = { opened++ },
+                )
+            }
+        }
+        compose.onNodeWithTag("archiveButton").performScrollTo().performClick()
+        assertEquals(1, opened)
+    }
 }

@@ -38,14 +38,16 @@ Wallpaper colors stay off. Type: Space Grotesk (titles, names), Inter (body). Bo
 
 ## 4. Components
 
+- **People list top** (ADR-039): the title "People" with only the Settings icon; under it "42 people · Manual order ⌄" (tap to sort); then the search line and the tags. No map, archive or tag-edit icons here.
 - **Person row**: hairline above; the photo (44 dp) only when one is set; name in Space Grotesk 18 sp; the Conversation Spark preview in muted text. No initials.
 - **Selecting**: a 22 dp check box in front of each row.
 - **Tags on the people list**: plain text; the selected tag is underlined in the accent.
 - **Person detail**: photo 104 dp (only when set) beside the name; the Conversation Spark under an accent line; the other details as titled blocks under hairlines.
 - **Edit form**: line fields; tags in one drop-down with check boxes and a plus button next to it; Save filled.
 - **Add button**: 64 dp square, accent color, plus icon, bottom right. The add buttons on the tags and relationship type screens use the same color at the standard size.
-- **Map**: people as small accent squares; groups as accent squares with the number.
-- **Widgets**: black, blue add button, names of the newest people.
+- **Map**: opens only from a person's place. People as small accent squares; groups as accent squares with the number.
+- **App icon** (ADR-039): "Line list": black, three rows of a square and a line, the middle row blue.
+- **Widgets** (ADR-039): the app icon and "Name List" on every size; white in light mode, black in dark mode; the accent add button; names of the newest people. 1 x 1 is the app icon with a plus badge.
 - **Empty states**: one short friendly sentence and one action button.
 
 ## 5. Accessibility
