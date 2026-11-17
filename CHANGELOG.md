@@ -4,6 +4,10 @@ Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier bu
 
 ## 1.3.0 (2026-11-16)
 
+- New look, "Line": white (or black in dark mode), thin lines instead of cards, one blue accent, new fonts (Space Grotesk and Inter).
+- People without a photo show only their name; the coloured initials are gone, also on the map and the widget.
+- The add button is a blue square at the bottom right. The widget is black with a blue add button and shows names.
+
 - Tabs are now called tags. A person can have several tags, and a tag shows everyone who has it.
 - A tag name exists only once; capitals do not count. Tags with the same name from earlier versions are merged.
 - In the edit form, pick tags in one drop-down with check boxes. The plus button next to it makes a new tag.

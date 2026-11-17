@@ -1,5 +1,9 @@
 package com.michalmarcin.namelist.ui.tabs
 
+import com.michalmarcin.namelist.ui.components.lineFieldColors
+import com.michalmarcin.namelist.ui.components.topHairline
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.TextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,7 +24,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -179,17 +182,16 @@ private fun TabList(
         state = listState,
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { it.id }) { tab ->
             ReorderableItem(reorderState, key = tab.id) { isDragging ->
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
+                    // Line design (ADR-038): rows under hairlines instead of cards.
+                    modifier = Modifier.fillMaxWidth().topHairline(MaterialTheme.colorScheme.outlineVariant),
                     color = if (isDragging) {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
+                        MaterialTheme.colorScheme.surfaceContainerHighest
                     } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
+                        MaterialTheme.colorScheme.background
                     },
                     shadowElevation = if (isDragging) 6.dp else 0.dp,
                 ) {
@@ -267,7 +269,9 @@ fun TabNameForm(
     val taken = name.isNotBlank() && isTaken(name)
     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall)
-        OutlinedTextField(
+        TextField(
+            colors = lineFieldColors(),
+            shape = RectangleShape,
             value = name,
             onValueChange = { name = it },
             label = { Text(fieldLabel) },

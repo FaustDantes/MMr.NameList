@@ -1,6 +1,6 @@
 # Design
 
-Status: approved by the owner on 2026-11-15.
+Status: approved by the owner on 2026-11-15; Line design approved on 2026-11-17 (ADR-038).
 
 ## 1. Principles
 
@@ -8,44 +8,45 @@ Status: approved by the owner on 2026-11-15.
 - Calm and clean. Much white space, few colors, no decoration that has no purpose.
 - Fast. The user adds a person in less than 10 seconds.
 
-## 2. Theme
+## 2. Theme: "Line" (ADR-038, owner, 2026-11-17)
 
-| Item | Rule |
-|---|---|
-| Design system | Material 3 |
-| Color | Dynamic color on Android 12 and later. Palette (owner, 2026-11-15, ADR-023). Wallpaper colors are off. Default theme: Light.
+Design canvas: "MMr.NameList Futuristic Redesign", Option 2 · Line, dark and light rows.
 
-| Role | Light | Dark |
+| Role | Light (default) | Dark |
 |---|---|---|
 | Background, surfaces | White `#FFFFFF` | Black `#000000` |
-| Text, icons | Black `#000000` | White `#FFFFFF` |
-| Buttons, selected chips | Light blue `#CFE6FF`, black text | Light blue `#CFE6FF`, black text |
-| Add button (people list and widget) | Dark navy `#0B2545`, white icon | Dark navy `#0B2545`, white icon |
-| Text buttons, accents | Blue `#0B5CAD` | Light blue `#9CCBFF` |
-| Cards | Near white `#F5F7F9` | `#121417` |
+| Text | Black `#000000` | White `#FFFFFF` |
+| Muted text | `#6B6B6B` | `#8C8C8C` |
+| Hairlines between rows | `#EAEAEA` | `#1F1F1F` |
+| Field lines, outlined buttons | `#8F8F8F` | `#6E6E6E` |
+| Accent: add button, Save, selected tag, links | `#0B5CAD`, white on it | `#5AA9FF`, black on it |
+| Dialogs and sheets | White | `#111111` |
+| Error | `#C62828` | `#FF8A80` |
 
-## 3. Shapes (square design)
+Wallpaper colors stay off. Type: Space Grotesk (titles, names), Inter (body). Both bundled (ADR-038).
 
-The owner chose a square look on 2026-11-15 (ADR-010) and asked for "everything squared" later the same day (ADR-018). No circles, no pills.
+## 3. Shapes
 
 | Element | Shape |
 |---|---|
-| Avatars, icon badges | Square with corners at 12 % of the size (`IconSquare`) |
-| Cards, list rows | 6 dp corners |
-| Search field, floating action button, all buttons | 8 dp corners. Material 3 buttons are round by default: always pass `shape = MaterialTheme.shapes.large`. |
-| Chips | 4 dp corners |
-| Dialogs, sheets | 10 dp corners |
-| Text fields, menus | 2 dp corners |
-
-The launcher icon shape comes from the phone's launcher. The app cannot force it to be square.
+| Photos | Square, corners at 8 % of the size |
+| Buttons, add button | 8 dp corners |
+| Small check boxes, chips | 4 dp corners |
+| Dialogs, sheets | 12 dp corners |
+| Rows | No shape: a 1 px hairline above each row |
+| Text fields | No box: a line under the text |
 
 ## 4. Components
 
-- **Person card**: card with 10 dp corners, 48 dp square avatar, name in `titleMedium`, one muted line below (city, or relationship to "Me").
-- **Avatar fallback**: initials in a square on a color from a hash of the name. The same name always gets the same color. Text contrast 4.5:1 or more.
+- **Person row**: hairline above; the photo (44 dp) only when one is set; name in Space Grotesk 18 sp; the Conversation Spark preview in muted text. No initials.
+- **Selecting**: a 22 dp check box in front of each row.
+- **Tags on the people list**: plain text; the selected tag is underlined in the accent.
+- **Person detail**: photo 104 dp (only when set) beside the name; the Conversation Spark under an accent line; the other details as titled blocks under hairlines.
+- **Edit form**: line fields; tags in one drop-down with check boxes and a plus button next to it; Save filled.
+- **Add button**: 64 dp square, accent color, plus icon, bottom right. The add buttons on the tags and relationship type screens use the same color at the standard size.
+- **Map**: people as small accent squares; groups as accent squares with the number.
+- **Widgets**: black, blue add button, names of the newest people.
 - **Empty states**: one short friendly sentence and one action button.
-- **Search field**: always visible at the top of the People screen.
-- **Add buttons**: icon only with a content description for screen readers. The people list has one 112 dp dark navy person-add button at the bottom center (ADR-032). The "add tag" button on the tags screen and the "add relationship type" button stay small, light blue, bottom right.
 
 ## 5. Accessibility
 

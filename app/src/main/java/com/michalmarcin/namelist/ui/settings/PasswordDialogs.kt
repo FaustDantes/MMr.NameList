@@ -1,5 +1,8 @@
 package com.michalmarcin.namelist.ui.settings
 
+import com.michalmarcin.namelist.ui.components.lineFieldColors
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.TextField
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +18,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -167,7 +169,9 @@ fun PasswordFormContent(
         Text(title, style = MaterialTheme.typography.titleLarge)
         hint?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         fields.forEachIndexed { index, label ->
-            OutlinedTextField(
+            TextField(
+                colors = lineFieldColors(),
+                shape = RectangleShape,
                 value = values.value[index],
                 onValueChange = { text -> values.value = values.value.toMutableList().also { it[index] = text } },
                 label = { Text(stringResource(label)) },

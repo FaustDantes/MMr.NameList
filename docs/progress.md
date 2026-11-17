@@ -21,6 +21,12 @@ The agent updates this file at the end of each session. Newest entry first.
 
 ## Log
 
+### 2026-11-17 (1.3.0, F32, owner request)
+
+- ADR-038: Line design from the design canvas, light (default) and dark. Photos only, no initials anywhere. Space Grotesk and Inter bundled (SIL OFL, licenses/).
+- Decisions I made without asking: the add button uses the accent color (the canvas showed it so); the people list keeps its top-bar icons (map, archive, tags, sort, settings); the map shows people as small squares without initials.
+- Check on the phone: light and dark theme on each screen; a person with and without a photo; the widget in all three sizes.
+
 ### 2026-11-16 (1.3.0, F29 to F31, owner request)
 
 - ADR-037: tabs are tags with unique names (case ignored); relationship types are a list in Settings; tag drop-down with a plus button in the edit form. Database 6 to 7, hand-written migration, tested.

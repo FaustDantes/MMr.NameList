@@ -2,7 +2,6 @@ package com.michalmarcin.namelist.ui.map
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -11,7 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -42,8 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.michalmarcin.namelist.platform.Mercator
 import com.michalmarcin.namelist.platform.WorldShapes
-import com.michalmarcin.namelist.ui.components.AvatarColors
-import com.michalmarcin.namelist.ui.components.initials
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -83,7 +79,7 @@ fun clusterMarkers(positioned: List<Pair<MapMarker, Offset>>, radiusPx: Float): 
 private const val MAX_ZOOM = 40f
 
 /**
- * Simple world map (M9): country borders (Natural Earth 1:110m) and people as circles with initials.
+ * Simple world map (M9): country borders (Natural Earth 1:110m) and people as small accent squares (ADR-038).
  * Pinch to zoom, drag to move, double tap to zoom in. Works offline; nothing is downloaded.
  *
  * [focus]: start centered on this marker at [focusZoom]. Else the view fits all markers.
@@ -100,9 +96,10 @@ fun WorldMap(
     val shapes = LocalWorldShapes.current
     val scheme = MaterialTheme.colorScheme
     val dark = scheme.background.luminance() < 0.5f
-    val ocean = if (dark) Color(0xFF0B1520) else Color(0xFFEAF4FF)
-    val land = if (dark) scheme.surfaceContainerHigh else Color.White
-    val borders = if (dark) Color(0xFF4A525A) else Color(0xFF9AA4AE)
+    // Line design (ADR-038): sea in the background color, land a step lighter or darker, thin borders.
+    val ocean = scheme.background
+    val land = if (dark) Color(0xFF141414) else Color(0xFFF2F2F2)
+    val borders = if (dark) Color(0xFF333333) else Color(0xFFCFCFCF)
     val path = remember(shapes) { shapes?.toPath() ?: Path() }
     val density = LocalDensity.current
     val markerRadius = with(density) { 18.dp.toPx() }
@@ -159,9 +156,8 @@ fun WorldMap(
             }
             if (cluster.markers.size == 1) {
                 val marker = cluster.markers.first()
-                InitialsCircle(
+                PersonPin(
                     name = marker.name,
-                    dark = dark,
                     modifier = position
                         .testTag("marker-${marker.id}")
                         .then(if (interactive) Modifier.clickable { onMarkerClick(marker.id) } else Modifier),
@@ -178,19 +174,26 @@ fun WorldMap(
     }
 }
 
+/** A person on the map: a small accent square with a halo (ADR-038). The touch area stays 36 dp. */
 @Composable
-private fun InitialsCircle(name: String, dark: Boolean, modifier: Modifier = Modifier) {
-    val (background, content) = AvatarColors.forName(name, dark)
+private fun PersonPin(name: String, modifier: Modifier = Modifier) {
+    val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
             .size(36.dp)
-            .shadow(3.dp, CircleShape)
-            .background(background, CircleShape)
-            .border(2.dp, Color.White, CircleShape)
             .semantics { contentDescription = name },
         contentAlignment = Alignment.Center,
     ) {
-        Text(initials(name), color = content, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Box(
+            Modifier
+                .size(22.dp)
+                .background(accent.copy(alpha = 0.22f), RoundedCornerShape(4.dp)),
+        )
+        Box(
+            Modifier
+                .size(12.dp)
+                .background(accent, RoundedCornerShape(2.dp)),
+        )
     }
 }
 
@@ -198,13 +201,11 @@ private fun InitialsCircle(name: String, dark: Boolean, modifier: Modifier = Mod
 private fun CountCircle(count: Int, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .size(36.dp)
-            .shadow(3.dp, CircleShape)
-            .background(MaterialTheme.colorScheme.primary, CircleShape)
-            .border(2.dp, Color.White, CircleShape),
+            .size(32.dp)
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)),
         contentAlignment = Alignment.Center,
     ) {
-        Text(count.toString(), color = MaterialTheme.colorScheme.onPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(count.toString(), color = MaterialTheme.colorScheme.onPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 

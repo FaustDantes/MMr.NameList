@@ -15,7 +15,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import com.michalmarcin.namelist.ui.theme.IconSquare
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,24 +30,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import com.michalmarcin.namelist.ui.person.sparkPreview
-import com.michalmarcin.namelist.ui.theme.Navy
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,7 +52,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -72,6 +66,18 @@ import com.michalmarcin.namelist.data.db.Tab
 import com.michalmarcin.namelist.data.repo.SortMode
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.hasPhoto
+import com.michalmarcin.namelist.ui.components.lineFieldColors
+import com.michalmarcin.namelist.ui.components.topHairline
+import androidx.compose.foundation.border
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import com.michalmarcin.namelist.ui.components.EmptyState
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -169,18 +175,19 @@ fun PeopleScreen(
         },
         floatingActionButton = {
             if (!state.isSelecting) {
-                // F21: twice the usual 56 dp, dark navy, a circle at the bottom right (ADR-032, ADR-033).
+                // F21, Line design (ADR-038): a 64 dp square in the accent color at the bottom right.
                 FloatingActionButton(
                     onClick = { onAddPerson(state.selectedTabId) },
                     modifier = Modifier.size(AddButtonSize).testTag("addPerson"),
-                    shape = CircleShape,
-                    containerColor = Navy,
-                    contentColor = Color.White,
+                    shape = MaterialTheme.shapes.large,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_person_add),
+                        painterResource(R.drawable.ic_add),
                         contentDescription = stringResource(R.string.add_person),
-                        modifier = Modifier.size(AddButtonSize / 2),
+                        modifier = Modifier.size(28.dp),
                     )
                 }
             }
@@ -194,7 +201,7 @@ fun PeopleScreen(
             SearchField(
                 query = state.query,
                 onQueryChange = onQueryChange,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
             if (state.tabs.isNotEmpty() && state.query.isBlank()) {
                 TabChips(state.tabs, state.selectedTabId, onSelectTab)
@@ -353,8 +360,8 @@ private fun TabChips(tabs: List<Tab>, selectedTabId: Long?, onSelectTab: (Long?)
         modifier = Modifier
             .fillMaxWidth()
             .testTag("tabChips"),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(22.dp),
     ) {
         item(key = "all") {
             TabChip(stringResource(R.string.all), selectedTabId == null) { onSelectTab(null) }
@@ -365,14 +372,31 @@ private fun TabChips(tabs: List<Tab>, selectedTabId: Long?, onSelectTab: (Long?)
     }
 }
 
+/** Line design (ADR-038): a tag is plain text; the selected one is underlined in the accent color. */
 @Composable
 private fun TabChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        shape = MaterialTheme.shapes.small,
-    )
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, onClick = onClick, role = Role.Tab),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) colors.onSurface else colors.onSurfaceVariant,
+            modifier = Modifier
+                .drawBehind {
+                    if (selected) {
+                        val line = 2.dp.toPx()
+                        drawRect(colors.primary, topLeft = Offset(0f, size.height - line), size = Size(size.width, line))
+                    }
+                }
+                .padding(vertical = 6.dp),
+        )
+    }
 }
 
 /**
@@ -404,8 +428,7 @@ private fun PeopleList(
         modifier = modifier
             .fillMaxWidth()
             .testTag("peopleList"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 120.dp),
     ) {
         items(items, key = { it.id }) { person ->
             ReorderableItem(reorderState, key = person.id, enabled = canReorder) { isDragging ->
@@ -461,34 +484,50 @@ fun PersonRow(
                 }
             }
             .testTag("person-${person.id}"),
-        shape = MaterialTheme.shapes.medium,
         color = when {
             isSelected -> colors.secondaryContainer
-            lifted -> colors.surfaceContainerHigh
-            else -> colors.surfaceContainerLow
+            lifted -> colors.surfaceContainerHighest
+            else -> colors.background
         },
         contentColor = if (isSelected) colors.onSecondaryContainer else colors.onSurface,
         shadowElevation = if (lifted) 6.dp else 0.dp,
     ) {
+        // Line design (ADR-038): no card; a hairline above each row, the photo only when there is one.
         Row(
             modifier = Modifier
-                .heightIn(min = 72.dp)
-                .padding(start = 12.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                .topHairline(colors.outlineVariant)
+                .heightIn(min = 64.dp)
+                .padding(top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (isSelected) {
+            if (isSelecting) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(colors.primary, IconSquare),
+                        .size(22.dp)
+                        .then(
+                            if (isSelected) {
+                                Modifier.background(colors.primary, MaterialTheme.shapes.small)
+                            } else {
+                                Modifier.border(1.5.dp, colors.outline, MaterialTheme.shapes.small)
+                            },
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = colors.onPrimary)
+                    if (isSelected) {
+                        Icon(
+                            painterResource(R.drawable.ic_check),
+                            contentDescription = null,
+                            tint = colors.onPrimary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
                 }
-            } else {
-                Avatar(name = person.name, photoFile = person.photoFile)
+                Spacer(Modifier.width(14.dp))
             }
-            Spacer(Modifier.width(16.dp))
+            if (hasPhoto(person.photoFile)) {
+                Avatar(photoFile = person.photoFile)
+                Spacer(Modifier.width(14.dp))
+            }
             Column(Modifier.weight(1f)) {
                 Text(
                     text = person.name,
@@ -504,7 +543,7 @@ fun PersonRow(
                         text = subtitle,
                         modifier = Modifier.testTag(if (spark != null) "spark-${person.id}" else "subtitle-${person.id}"),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant,
+                        color = colors.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -543,7 +582,7 @@ private fun SortMenu(sort: SortMode, onSortChange: (SortMode) -> Unit) {
 
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    val container = MaterialTheme.colorScheme.surfaceContainerHigh
+    // Line design (ADR-038): a search line, no box.
     TextField(
         value = query,
         onValueChange = onQueryChange,
@@ -554,15 +593,10 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier
         placeholder = { Text(stringResource(R.string.search_placeholder)) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
         singleLine = true,
-        shape = MaterialTheme.shapes.large,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = container,
-            unfocusedContainerColor = container,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
+        shape = RectangleShape,
+        colors = lineFieldColors(),
     )
 }
 
-/** The add button on the people list: 88 dp, a round button well above the Material default of 56 dp (F21, ADR-034). */
-internal val AddButtonSize = 88.dp
+/** The add button on the people list: 64 dp, larger than the Material default of 56 dp (F21, ADR-038). */
+internal val AddButtonSize = 64.dp

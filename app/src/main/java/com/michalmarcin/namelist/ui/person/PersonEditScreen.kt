@@ -1,5 +1,8 @@
 package com.michalmarcin.namelist.ui.person
 
+import com.michalmarcin.namelist.ui.components.lineFieldColors
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.TextField
 import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.hasPhoto
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,9 +49,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -183,7 +187,13 @@ fun PersonEditScreen(
                     }
                 },
                 actions = {
-                    TextButton(shape = MaterialTheme.shapes.large, onClick = onSave, enabled = !state.isLoading, modifier = Modifier.testTag("save")) {
+                    // Line design (ADR-038): Save is the one filled button on the screen.
+                    Button(
+                        shape = MaterialTheme.shapes.large,
+                        onClick = onSave,
+                        enabled = !state.isLoading,
+                        modifier = Modifier.padding(end = 12.dp).testTag("save"),
+                    ) {
                         Text(stringResource(R.string.save))
                     }
                 },
@@ -207,7 +217,9 @@ fun PersonEditScreen(
                 }
             }
             PhotoSection(state, onCamera, onGallery, onRemovePhoto)
-            OutlinedTextField(
+            TextField(
+                colors = lineFieldColors(),
+                shape = RectangleShape,
                 value = state.name,
                 onValueChange = onNameChange,
                 modifier = Modifier
@@ -247,7 +259,9 @@ fun PersonEditScreen(
                 TextDetail(state.nativeLanguage, onNativeLanguageChange, R.string.native_language, "nativeLanguageField")
                 TextDetail(state.education, onEducationChange, R.string.education, "educationField")
                 TextDetail(state.currentWork, onCurrentWorkChange, R.string.current_work, "currentWorkField")
-                OutlinedTextField(
+                TextField(
+                    colors = lineFieldColors(),
+                    shape = RectangleShape,
                     value = state.notes,
                     onValueChange = onNotesChange,
                     modifier = Modifier
@@ -269,12 +283,15 @@ private fun PhotoSection(
     onGallery: () -> Unit,
     onRemovePhoto: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(contentAlignment = Alignment.Center) {
-            Avatar(name = state.name.ifBlank { "?" }, size = 120.dp, photoFile = state.photoFile)
-            if (state.isImportingPhoto) CircularProgressIndicator()
+    Column(Modifier.fillMaxWidth()) {
+        // Line design (ADR-038): the photo shows only when there is one.
+        if (hasPhoto(state.photoFile) || state.isImportingPhoto) {
+            Box(contentAlignment = Alignment.Center) {
+                Avatar(photoFile = state.photoFile, size = 104.dp)
+                if (state.isImportingPhoto) CircularProgressIndicator()
+            }
+            Spacer(Modifier.height(12.dp))
         }
-        Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             FilledTonalButton(shape = MaterialTheme.shapes.large, onClick = onCamera, modifier = Modifier.testTag("camera")) {
                 Icon(painterResource(R.drawable.ic_photo_camera), contentDescription = null, Modifier.size(18.dp))
@@ -394,7 +411,9 @@ private fun PlaceField(
     onClearCoordinates: () -> Unit,
 ) {
     Column {
-        OutlinedTextField(
+        TextField(
+            colors = lineFieldColors(),
+            shape = RectangleShape,
             value = state.metPlace,
             onValueChange = onPlaceChange,
             modifier = Modifier
@@ -483,7 +502,9 @@ private fun DetailsToggle(open: Boolean, onToggle: () -> Unit) {
 
 @Composable
 private fun TextDetail(value: String, onChange: (String) -> Unit, label: Int, tag: String) {
-    OutlinedTextField(
+    TextField(
+        colors = lineFieldColors(),
+        shape = RectangleShape,
         value = value,
         onValueChange = onChange,
         modifier = Modifier
@@ -509,7 +530,9 @@ private fun DateField(epochDay: Long?, onChange: (Long?) -> Unit, label: Int, em
     LaunchedEffect(interaction) {
         interaction.interactions.collect { if (it is PressInteraction.Release) showPicker = true }
     }
-    OutlinedTextField(
+    TextField(
+        colors = lineFieldColors(),
+        shape = RectangleShape,
         value = epochDay?.let { formatEpochDay(it) }.orEmpty(),
         onValueChange = {},
         readOnly = true,

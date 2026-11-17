@@ -37,6 +37,8 @@ import com.michalmarcin.namelist.R
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.hasPhoto
+import com.michalmarcin.namelist.ui.components.topHairline
 import com.michalmarcin.namelist.ui.components.EmptyState
 import com.michalmarcin.namelist.ui.person.formatEpochDay
 import com.michalmarcin.namelist.ui.person.millisToEpochDay
@@ -104,8 +106,7 @@ fun ArchiveScreen(
                     .padding(padding)
                     .fillMaxSize()
                     .testTag("archiveList"),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
             ) {
                 items(state.people, key = { it.id }) { person ->
                     ArchiveRow(person, now, onOpenPerson, onRestore)
@@ -119,21 +120,23 @@ fun ArchiveScreen(
 private fun ArchiveRow(person: Person, now: Long, onOpen: (Long) -> Unit, onRestore: (Long) -> Unit) {
     val archivedAt = person.archivedAt ?: now
     Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.background,
         modifier = Modifier
             .fillMaxWidth()
+            .topHairline(MaterialTheme.colorScheme.outlineVariant)
             .clickable { onOpen(person.id) }
             .testTag("archived-${person.id}"),
     ) {
         Row(
             modifier = Modifier
                 .heightIn(min = 72.dp)
-                .padding(start = 12.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                .padding(end = 0.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(name = person.name, photoFile = person.photoFile)
-            Spacer(Modifier.width(16.dp))
+            if (hasPhoto(person.photoFile)) {
+                Avatar(photoFile = person.photoFile)
+                Spacer(Modifier.width(14.dp))
+            }
             Column(Modifier.weight(1f)) {
                 Text(
                     text = person.name,

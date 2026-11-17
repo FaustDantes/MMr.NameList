@@ -60,6 +60,8 @@ import com.michalmarcin.namelist.ui.archive.text
 import com.michalmarcin.namelist.data.db.Person
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.hasPhoto
+import com.michalmarcin.namelist.ui.components.topHairline
 
 @Composable
 fun PersonDetailRoute(
@@ -226,48 +228,44 @@ private fun PersonDetailContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .padding(horizontal = 24.dp),
     ) {
         Spacer(Modifier.height(8.dp))
-        Avatar(name = person.name, size = 144.dp, photoFile = person.photoFile)
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = person.name,
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center,
-        )
-        if (tabName != null) {
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier.testTag("tabLabel"),
-            ) {
-                Text(
-                    text = tabName,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                )
+        // Line design (ADR-038): the photo only when there is one, the name beside it, left aligned.
+        Row(verticalAlignment = Alignment.Bottom) {
+            if (hasPhoto(person.photoFile)) {
+                Avatar(photoFile = person.photoFile, size = 104.dp)
+                Spacer(Modifier.width(16.dp))
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = person.name, style = MaterialTheme.typography.headlineMedium)
+                if (tabName != null) {
+                    Text(
+                        text = tabName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("tabLabel"),
+                    )
+                }
             }
         }
         person.askAbout?.let { ask ->
-            // F23: what to ask next time, right below the name.
-            Spacer(Modifier.height(16.dp))
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier.fillMaxWidth().testTag("askAboutBlock"),
+            // F23: what to ask next time, right below the name, under a line in the accent color.
+            Spacer(Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .topHairline(MaterialTheme.colorScheme.primary)
+                    .padding(vertical = 14.dp)
+                    .testTag("askAboutBlock"),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Column(Modifier.padding(12.dp)) {
-                    Text(
-                        stringResource(R.string.ask_about),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                    Text(ask, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                }
+                Text(
+                    stringResource(R.string.ask_about),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(ask, style = MaterialTheme.typography.titleMedium)
             }
         }
         Spacer(Modifier.height(24.dp))
@@ -379,21 +377,22 @@ private fun PersonDetailContent(
     }
 }
 
+/** A titled block under a thin line (Line design, ADR-038). Used on the detail screen and in Settings. */
 @Composable
 fun DetailSection(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .topHairline(MaterialTheme.colorScheme.outlineVariant)
+            .padding(vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            content()
-        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        content()
     }
 }
 

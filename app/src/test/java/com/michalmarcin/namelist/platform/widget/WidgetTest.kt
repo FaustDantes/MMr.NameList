@@ -36,7 +36,7 @@ class WidgetTest {
     fun newestThreeFirstWithoutMeAndArchive() {
         val content = WidgetContent.from(people)
         assertEquals("Peter Horváth", content.lastAdded)
-        assertEquals(listOf("PH", "EM", "AN"), content.recentInitials)
+        assertEquals(listOf("Peter Horváth", "Eva Malá", "Anna Nováková"), content.recentNames)
     }
 
     @Test
@@ -49,7 +49,7 @@ class WidgetTest {
     fun nobodyGivesAnEmptyContent() {
         val content = WidgetContent.from(emptyList())
         assertNull(content.lastAdded)
-        assertEquals(emptyList<String>(), content.recentInitials)
+        assertEquals(emptyList<String>(), content.recentNames)
     }
 
     // ---- size ----
@@ -68,11 +68,11 @@ class WidgetTest {
         NameListWidget.build(context, size, content).apply(context, FrameLayout(context))
 
     @Test
-    fun cardShowsInitialsOfTheNewestPeople() {
+    fun cardShowsNamesOfTheNewestPeople() {
         val view = render(WidgetSize.CARD, WidgetContent.from(people))
-        assertEquals("PH", view.findViewById<TextView>(R.id.widget_tile_1).text.toString())
-        assertEquals("EM", view.findViewById<TextView>(R.id.widget_tile_2).text.toString())
-        assertEquals("AN", view.findViewById<TextView>(R.id.widget_tile_3).text.toString())
+        assertEquals("Peter Horváth", view.findViewById<TextView>(R.id.widget_tile_1).text.toString())
+        assertEquals("Eva Malá", view.findViewById<TextView>(R.id.widget_tile_2).text.toString())
+        assertEquals("Anna Nováková", view.findViewById<TextView>(R.id.widget_tile_3).text.toString())
     }
 
     @Test

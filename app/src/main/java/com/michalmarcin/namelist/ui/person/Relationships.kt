@@ -43,6 +43,7 @@ import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.data.db.RelationType
 import com.michalmarcin.namelist.data.repo.RelationView
 import com.michalmarcin.namelist.ui.components.Avatar
+import com.michalmarcin.namelist.ui.components.hasPhoto
 
 @StringRes
 fun RelationType.labelRes(): Int = when (this) {
@@ -110,8 +111,10 @@ private fun RelationRow(
             .testTag("relation-${relation.id}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Avatar(name = relation.other.name, size = 40.dp, photoFile = relation.other.photoFile)
-        Spacer(Modifier.width(12.dp))
+        if (hasPhoto(relation.other.photoFile)) {
+            Avatar(photoFile = relation.other.photoFile, size = 40.dp)
+            Spacer(Modifier.width(12.dp))
+        }
         Column(Modifier.weight(1f)) {
             Text(
                 relation.other.name,
@@ -207,9 +210,11 @@ fun AddRelationshipContent(
                         .testTag("candidate-${person.id}"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Avatar(name = person.name, size = 40.dp, photoFile = person.photoFile)
-                    Spacer(Modifier.width(12.dp))
-                    Text(person.name, style = MaterialTheme.typography.bodyLarge)
+                    if (hasPhoto(person.photoFile)) {
+                        Avatar(photoFile = person.photoFile, size = 40.dp)
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    Text(person.name, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

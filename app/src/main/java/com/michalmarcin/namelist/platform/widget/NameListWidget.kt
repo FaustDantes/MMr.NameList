@@ -103,13 +103,13 @@ class NameListWidget : AppWidgetProvider() {
                 WidgetSize.CARD -> {
                     val tiles = intArrayOf(R.id.widget_tile_1, R.id.widget_tile_2, R.id.widget_tile_3)
                     tiles.forEachIndexed { index, tile ->
-                        val initials = content.recentInitials.getOrNull(index)
-                        views.setViewVisibility(tile, if (initials == null) android.view.View.GONE else android.view.View.VISIBLE)
-                        if (initials != null) views.setTextViewText(tile, initials)
+                        val name = content.recentNames.getOrNull(index)
+                        views.setViewVisibility(tile, if (name == null) android.view.View.GONE else android.view.View.VISIBLE)
+                        if (name != null) views.setTextViewText(tile, name)
                     }
                     views.setViewVisibility(
                         R.id.widget_recent,
-                        if (content.recentInitials.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE,
+                        if (content.recentNames.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE,
                     )
                 }
             }

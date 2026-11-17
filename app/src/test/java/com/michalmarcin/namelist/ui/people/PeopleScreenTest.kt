@@ -230,13 +230,13 @@ class PeopleScreenTest {
     }
 
     @Test
-    fun addButtonIs88dpAndAtTheBottomRight() {
+    fun addButtonIs64dpAndAtTheBottomRight() {
         show(PeopleUiState(people = SampleData.people, isLoading = false))
         val button = compose.onNodeWithTag("addPerson").fetchSemanticsNode()
         val root = compose.onRoot().fetchSemanticsNode()
         val density = compose.density.density
-        assertEquals(88f * density, button.size.width.toFloat(), 1f)
-        assertEquals(88f * density, button.size.height.toFloat(), 1f)
+        assertEquals(64f * density, button.size.width.toFloat(), 1f)
+        assertEquals(64f * density, button.size.height.toFloat(), 1f)
         assertTrue(button.boundsInRoot.center.x > root.size.width / 2f)
         assertTrue(button.boundsInRoot.center.y > root.size.height / 2f)
     }

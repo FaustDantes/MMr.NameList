@@ -135,3 +135,6 @@ The list of relationship types is edited in Settings: add, rename and delete. Na
 
 ### F31 Lists in Settings and a tag drop-down (added by the owner on 2026-11-16)
 Settings opens the list of tags and the list of relationship types. The edit form shows the tags in one drop-down with many choices, and a plus button next to it adds a new tag. See ADR-037.
+
+### F32 Line design (added by the owner on 2026-11-17)
+The app uses the "Line" look in light and dark: white or black, hairlines instead of cards, one blue accent, Space Grotesk and Inter. A photo shows only for people who have one; there are no initials. See ADR-038 and docs/design.md.

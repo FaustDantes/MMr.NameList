@@ -1,7 +1,6 @@
 package com.michalmarcin.namelist.platform.widget
 
 import com.michalmarcin.namelist.data.db.Person
-import com.michalmarcin.namelist.ui.components.initials
 
 /** The three widget layouts (F20). The launcher resizes one widget between them. */
 enum class WidgetSize {
@@ -11,7 +10,7 @@ enum class WidgetSize {
     /** 4 x 1: add button and the newest person. */
     STRIP,
 
-    /** 4 x 2: add button, hint and the three newest people as initials. */
+    /** 4 x 2: add button, hint and the names of the three newest people (ADR-038). */
     CARD,
     ;
 
@@ -32,8 +31,8 @@ enum class WidgetSize {
 data class WidgetContent(
     /** Name of the newest person, or null when there is nobody. */
     val lastAdded: String?,
-    /** Initials of up to [MAX_RECENT] newest people, newest first. */
-    val recentInitials: List<String>,
+    /** Names of up to [MAX_RECENT] newest people, newest first. */
+    val recentNames: List<String>,
 ) {
     companion object {
         const val MAX_RECENT = 3
@@ -46,7 +45,7 @@ data class WidgetContent(
                 .take(MAX_RECENT)
             return WidgetContent(
                 lastAdded = newest.firstOrNull()?.name?.trim()?.takeIf { it.isNotEmpty() },
-                recentInitials = newest.map { initials(it.name) },
+                recentNames = newest.map { it.name.trim() },
             )
         }
     }

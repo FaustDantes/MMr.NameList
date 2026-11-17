@@ -4,67 +4,82 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Owner palette (ADR-023): white background, black text, light blue buttons.
-// Wallpaper colors (dynamic color) are off, so the app looks the same on every phone.
+// "Line" design (owner, 2026-11-17, ADR-038): white or black, thin lines instead of cards, one blue accent.
+// Wallpaper colors (dynamic color) stay off, so the app looks the same on every phone.
 
-private val LightBlue = Color(0xFFCFE6FF)
-private val Blue = Color(0xFF0B5CAD) // Text buttons and accents: light blue text on white is not readable.
-/** Dark navy: the add button in the app and on the home-screen widget (ADR-032). */
-val Navy = Color(0xFF0B2545)
 private val Black = Color(0xFF000000)
 private val White = Color(0xFFFFFFFF)
+
+/** Accent in the light theme: buttons, the selected tag, links. 6.6:1 on white. */
+private val Blue = Color(0xFF0B5CAD)
+
+/** Accent in the dark theme. 7.9:1 on black. */
+private val SkyBlue = Color(0xFF5AA9FF)
+
+/** Kept for the launcher background and old references; the add button now uses the accent (ADR-038). */
+val Navy = Color(0xFF0B2545)
 
 internal val LightColors = lightColorScheme(
     primary = Blue,
     onPrimary = White,
-    primaryContainer = LightBlue,
-    onPrimaryContainer = Black,
-    secondary = Color(0xFF2F5F8A),
+    primaryContainer = Blue,
+    onPrimaryContainer = White,
+    secondary = Blue,
     onSecondary = White,
-    secondaryContainer = LightBlue,
+    secondaryContainer = Color(0xFFE8F1FB),
     onSecondaryContainer = Black,
-    tertiary = Color(0xFF4A5F75),
+    tertiary = Color(0xFF3D3D3D),
     onTertiary = White,
     background = White,
     onBackground = Black,
     surface = White,
     onSurface = Black,
-    surfaceVariant = Color(0xFFE6EBF0),
-    onSurfaceVariant = Color(0xFF3D4349),
-    outline = Color(0xFF73787E),
-    outlineVariant = Color(0xFFC3C8CE),
+    surfaceVariant = Color(0xFFF2F2F2),
+    // Muted text: 5.3:1 on white.
+    onSurfaceVariant = Color(0xFF6B6B6B),
+    // Field lines and outlined buttons: 3:1 or more on white.
+    outline = Color(0xFF8F8F8F),
+    // Hairlines between rows.
+    outlineVariant = Color(0xFFEAEAEA),
+    error = Color(0xFFC62828),
+    onError = White,
     surfaceContainerLowest = White,
-    surfaceContainerLow = Color(0xFFF5F7F9),
-    surfaceContainer = Color(0xFFF0F2F5),
-    surfaceContainerHigh = Color(0xFFEBEEF1),
-    surfaceContainerHighest = Color(0xFFE5E8EC),
+    surfaceContainerLow = White,
+    surfaceContainer = White,
+    surfaceContainerHigh = White,
+    surfaceContainerHighest = Color(0xFFF2F2F2),
     surfaceTint = White,
+    scrim = Black,
 )
 
-// Dark theme (Settings, Theme, Dark): black background, white text, the same light blue buttons.
 internal val DarkColors = darkColorScheme(
-    primary = Color(0xFF9CCBFF),
-    onPrimary = Color(0xFF00315C),
-    primaryContainer = LightBlue,
+    primary = SkyBlue,
+    onPrimary = Black,
+    primaryContainer = SkyBlue,
     onPrimaryContainer = Black,
-    secondary = Color(0xFFB4CCE6),
-    onSecondary = Color(0xFF1C3249),
-    secondaryContainer = LightBlue,
-    onSecondaryContainer = Black,
-    tertiary = Color(0xFFB4C8DE),
-    onTertiary = Color(0xFF1E3245),
+    secondary = SkyBlue,
+    onSecondary = Black,
+    secondaryContainer = Color(0xFF0E2236),
+    onSecondaryContainer = White,
+    tertiary = Color(0xFFCFCFCF),
+    onTertiary = Black,
     background = Black,
     onBackground = White,
     surface = Black,
     onSurface = White,
-    surfaceVariant = Color(0xFF2A2E33),
-    onSurfaceVariant = Color(0xFFC3C8CE),
-    outline = Color(0xFF8D9298),
-    outlineVariant = Color(0xFF3D4349),
+    surfaceVariant = Color(0xFF1A1A1A),
+    // Muted text: 6.6:1 on black.
+    onSurfaceVariant = Color(0xFF8C8C8C),
+    outline = Color(0xFF6E6E6E),
+    outlineVariant = Color(0xFF1F1F1F),
+    error = Color(0xFFFF8A80),
+    onError = Black,
     surfaceContainerLowest = Black,
-    surfaceContainerLow = Color(0xFF121417),
-    surfaceContainer = Color(0xFF17191C),
-    surfaceContainerHigh = Color(0xFF1F2226),
-    surfaceContainerHighest = Color(0xFF272A2E),
+    surfaceContainerLow = Black,
+    surfaceContainer = Color(0xFF0A0A0A),
+    // Dialogs and sheets lift off the black background.
+    surfaceContainerHigh = Color(0xFF111111),
+    surfaceContainerHighest = Color(0xFF1A1A1A),
     surfaceTint = Black,
+    scrim = Black,
 )

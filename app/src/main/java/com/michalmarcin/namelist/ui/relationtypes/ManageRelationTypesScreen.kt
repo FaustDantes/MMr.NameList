@@ -41,6 +41,7 @@ import com.michalmarcin.namelist.data.db.RelationKind
 import com.michalmarcin.namelist.ui.AppViewModelFactory
 import com.michalmarcin.namelist.ui.person.label
 import com.michalmarcin.namelist.ui.tabs.NameDialog
+import com.michalmarcin.namelist.ui.components.topHairline
 
 @Composable
 fun ManageRelationTypesRoute(
@@ -97,18 +98,20 @@ fun ManageRelationTypesScreen(
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(start = 24.dp, end = 12.dp, top = 8.dp, bottom = 96.dp),
         ) {
             items(state.types, key = { it.id }) { type ->
                 val label = type.label()
                 Surface(
-                    modifier = Modifier.fillMaxWidth().testTag("relationType-${type.id}"),
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    // Line design (ADR-038): rows under hairlines instead of cards.
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .topHairline(MaterialTheme.colorScheme.outlineVariant)
+                        .testTag("relationType-${type.id}"),
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     Row(
-                        modifier = Modifier.heightIn(min = 64.dp).padding(start = 16.dp, end = 4.dp),
+                        modifier = Modifier.heightIn(min = 56.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(

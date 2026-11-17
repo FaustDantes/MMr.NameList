@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 /**
- * App theme: the owner's white, black and light blue palette (ADR-023).
+ * App theme: the "Line" design (ADR-038), light and dark.
  * Wallpaper colors (dynamic color) are off by default and only kept as an option.
  */
 @Composable
@@ -26,5 +26,5 @@ fun NameListTheme(
         darkTheme -> DarkColors
         else -> LightColors
     }
-    MaterialTheme(colorScheme = colorScheme, shapes = AppShapes, content = content)
+    MaterialTheme(colorScheme = colorScheme, shapes = AppShapes, typography = AppTypography, content = content)
 }

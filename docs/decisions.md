@@ -324,3 +324,19 @@ Decision:
 - The backup format stays version 1: `relationTypes` and `typeId` are new optional fields; `type` stays for older app versions (a type the user made is written as OTHER there).
 Reason: The owner asked for this on 2026-11-16.
 Alternatives: Rename the code and tables to "tag" (large change and a migration for no user value). Store the type name in each relationship (a rename would have to touch every link). Let the user delete every type (deleting "Other" leaves no safe target; deleting one of parent and child breaks the reverse reading). Let custom types have a reverse type (more UI; can come later).
+
+## ADR-038: "Line" design, light and dark; photos only
+
+Date: 2026-11-17
+Status: accepted
+Decision:
+- The owner chose "Option 2, Line" from the design canvas (MMr.NameList Futuristic Redesign). It replaces the palette of ADR-023 and the add button of ADR-032 to ADR-034.
+- Light: white `#FFFFFF`, black text, muted text `#6B6B6B`, hairlines `#EAEAEA`, accent `#0B5CAD` (white text on it). Dark: black `#000000`, white text, muted `#8C8C8C`, hairlines `#1F1F1F`, accent `#5AA9FF` (black text on it), dialogs `#111111`. Light stays the default theme.
+- No cards: rows sit under 1 px hairlines (`topHairline`). Tags on the people list are plain text; the selected one is underlined in the accent. Text fields are a line, not a box (`lineFieldColors`).
+- A person shows a photo only when one is set. There are no initials anywhere: not in lists, not on the detail page, not on the map (a small accent square), not on the widget (names instead).
+- Add button: a 64 dp square with 8 dp corners in the accent color, bottom right, a plus icon.
+- Save is a filled accent button; the other buttons are text or outlined.
+- Type: Space Grotesk for titles and names, Inter for body text. The six TTF files (regular, medium, semibold) are bundled in `res/font`, about 1.3 MB, so no network or Google Play services are needed. Both are under the SIL Open Font License 1.1; the license texts are in `licenses/`. Both cover all Czech and Slovak letters (checked with fontTools).
+- Widgets are black in light and dark mode, with the blue add button and the names of the newest people.
+Reason: The owner asked for a new, futuristic look on 2026-11-17, chose Line, asked for a light mode and for photos only on profiles that have one.
+Alternatives: Downloadable Google Fonts (needs Google Play services and a provider certificate; fails offline on first start). Keep initials for people without a photo (the owner did not want them).
