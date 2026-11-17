@@ -95,6 +95,8 @@ jobs:
         run: |
           [ -d app/schemas ] || { echo "No schemas."; exit 0; }
           mkdir -p "$RUNNER_TEMP/outputs" && cp -r app/schemas "$RUNNER_TEMP/outputs/schemas"
+          # README screenshots from ScreenshotsTest (ADR-040).
+          [ -d app/build/screenshots ] && cp -r app/build/screenshots "$RUNNER_TEMP/outputs/screenshots" || true
           cd "$RUNNER_TEMP/outputs"
           echo "Outputs of run ${{ github.run_number }} on ${{ github.ref_name }} (${{ github.sha }})." > README.md
           git init -q -b ci-outputs
