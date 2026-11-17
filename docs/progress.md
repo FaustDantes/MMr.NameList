@@ -17,9 +17,20 @@ The agent updates this file at the end of each session. Newest entry first.
 | M8 Multi-select and colors | approved | v1.0.0 | 2026-11-15 |
 | M9 World map | approved | v1.0.0 | 2026-11-15 |
 | M10 to M13 First meeting, backup password, archive, more details | approved | v1.1.0 | 2026-11-15 |
-| M14 Widget, M15 Big add button | review | v1.2.0-rc1 | 2026-11-15 |
+| M14 Widget, M15 Big add button | approved | v1.2.0 | 2026-11-15 |
+| M16 to M19 Same name, tags, Line design, welcome | approved | v1.3.0 | 2026-11-17 |
+| M20 Learn names | review | v1.4.0-rc1 | 2026-11-17 |
 
 ## Log
+
+### 2026-11-17 (M20, F35 learn names, owner request)
+
+- Owner asked for learning with flash cards and approved the plan with these answers: people without spark, place and notes are left out; results are saved and shown with a time and score chart; the front shows tags, spark, place, and notes at the bottom; 10 cards in random order.
+- ADR-042: book button bottom left; rounds of up to 10 random people; tap turns the card to the name; "I knew it" or "I did not know" (off until the turn); table `learn_round`, schema 8, auto migration 7 to 8; result with score, change against the last round, best score, Canvas line chart in percent, people to learn again.
+- Decisions I made without asking: no photo on the front; the chart's left axis is percent, because a round can have fewer than 10 cards; a round left before the end is not saved; learning results are not in the backup.
+- Build change: 2 GB heap for unit tests. With the two new screenshot tests, the test process stopped with a native error at 512 MB; with 2 GB all tests pass.
+- Tests: 266 pass in CI. Build and lint pass. README screenshots 07 and 08 added.
+- Check on the phone: the book button beside the add button; the turn animation; a round with fewer than 10 people; the chart after a few rounds on different days; the empty message when nobody has details.
 
 ### 2026-11-17 (release 1.3.0)
 
