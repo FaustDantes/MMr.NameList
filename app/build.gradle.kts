@@ -64,6 +64,9 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            // The screenshot tests draw full screens with native graphics; the default 512 MB test heap
+            // ran out after the two learning screenshots were added (F35).
+            all { it.maxHeapSize = "2g" }
         }
     }
 }
