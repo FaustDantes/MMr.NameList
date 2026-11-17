@@ -33,6 +33,7 @@ The future of remembering people should not need a social network, an account or
 - **Groups:** tags such as Work, Family or Gym; a person can have several.
 - **Relationships:** who is whose sibling, colleague or partner, with your own relationship types.
 - **Finding people again:** search over every field and every date; sort A to Z or in your own order; a world map from a person's place.
+- **Learning names:** rounds of 10 flash cards with random people; the details are on the front, the name is on the back; a chart shows your progress.
 - **Clean-up:** an archive for people you do not see any more.
 
 ### Basic setup
@@ -88,6 +89,7 @@ The app stays small on purpose. Ideas for later, not promises:
 | Details | Conversation Spark, native language, date of birth, education, current work, date of first meeting, last updated |
 | Look | "Line" design: white or black, thin lines, one blue accent; light, dark or system theme; English, Slovak, Czech |
 | Widget | Add a person from the home screen; 1 x 1, 4 x 1 and 4 x 2 |
+| Learning | Flash cards with 10 random people, knew or did not know, saved results and a progress chart |
 
 Full list with IDs: [docs/requirements.md](docs/requirements.md).
 
@@ -99,7 +101,7 @@ Kotlin, Jetpack Compose, Material 3, Room. Built and tested in GitHub Actions. N
 
 | Document | Content |
 |---|---|
-| [Requirements](docs/requirements.md) | What the app must do (F1 to F34, N1 to N5) |
+| [Requirements](docs/requirements.md) | What the app must do (F1 to F35, N1 to N5) |
 | [Architecture](docs/architecture.md) | Stack, layers, data model, platform decisions, open decisions |
 | [Design](docs/design.md) | Theme, colors, components, accessibility |
 | [Milestones](docs/milestones.md) | Build plan M0 to M7, "done when" criteria, screenshot rules |

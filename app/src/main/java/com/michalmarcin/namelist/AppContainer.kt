@@ -8,6 +8,7 @@ import com.michalmarcin.namelist.platform.AppLanguage
 import com.michalmarcin.namelist.ui.person.labelRes
 import java.util.Locale
 import com.michalmarcin.namelist.data.db.AppDatabase
+import com.michalmarcin.namelist.data.repo.LearnRepository
 import com.michalmarcin.namelist.data.repo.PeopleRepository
 import com.michalmarcin.namelist.data.repo.RelationshipsRepository
 import com.michalmarcin.namelist.data.repo.TabsRepository
@@ -37,6 +38,9 @@ class AppContainer(context: Context) {
     /** Country borders for the map. Read on first use; call from a background thread. */
     val worldShapes: WorldShapes by lazy { context.assets.open(WorldMapData.ASSET).use(WorldMapData::read) }
     val backupManager: BackupManager by lazy { BackupManager(context, database, photoStore) }
+    val learnRepository: LearnRepository by lazy {
+        LearnRepository(database.personDao(), database.tabDao(), database.learnRoundDao())
+    }
     val peopleRepository: PeopleRepository by lazy {
         PeopleRepository(database.personDao(), deletePhoto = photoStore::delete)
     }

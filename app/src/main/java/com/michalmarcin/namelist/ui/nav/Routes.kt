@@ -27,3 +27,7 @@ data object SettingsRoute
 /** [focusId] = 0 shows everyone; else starts centered on that person. */
 @Serializable
 data class MapRoute(val focusId: Long = 0L)
+
+/** Learning with flash cards (F35). */
+@Serializable
+data object LearnRoute

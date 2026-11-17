@@ -34,12 +34,13 @@ Each milestone ends with:
 | M17 | Many tabs per person | F28 | A person can be in several tabs; migration 5 to 6; backups carry all tabs. Release 1.3.0. |
 | M19 | Line design | F32, F33, F34 | Light and dark Line theme, photos only, no initials, bundled fonts, black widgets. Release 1.3.0. |
 | M18 | Tags and relationship types | F29, F30, F31 | Tabs are tags with unique names; relationship types are edited in Settings; tag drop-down in the edit form; migration 6 to 7. Release 1.3.0. |
+| M20 | Learn names | F35 | Book button bottom left; rounds of 10 random flash cards (tags, spark, place, notes; name on the back); knew or did not know; saved results with a progress chart; migration 7 to 8. Release 1.4.0. |
 
 The app is useful after M1. The owner can stop after any milestone.
 
 ## Screenshots
 
-Stopped after M3 by the owner (ADR-019). Do not add screenshot tests.
+Stopped after M3 by the owner (ADR-019). Only the README screenshots of ADR-040 are made.
 
 ## Progress
 

@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -82,6 +84,35 @@ class PeopleScreenTest {
         compose.onNodeWithTag("sortMenu").performClick()
         compose.onNodeWithText("A to Z").performClick()
         assertEquals(SortMode.A_TO_Z, sort)
+    }
+
+    @Test
+    fun learnButtonSitsBottomLeftAndOpensLearning() {
+        var opened = 0
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(PeopleUiState(people = SampleData.people, isLoading = false), {}, {}, {}, {}, onLearn = { opened++ })
+            }
+        }
+        // F35: the book button on the left, the add button on the right, both 64 dp, on one line.
+        val learn = compose.onNodeWithTag("learn").assertIsDisplayed().getBoundsInRoot()
+        val add = compose.onNodeWithTag("addPerson").getBoundsInRoot()
+        assertEquals(16f, learn.left.value, 1f)
+        assertEquals(64f, learn.width.value, 1f)
+        assertEquals(add.top.value, learn.top.value, 1f)
+        assertTrue(learn.right < add.left)
+        compose.onNodeWithContentDescription("Learn names").performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun learnButtonHidesWhileSelecting() {
+        compose.setContent {
+            NameListTheme(dynamicColor = false) {
+                PeopleScreen(PeopleUiState(people = SampleData.people, isLoading = false, selected = setOf(2L)), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("learn").assertDoesNotExist()
     }
 
     @Test

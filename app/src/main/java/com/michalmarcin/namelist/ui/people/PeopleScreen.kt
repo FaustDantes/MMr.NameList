@@ -35,6 +35,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -88,6 +91,7 @@ fun PeopleRoute(
     onAddPerson: (tabId: Long?) -> Unit,
     onOpenPerson: (Long) -> Unit,
     onSettings: () -> Unit,
+    onLearn: () -> Unit = {},
     viewModel: PeopleViewModel = viewModel(factory = AppViewModelFactory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,6 +107,7 @@ fun PeopleRoute(
         onSelectTab = viewModel::onSelectTab,
         onReorder = viewModel::onReorder,
         onSettings = onSettings,
+        onLearn = onLearn,
         onArchiveSelected = viewModel::onArchiveSelected,
         onToggleSelect = viewModel::onToggleSelect,
         onSelectAll = viewModel::onSelectAll,
@@ -124,6 +129,7 @@ fun PeopleScreen(
     onSelectTab: (Long?) -> Unit = {},
     onReorder: (List<Long>) -> Unit = {},
     onSettings: () -> Unit = {},
+    onLearn: () -> Unit = {},
     onArchiveSelected: () -> Unit = {},
     onToggleSelect: (Long) -> Unit = {},
     onSelectAll: () -> Unit = {},
@@ -135,7 +141,8 @@ fun PeopleScreen(
     var dialog by remember { mutableStateOf<BulkDialog?>(null) }
     BackHandler(enabled = state.isSelecting) { onClearSelection() }
     Scaffold(
-        floatingActionButtonPosition = FabPosition.End,
+        // F35: the learn button at the bottom left, the add button at the bottom right, in one row.
+        floatingActionButtonPosition = FabPosition.Center,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (state.isSelecting) {
@@ -161,7 +168,24 @@ fun PeopleScreen(
             )
         },
         floatingActionButton = {
-            if (!state.isSelecting) {
+            if (!state.isSelecting) Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                // F35: a 64 dp square with a line border, so the add button stays the main action.
+                OutlinedIconButton(
+                    onClick = onLearn,
+                    modifier = Modifier.size(AddButtonSize).testTag("learn"),
+                    shape = MaterialTheme.shapes.large,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(containerColor = MaterialTheme.colorScheme.background),
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_book),
+                        contentDescription = stringResource(R.string.learn),
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
                 // F21, Line design (ADR-038): a 64 dp square in the accent color at the bottom right.
                 FloatingActionButton(
                     onClick = { onAddPerson(state.selectedTabId) },

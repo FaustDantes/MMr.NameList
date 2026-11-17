@@ -372,3 +372,18 @@ Decision:
 - No example people. The owner first asked for three example people on a new install, then withdrew it the same day in favour of the welcome.
 Reason: Owner requests on 2026-11-17.
 Alternatives: A screen-by-screen tour (longer, and the app has few screens). Example people (withdrawn by the owner).
+
+## ADR-042: Learning with flash cards
+
+Date: 2026-11-17
+Status: accepted
+Decision:
+- A 64 dp square book button with a line border at the bottom left of the people list; the blue add button stays at the bottom right. Both sit in the Scaffold's button slot in one row. The book button hides while people are selected.
+- A round is up to 10 people, picked at random and in random order, each once. Only people who are not "Me", not archived, and have at least one of Conversation Spark, place (city) or notes. A tag alone does not count, because many people share a tag and the card would be a pure guess.
+- The front shows the tags, then the spark, then the place, and the notes at the bottom (owner's order). No photo on the front: the owner listed only these fields, and a photo would make the card too easy. The back shows only the name. A tap turns the card (350 ms turn around the vertical axis).
+- After the turn, "I knew it" or "I did not know". The buttons are off before the turn, so a quick tap cannot skip a card. The user judges their own answer; there is no typing, because names with diacritics are hard to type and compare.
+- Each finished round is saved in a new table `learn_round` (finishedAt, known, total). Schema 8, auto migration 7 to 8. A round left before the end is not saved.
+- The result shows "known of total", the change in percent points against the last round, the best score, a line chart and the missed people (tap opens the person). The chart's left axis is the score in percent (0 to 100), because a round can have fewer than 10 cards; the bottom axis is the real time of each round. The last 30 rounds are drawn. The chart is drawn with Compose Canvas, no chart library (no new dependency).
+- Learning results are not in the backup file. An import keeps them, because it does not touch `learn_round`.
+Reason: The owner asked for this on 2026-11-17, with saved progress and a simple time and score chart.
+Alternatives: Typing the name (hard with diacritics, slow on a phone). A chart library such as Vico (a dependency for one line chart). Results in the backup (changes the backup format; can come later).

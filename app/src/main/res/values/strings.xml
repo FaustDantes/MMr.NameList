@@ -243,4 +243,28 @@
     <string name="intro_4_title">Private by design</string>
     <string name="intro_4_text">Everything stays on your phone. Export one backup file whenever you want.</string>
     <string name="intro_confirm">Get started</string>
+    <!-- F35: learning with flash cards -->
+    <string name="learn">Learn names</string>
+    <string name="learn_progress">Card %1$d of %2$d</string>
+    <string name="learn_who">Who is this?</string>
+    <string name="learn_tags">Tags</string>
+    <string name="learn_tap_to_flip">Tap the card to see the name</string>
+    <string name="learn_tap_to_turn">Tap the card to see the details again</string>
+    <string name="learn_knew">I knew it</string>
+    <string name="learn_not_knew">I did not know</string>
+    <string name="learn_result_title">Round done</string>
+    <string name="learn_score">%1$d of %2$d</string>
+    <string name="learn_first_round">Your first round</string>
+    <string name="learn_change_up">%1$d points more than the last round</string>
+    <string name="learn_change_down">%1$d points less than the last round</string>
+    <string name="learn_change_same">Same as the last round</string>
+    <string name="learn_best">Best: %1$d%%</string>
+    <string name="learn_chart_title">Your progress</string>
+    <string name="learn_chart_description">Score in percent for each round, %1$d rounds. Last round: %2$d%%.</string>
+    <string name="learn_missed_title">Learn these again</string>
+    <string name="learn_all_known">You knew everyone. Well done.</string>
+    <string name="learn_again">New round</string>
+    <string name="learn_done">Done</string>
+    <string name="learn_empty_title">Nothing to learn yet</string>
+    <string name="learn_empty_body">Give a person a conversation spark, a place or notes. Then that person can be on a card.</string>
 </resources>

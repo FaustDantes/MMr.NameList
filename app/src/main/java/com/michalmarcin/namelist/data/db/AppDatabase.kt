@@ -22,12 +22,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  *   person.tabId into person_tab. The column person.tabId stays, unused, so no data is lost (ADR-035).
  * 7 (1.3.0): relation_type, editable relationship types (F30); relationship.type becomes relationship.typeId.
  *   Tags with the same name are merged (F29). Hand-written [Migration6To7]; tested in MigrationTest (ADR-037).
+ * 8 (1.4.0): learn_round, saved learning results (F35). Auto migration; tested in MigrationTest (ADR-042).
  */
 @Database(
-    entities = [Person::class, Tab::class, Relationship::class, PersonTab::class, RelationKind::class],
-    version = 7,
+    entities = [Person::class, Tab::class, Relationship::class, PersonTab::class, RelationKind::class, LearnRound::class],
+    version = 8,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6, spec = PersonTabMigration::class)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6, spec = PersonTabMigration::class), AutoMigration(from = 7, to = 8)],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +40,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun relationshipDao(): RelationshipDao
 
     abstract fun relationKindDao(): RelationKindDao
+
+    abstract fun learnRoundDao(): LearnRoundDao
 
     companion object {
         const val NAME = "namelist.db"

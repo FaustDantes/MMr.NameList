@@ -251,4 +251,28 @@
     <string name="intro_4_title">Súkromie na prvom mieste</string>
     <string name="intro_4_text">Všetko zostáva vo vašom telefóne. Zálohu do jedného súboru urobíte, kedy chcete.</string>
     <string name="intro_confirm">Začať</string>
+    <!-- F35: učenie s kartičkami -->
+    <string name="learn">Učiť sa mená</string>
+    <string name="learn_progress">Kartička %1$d z %2$d</string>
+    <string name="learn_who">Kto je to?</string>
+    <string name="learn_tags">Štítky</string>
+    <string name="learn_tap_to_flip">Ťuknite na kartičku a uvidíte meno</string>
+    <string name="learn_tap_to_turn">Ťuknite na kartičku a uvidíte znova podrobnosti</string>
+    <string name="learn_knew">Viem</string>
+    <string name="learn_not_knew">Neviem</string>
+    <string name="learn_result_title">Kolo je hotové</string>
+    <string name="learn_score">%1$d z %2$d</string>
+    <string name="learn_first_round">Vaše prvé kolo</string>
+    <string name="learn_change_up">O %1$d bodov viac ako minulé kolo</string>
+    <string name="learn_change_down">O %1$d bodov menej ako minulé kolo</string>
+    <string name="learn_change_same">Rovnako ako minulé kolo</string>
+    <string name="learn_best">Najlepšie: %1$d %%</string>
+    <string name="learn_chart_title">Váš pokrok</string>
+    <string name="learn_chart_description">Skóre v percentách za každé kolo, kôl: %1$d. Posledné kolo: %2$d %%.</string>
+    <string name="learn_missed_title">Týchto sa naučte znova</string>
+    <string name="learn_all_known">Poznali ste všetkých. Výborne.</string>
+    <string name="learn_again">Nové kolo</string>
+    <string name="learn_done">Hotovo</string>
+    <string name="learn_empty_title">Zatiaľ nie je čo sa učiť</string>
+    <string name="learn_empty_body">Pridajte osobe iskru rozhovoru, miesto alebo poznámky. Potom môže byť na kartičke.</string>
 </resources>

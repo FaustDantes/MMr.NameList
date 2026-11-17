@@ -2,6 +2,12 @@
 
 Versions follow [semantic versioning](https://semver.org/) (ADR-026). Earlier builds were tagged by milestone (`m0` to `m9-rc1`).
 
+## 1.4.0 (not released)
+
+- Learn names: a new book button at the bottom left of the people list. A round shows 10 random people as flash cards: tags, Conversation Spark, where you met and notes on the front, the name on the back. Tap to turn the card, then say if you knew the name.
+- After each round you see your score, the change against the last round, a chart of your progress and the people to learn again. Results are saved on the phone.
+- People with no spark, place or notes are not on cards.
+
 ## 1.3.0 (2026-11-17)
 
 - New look, "Line": white (or black in dark mode), thin lines instead of cards, one blue accent, new fonts (Space Grotesk and Inter).

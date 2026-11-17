@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michalmarcin.namelist.App
 import com.michalmarcin.namelist.AppContainer
 import com.michalmarcin.namelist.ui.archive.ArchiveViewModel
+import com.michalmarcin.namelist.ui.learn.LearnViewModel
 import com.michalmarcin.namelist.ui.map.MapViewModel
 import com.michalmarcin.namelist.ui.people.PeopleViewModel
 import com.michalmarcin.namelist.ui.person.PersonDetailViewModel
@@ -40,6 +41,7 @@ val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
         )
     }
     initializer { ArchiveViewModel(container().peopleRepository) }
+    initializer { LearnViewModel(container().learnRepository) }
     initializer { ManageTabsViewModel(container().tabsRepository) }
     initializer { ManageRelationTypesViewModel(container().relationTypesRepository) }
     initializer { MapViewModel(container().peopleRepository, createSavedStateHandle()) }

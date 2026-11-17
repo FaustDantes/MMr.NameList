@@ -144,3 +144,6 @@ Only Settings in the top bar of the people list; the sort choice under the title
 
 ### F34 Welcome shown once (added by the owner on 2026-11-17)
 On the first start, a dialog with four points says what the app does and how it helps. It closes only when the user confirms it and never shows again. See ADR-041.
+
+### F35 Learn names with flash cards (added by the owner on 2026-11-17)
+A book button at the bottom left of the people list opens learning. A round has 10 cards with random people in a random order (fewer when fewer people can be on a card). The front of a card shows the person's tags, the Conversation Spark first, then where you met, and the notes at the bottom. A tap flips the card to the name. The user then says if they knew it. People with none of spark, place and notes are not on cards. After the round the app shows the score, the change against the last round, a chart of all rounds (time on the bottom axis, score on the left axis) and the people to learn again. Results are saved. See ADR-042.

@@ -168,12 +168,31 @@ class MigrationTest {
     }
 
     @Test
+    fun version7To8AddsLearnRoundsAndKeepsPeople() {
+        helper.createDatabase(DB, 7).apply {
+            execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 8, true)
+        db.query("SELECT name FROM person WHERE id = 2").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Anna", it.getString(0))
+        }
+        db.execSQL("INSERT INTO learn_round (finishedAt, known, total) VALUES (10, 7, 10)")
+        db.query("SELECT known, total FROM learn_round").use {
+            assertTrue(it.moveToFirst())
+            assertEquals(7, it.getInt(0))
+            assertEquals(10, it.getInt(1))
+        }
+    }
+
+    @Test
     fun version1To3InOneUpdate() {
         helper.createDatabase(DB, 1).apply {
             execSQL("INSERT INTO person (id, name, notes, isSelf, sortIndex, createdAt) VALUES (2, 'Anna', 'x', 0, 1, 5)")
             close()
         }
-        val db = helper.runMigrationsAndValidate(DB, 7, true, Migration6To7)
+        val db = helper.runMigrationsAndValidate(DB, 8, true, Migration6To7)
         db.query("SELECT name FROM person WHERE id = 2").use {
             assertTrue(it.moveToFirst())
             assertEquals("Anna", it.getString(0))

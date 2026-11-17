@@ -67,6 +67,7 @@ app/src/main/java/<package>/
 | Tab (shown as "tag", ADR-037) | id, name (unique without case, checked in code), sortIndex |
 | PersonTab | personId, tabId. Many tags per person (F28). |
 | RelationKind (`relation_type`) | id, name (null = built-in label), builtIn (enum name or null), sortIndex. Built-in ids 1 to 9 (F30). |
+| LearnRound (`learn_round`) | id, finishedAt (ms), known, total. One row per finished learning round (F35, schema 8). Not in the backup. |
 | Relationship | id, fromPersonId, toPersonId, typeId. Foreign keys with ON DELETE CASCADE. Unique index on (fromPersonId, toPersonId, typeId). |
 
 Rules:
